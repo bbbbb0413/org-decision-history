@@ -1,0 +1,55 @@
+# 환경 변수 — 로컬에서 생성한 비밀값이 들어 있다. .env.example 만 공유한다
+.env
+.env.*
+!.env.example
+
+# Gradle
+.gradle/
+build/
+bin/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+
+# 컴파일 산출물
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+
+# Node
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# 로그와 임시 파일
+*.log
+logs/
+tmp/
+*.pid
+
+# 컨테이너 볼륨 데이터
+deploy/data/
+volumes/
+
+# 에디터와 OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# 인증서·키
+*.pem
+*.key
+*.p12
+*.jks

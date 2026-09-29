@@ -1,0 +1,10 @@
+{
+  "id" : "header-title-only",
+  "chunks" : [ {
+    "chunkNo" : 0,
+    "sectionPath" : "",
+    "chunkTag" : "BACKGROUND",
+    "tokenCount" : 7,
+    "content" : "[문서] 제목만\n\n본문"
+  } ]
+}

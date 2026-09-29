@@ -1,0 +1,22 @@
+{
+  "id" : "sibling-heading-drops-deeper-path",
+  "chunks" : [ {
+    "chunkNo" : 0,
+    "sectionPath" : "결제",
+    "chunkTag" : "BACKGROUND",
+    "tokenCount" : 28,
+    "content" : "[문서] 결제 정책 회의록 | 작성일 2024-03-15 | 프로젝트 결제팀 프로젝트 | 절 결제\n\n# 결제"
+  }, {
+    "chunkNo" : 1,
+    "sectionPath" : "결제 > 환불",
+    "chunkTag" : "BACKGROUND",
+    "tokenCount" : 34,
+    "content" : "[문서] 결제 정책 회의록 | 작성일 2024-03-15 | 프로젝트 결제팀 프로젝트 | 절 결제 > 환불\n\n## 환불\n환불 본문"
+  }, {
+    "chunkNo" : 2,
+    "sectionPath" : "배송",
+    "chunkTag" : "BACKGROUND",
+    "tokenCount" : 31,
+    "content" : "[문서] 결제 정책 회의록 | 작성일 2024-03-15 | 프로젝트 결제팀 프로젝트 | 절 배송\n\n# 배송\n배송 본문"
+  } ]
+}

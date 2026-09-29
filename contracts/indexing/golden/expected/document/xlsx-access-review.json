@@ -1,0 +1,32 @@
+{
+  "id" : "xlsx-access-review",
+  "filename" : "access-review-log.xlsx",
+  "scopeKey" : "team:3",
+  "parsed" : {
+    "text" : "검토이력\n| 검토일 | 대상 시스템 | 검토자 | 결과 | 비고 |\n| 2026-03-02 | 사내포털 | 김보안 | 승인 |\n| 2026-03-09 | 인사시스템 | 이감사 | 반려 | 퇴직자 계정 3건 즉시 회수 \\| 재검토 필요 |\n| 2026-03-16 14:30:00 | 결재시스템 | 박운영 | 승인 | TRUE |\n합계\n| 항목 | 건수 |\n| 검토 완료 | 3 |\n| 합계 |\n",
+    "headings" : [ {
+      "level" : 1,
+      "title" : "검토이력",
+      "offset" : 0
+    }, {
+      "level" : 1,
+      "title" : "합계",
+      "offset" : 183
+    } ]
+  },
+  "chunks" : [ {
+    "chunkNo" : 0,
+    "sectionPath" : "검토이력",
+    "chunkTag" : "DECISION",
+    "tokenCount" : 93,
+    "pointId" : "ea91c2eb-247e-3433-9747-3d4cda100e0e",
+    "content" : "[문서] 분기 권한 검토 이력 | 작성일 2026-05-18 | 절 검토이력\n\n검토이력\n| 검토일 | 대상 시스템 | 검토자 | 결과 | 비고 |\n| 2026-03-02 | 사내포털 | 김보안 | 승인 |\n| 2026-03-09 | 인사시스템 | 이감사 | 반려 | 퇴직자 계정 3건 즉시 회수 \\| 재검토 필요 |\n| 2026-03-16 14:30:00 | 결재시스템 | 박운영 | 승인 | TRUE |"
+  }, {
+    "chunkNo" : 1,
+    "sectionPath" : "합계",
+    "chunkTag" : "DISCUSSION",
+    "tokenCount" : 32,
+    "pointId" : "a0551e12-7688-382b-919a-33ec2aa59080",
+    "content" : "[문서] 분기 권한 검토 이력 | 작성일 2026-05-18 | 절 합계\n\n합계\n| 항목 | 건수 |\n| 검토 완료 | 3 |\n| 합계 |"
+  } ]
+}

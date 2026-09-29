@@ -1,0 +1,9 @@
+{
+  "id" : "error-corrupt-pdf",
+  "filename" : "broken.pdf",
+  "scopeKey" : "org:1",
+  "error" : {
+    "retryable" : false,
+    "messagePrefix" : "PDF 를 읽을 수 없습니다"
+  }
+}

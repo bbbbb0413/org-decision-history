@@ -1,0 +1,198 @@
+# Python 서비스 린트 + 테스트.
+# 테스트는 외부 API(Groq·Gemini·Neo4j)를 부르지 않는다 — CI 에 비밀값을 넣지 않는다.
+name: ci-python
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "server/python/**"
+      # shared 테스트가 골든 스냅샷·JSON 스키마를 읽는다
+      - "contracts/**"
+      - ".github/workflows/ci-python.yml"
+  pull_request:
+    paths:
+      - "server/python/**"
+      - "contracts/**"
+      - ".github/workflows/ci-python.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: ruff
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      # 규칙은 server/python/ruff.toml (F·E9) 이 정한다. 버전을 고정해 규칙 변화로 CI 가 흔들리지 않게 한다
+      - run: python -m pip install ruff==0.16.7
+      - run: ruff check server/python
+
+  shared:
+    name: pytest (shared)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # streams 테스트는 실제 Redis 가 필요하다(fakeredis 는 전달 횟수를 돌려주지 않는다)
+    services:
+      redis:
+        image: redis:7.4-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      TEST_REDIS_URL: redis://localhost:6379/15
+    defaults:
+      run:
+        working-directory: server/python/shared
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: server/python/shared/pyproject.toml
+      - run: python -m pip install ".[web,graph,test]"
+      - run: python -m pytest -q
+
+  index-worker:
+    name: pytest (index-worker)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # 작업 선점(SKIP LOCKED)·멱등 접수(ON CONFLICT)·스트림 재전달은 실제 PostgreSQL·Redis 로만 검증된다
+    services:
+      postgres:
+        image: postgres:16.4-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: index_worker_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U test -d index_worker_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+      redis:
+        image: redis:7.4-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      # 테스트가 indexing·document 스키마를 지우고 다시 만든다. DB 이름에 test 가 없으면 테스트가 거부한다
+      TEST_DATABASE_URL: postgresql://test:test@localhost:5432/index_worker_test
+      TEST_REDIS_URL: redis://localhost:6379/15
+    defaults:
+      run:
+        working-directory: server/python/index-worker
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            server/python/index-worker/requirements.txt
+            server/python/shared/pyproject.toml
+      - run: python -m pip install -r requirements.txt ../shared
+      - run: python -m pytest -q
+
+  governance-worker:
+    name: pytest (governance-worker)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # record_conflict의 ON CONFLICT(md5 식 인덱스)·상충 후보 조회는 실제 PostgreSQL·Redis 로만 검증된다
+    services:
+      postgres:
+        image: postgres:16.4-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: governance_worker_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U test -d governance_worker_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+      redis:
+        image: redis:7.4-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      # 테스트가 document·indexing 스키마를 지우고 다시 만든다. DB 이름에 test 가 없으면 테스트가 거부한다
+      TEST_DATABASE_URL: postgresql://test:test@localhost:5432/governance_worker_test
+      TEST_REDIS_URL: redis://localhost:6379/15
+    defaults:
+      run:
+        working-directory: server/python/governance-worker
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            server/python/governance-worker/requirements.txt
+            server/python/shared/pyproject.toml
+      - run: python -m pip install -r requirements.txt ../shared
+      - run: python -m pytest -q
+
+  rag-service:
+    name: pytest (rag-service)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # SourceResolver 의 권한 재확인·바운딩 박스 조회는 실제 PostgreSQL 로만 검증된다
+    services:
+      postgres:
+        image: postgres:16.4-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: rag_service_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U test -d rag_service_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      # 테스트가 document·indexing 스키마를 지우고 다시 만든다. DB 이름에 test 가 없으면 테스트가 거부한다
+      TEST_DATABASE_URL: postgresql://test:test@localhost:5432/rag_service_test
+    defaults:
+      run:
+        working-directory: server/python/rag-service
+    steps:
+      - uses: actions/checkout@v7
+
+      # 서비스 Dockerfile 의 python:3.12-slim 과 맞춘다
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            server/python/rag-service/requirements.txt
+            server/python/shared/pyproject.toml
+
+      # Dockerfile 과 같은 조합: 서비스가 고정한 의존성 + 공통 패키지
+      - run: python -m pip install -r requirements.txt ../shared
+      - run: python -m pytest -q

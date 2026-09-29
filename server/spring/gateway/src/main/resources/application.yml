@@ -1,0 +1,63 @@
+spring:
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          httpclient:
+            # SSE 응답은 오래 열려 있다. 15초 하트비트보다 충분히 길게 둔다.
+            response-timeout: 300s
+            connect-timeout: 3000
+  data:
+    redis:
+      # 로그인 rate limiting(RedisRateLimiter)에 쓴다
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      password: ${SPRING_DATA_REDIS_PASSWORD:}
+
+server:
+  port: ${SERVER_PORT:8080}
+
+gateway:
+  auth-url:     ${AUTH_SERVICE_URL:http://localhost:8081}
+  document-url: ${DOCUMENT_SERVICE_URL:http://localhost:8082}
+  index-url:    ${INDEX_SERVICE_URL:http://localhost:8083}
+  chat-url:     ${CHAT_SERVICE_URL:http://localhost:8084}
+  internal-key: ${INTERNAL_API_KEY:}
+  jwks-uri:     ${AUTH_SERVICE_URL:http://localhost:8081}/.well-known/jwks.json
+  # 프론트가 nginx 프록시 없이 게이트웨이를 직접 호출하므로 origin 이 달라진다.
+  front-origin: ${FRONT_ORIGIN:http://localhost:5173}
+  # 로그인은 인증 전이라 무차별 대입 공격에 무방비였다. IP당 초당 1건, 순간 5건까지 허용
+  login-rate-limit-per-second: ${LOGIN_RATE_LIMIT_PER_SECOND:1}
+  login-rate-limit-burst: ${LOGIN_RATE_LIMIT_BURST:5}
+
+management:
+  # actuator 를 서비스 포트에서 떼어낸다.
+  #
+  # 게이트웨이는 호스트에 노출되는 유일한 포트라(compose 의 127.0.0.1:8080), actuator 가
+  # 같은 포트에 있으면 인증 없이 그대로 열린다. AuthenticationFilter 는 GlobalFilter 라
+  # 라우트에 걸린 요청에만 돌고, actuator 는 게이트웨이 자신의 핸들러가 처리해 필터를
+  # 거치지 않는다 — 노출 목록의 `gateway` 엔드포인트는 라우트 표 전체를, `prometheus` 는
+  # 내부 지표를 그대로 내준다. E2E 에서 `GET localhost:8080/actuator/prometheus` 가
+  # 200 으로 확인됐다.
+  #
+  # 이 포트는 compose 에서 publish 하지 않는다. 같은 도커 네트워크 안(헬스체크,
+  # auth-service 의 운영 현황 조회)에서만 닿는다.
+  server:
+    port: ${MANAGEMENT_SERVER_PORT:9090}
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway,prometheus
+  metrics:
+    tags:
+      # 여러 서비스를 한 Prometheus 로 긁을 때 시계열을 구분한다
+      application: gateway
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+logging:
+  pattern:
+    console: "%d{HH:mm:ss.SSS} %-5level [gateway] %logger{36} - %msg%n"

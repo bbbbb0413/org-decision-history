@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "history-shared"
+version = "0.1.0"
+description = "Python 워커 공통 모듈: 설정·DB·로깅·임베딩·벡터·스트림·웹 규약"
+requires-python = ">=3.12"
+# 정확한 버전은 각 서비스 requirements.txt 가 고정한다. 여기에는 호환 범위만 둔다.
+dependencies = [
+    "asyncpg>=0.30,<0.31",
+    "httpx>=0.28,<0.29",
+    # history_shared.metrics(Prometheus 노출). streams 가 소비 지표를 여기에 기록하므로
+    # 선택 의존성이 아니라 기본으로 둔다 — 세 워커 모두 스트림 컨슈머를 쓴다.
+    "prometheus-client>=0.21,<1",
+    "pydantic-settings>=2.7,<3",
+    "qdrant-client>=1.12,<1.13",
+    "redis>=5.2,<6",
+    "structlog>=24.4,<25",
+]
+
+[project.optional-dependencies]
+# HTTP API 가 있는 워커(index-worker)만 설치한다
+web = ["fastapi>=0.115,<0.116"]
+# history_shared.graph(Neo4j 지식 그래프)를 쓰는 워커만 설치한다(rag-service·governance-worker)
+graph = ["neo4j>=5.26,<6"]
+test = [
+    "pytest==8.3.4",
+    "pytest-asyncio==0.24.0",
+    "jsonschema==4.23.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["history_shared*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"

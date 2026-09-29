@@ -1,0 +1,131 @@
+# 컨테이너 이미지가 빌드되는지 확인한다. 레지스트리에 올리지 않는다(배포 대상이 없다).
+#
+# - main push       : 바뀐 파일이 영향을 주는 이미지만 빌드한다 (이미지별 영향 경로는 아래 filters)
+# - 수동 실행·주간  : 전체를 빌드한다. 코드가 그대로여도 베이스 이미지 태그나 버전이 느슨한
+#                     Python 의존성(numpy>=, neo4j>=)이 바뀌면 빌드가 깨질 수 있어서다
+#
+# GitHub Actions 캐시(type=gha)를 쓴다. 대상 이미지를 전부 같은 job 안에서 bake 한 번으로
+# 빌드하고, 이미지마다 스코프(scope=이미지 이름)를 따로 둬서 서로 캐시 엔트리를 덮어쓰지
+# 않게 한다 — 여러 job 이 스코프 없이 같은 캐시에 동시에 쓰면 `error writing layer blob:
+# not_found`로 깨진다.
+name: ci-images
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 18 * * 0"   # 매주 월요일 03:00 KST
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# 동시 실행을 취소하지 않는다. 푸시마다 대상 이미지가 달라서, 앞 실행을 취소하면 그 변경의 검사가 사라진다.
+
+jobs:
+  changes:
+    name: pick images
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      targets: ${{ steps.pick.outputs.targets }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - id: filter
+        if: github.event_name == 'push'
+        uses: dorny/paths-filter@v4
+        with:
+          # 이름이 _ 로 시작하는 필터는 공통 경로 묶음이라 이미지 목록에서 뺀다.
+          # 경로는 각 Dockerfile 의 COPY 대상과 일치시킨다.
+          filters: |
+            _all: &all
+              - .dockerignore
+              - docker-bake.hcl
+              - .github/workflows/ci-images.yml
+            _spring: &spring
+              - gradlew
+              - settings.gradle.kts
+              - build.gradle.kts
+              - gradle/**
+              - server/spring/common/**
+              # Spring Dockerfile 은 의존성 단계에서 모든 모듈의 빌드 파일을 복사한다
+              - server/spring/*/build.gradle.kts
+            gateway:
+              - *all
+              - *spring
+              - server/spring/gateway/**
+            auth-service:
+              - *all
+              - *spring
+              - server/spring/auth-service/**
+            document-service:
+              - *all
+              - *spring
+              - server/spring/document-service/**
+            chat-service:
+              - *all
+              - *spring
+              - server/spring/chat-service/**
+            _python: &python
+              - server/python/shared/**
+            rag-service:
+              - *all
+              - *python
+              - server/python/rag-service/**
+            index-worker:
+              - *all
+              - *python
+              - server/python/index-worker/**
+            governance-worker:
+              - *all
+              - *python
+              - server/python/governance-worker/**
+            front:
+              - *all
+              - front/**
+
+      - id: pick
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          CHANGES: ${{ steps.filter.outputs.changes }}
+        run: |
+          all=$(docker buildx bake --print 2>/dev/null | jq -r '.group.default.targets | join(" ")')
+          if [ "$EVENT_NAME" = "push" ]; then
+            # 걸린 필터 이름 중 bake 에 정의된 이미지만 남긴다
+            targets=$(jq -r --arg all "$all" '[.[] | select(IN(($all | split(" "))[]))] | join(" ")' <<< "${CHANGES:-[]}")
+          else
+            targets="$all"
+          fi
+          echo "대상 이미지: ${targets:-(없음)}"
+          echo "targets=$targets" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: bake (${{ needs.changes.outputs.targets }})
+    needs: changes
+    if: needs.changes.outputs.targets != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+
+      # docker buildx bake(빌드-푸시 액션이 아니다)로 gha 캐시를 쓰려면 이 토큰들을 직접
+      # 환경변수로 꺼내와야 한다 — build-push-action 은 이걸 내부적으로 해주지만 우리는 안 쓴다
+      - uses: crazy-max/ghaction-github-runtime@v3
+
+      # Dockerfile 들이 RUN --mount=type=cache 를 쓰므로 BuildKit(buildx)이 필요하다
+      - uses: docker/setup-buildx-action@v4
+
+      # 이미지를 내보내지 않고(cacheonly) 빌드 성공 여부만 본다. 캐시는 이미지 이름별로
+      # 스코프를 나눠(scope=$t) 서로 다른 이미지끼리 캐시 엔트리를 덮어쓰지 않게 한다
+      - name: Build
+        env:
+          BAKE_TARGETS: ${{ needs.changes.outputs.targets }}
+        run: |
+          read -r -a targets <<< "$BAKE_TARGETS"
+          args=(--set "*.output=type=cacheonly")
+          for t in "${targets[@]}"; do
+            args+=(--set "$t.cache-from=type=gha,scope=$t")
+            args+=(--set "$t.cache-to=type=gha,mode=max,scope=$t")
+          done
+          docker buildx bake "${args[@]}" "${targets[@]}"

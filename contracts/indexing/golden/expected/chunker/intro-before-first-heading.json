@@ -1,0 +1,16 @@
+{
+  "id" : "intro-before-first-heading",
+  "chunks" : [ {
+    "chunkNo" : 0,
+    "sectionPath" : "",
+    "chunkTag" : "BACKGROUND",
+    "tokenCount" : 28,
+    "content" : "[문서] 결제 정책 회의록 | 작성일 2024-03-15 | 프로젝트 결제팀 프로젝트\n\n도입부입니다."
+  }, {
+    "chunkNo" : 1,
+    "sectionPath" : "첫 절",
+    "chunkTag" : "BACKGROUND",
+    "tokenCount" : 32,
+    "content" : "[문서] 결제 정책 회의록 | 작성일 2024-03-15 | 프로젝트 결제팀 프로젝트 | 절 첫 절\n\n# 첫 절\n본문 내용."
+  } ]
+}

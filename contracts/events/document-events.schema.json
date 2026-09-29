@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "contracts/events/document-events.schema.json",
+  "title": "stream:document-events 항목",
+  "description": "document-service 가 문서 변경을 트랜잭션 아웃박스(document.document_outbox)에 기록하고, 2초 주기로 Redis Stream 에 옮긴다. 항목은 필드 4개이고 payload 는 JSON 문자열이다. payload 는 jsonb 컬럼을 거쳐 나오므로 키 순서와 공백이 바뀐다. 소비자는 JSON 으로 파싱해야 하며 문자열로 비교하면 안 된다.",
+  "x-status": "current",
+  "x-stream": "stream:document-events",
+  "x-producer": "document-service OutboxPublisher (record → publishPending)",
+  "x-consumers": [
+    "index-worker (그룹 index-worker) — DocumentEventConsumer",
+    "governance-worker (그룹 governance-worker-group) — app/consumer.py"
+  ],
+  "x-delivery": "최소 한 번 전달. 아웃박스 행을 스트림에 넣은 뒤 published_at 을 기록하므로, 그 사이에 실패하면 같은 이벤트가 다시 발행된다. 소비자는 멱등해야 한다.",
+  "type": "object",
+  "required": ["aggregateId", "eventType", "payload"],
+  "properties": {
+    "eventId": {
+      "description": "아웃박스 행 번호(document_outbox.id)의 10진 문자열. 소비자가 접수 중복을 막는 키에 쓴다 — (문서, 판, 종류)만으로는 같은 판에 원본 파일을 다시 올렸을 때 키가 겹쳐 두 번째 재색인이 건너뛰어진다. 같은 행의 재전달에는 같은 값이 오므로 최소 한 번 전달에 대한 멱등은 유지된다. 이 필드를 넣기 전에 발행된 항목에는 없으므로 required 가 아니다. 소비자는 없으면 옛 키 형식으로 되돌린다",
+      "type": "string",
+      "pattern": "^[0-9]+$"
+    },
+    "aggregateId": {
+      "description": "문서 ID 의 10진 문자열",
+      "type": "string",
+      "pattern": "^[0-9]+$"
+    },
+    "eventType": {
+      "description": "document.outbox_event_type enum 과 같은 값",
+      "enum": ["DOCUMENT_CREATED", "DOCUMENT_UPDATED", "DOCUMENT_DELETED", "PERMISSION_CHANGED"]
+    },
+    "payload": {
+      "type": "string",
+      "contentMediaType": "application/json",
+      "contentSchema": { "$ref": "#/$defs/DocumentEventPayload" }
+    }
+  },
+  "$defs": {
+    "DocumentEventPayload": {
+      "type": "object",
+      "required": ["documentId", "version", "organizationId", "teamId", "documentType"],
+      "properties": {
+        "documentId": { "type": "integer", "minimum": 1 },
+        "version": { "description": "이벤트 시점의 current_version", "type": "integer", "minimum": 1 },
+        "organizationId": { "type": "integer" },
+        "teamId": {
+          "description": "팀이 없으면 빈 문자열이다(Map.of 가 null 을 받지 않아 생긴 관례). 새 이벤트는 이 관례를 따르지 않는다",
+          "oneOf": [
+            { "type": "integer" },
+            { "const": "" }
+          ]
+        },
+        "documentType": {
+          "description": "document.document_type enum 과 같은 값",
+          "enum": ["MEETING_NOTE", "DECISION_RECORD", "DESIGN_DOC", "POLICY_DOC"]
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

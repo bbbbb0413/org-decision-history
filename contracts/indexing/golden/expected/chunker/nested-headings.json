@@ -1,0 +1,16 @@
+{
+  "id" : "nested-headings",
+  "chunks" : [ {
+    "chunkNo" : 0,
+    "sectionPath" : "결제 정책",
+    "chunkTag" : "BACKGROUND",
+    "tokenCount" : 36,
+    "content" : "[문서] 결제 정책 회의록 | 작성일 2024-03-15 | 프로젝트 결제팀 프로젝트 | 절 결제 정책\n\n# 결제 정책\n상위 절 본문"
+  }, {
+    "chunkNo" : 1,
+    "sectionPath" : "결제 정책 > 환불 규정",
+    "chunkTag" : "BACKGROUND",
+    "tokenCount" : 40,
+    "content" : "[문서] 결제 정책 회의록 | 작성일 2024-03-15 | 프로젝트 결제팀 프로젝트 | 절 결제 정책 > 환불 규정\n\n## 환불 규정\n하위 절 본문"
+  } ]
+}

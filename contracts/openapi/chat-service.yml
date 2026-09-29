@@ -1,0 +1,343 @@
+openapi: 3.1.0
+info:
+  description: "대화·메시지, 답변 스트리밍(SSE), 출처 재조회, 타임라인"
+  title: chat-service API
+  version: 0.1.0
+servers:
+- description: Generated server url
+  url: http://localhost
+paths:
+  /api/conversations:
+    get:
+      operationId: list
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageResponseConversation"
+          description: OK
+      tags:
+      - chat-controller
+    post:
+      operationId: create
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Conversation"
+          description: OK
+      tags:
+      - chat-controller
+  /api/conversations/{conversationId}:
+    delete:
+      operationId: delete
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: conversationId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                type: object
+          description: OK
+      tags:
+      - chat-controller
+    get:
+      operationId: get_1
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: conversationId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                type: object
+          description: OK
+      tags:
+      - chat-controller
+  /api/conversations/{conversationId}/jobs/{jobKey}/stream:
+    get:
+      operationId: resume
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: conversationId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: jobKey
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - in: header
+        name: Last-Event-ID
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            text/event-stream:
+              schema:
+                $ref: "#/components/schemas/SseEmitter"
+          description: OK
+      tags:
+      - chat-controller
+  /api/conversations/{conversationId}/messages:
+    get:
+      operationId: messages
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: conversationId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                type: object
+          description: OK
+      tags:
+      - chat-controller
+    post:
+      operationId: ask
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: conversationId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AskRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            text/event-stream:
+              schema:
+                $ref: "#/components/schemas/SseEmitter"
+          description: OK
+      tags:
+      - chat-controller
+  /api/messages/{messageId}/feedback:
+    put:
+      operationId: feedback
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: messageId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeedbackRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                type: object
+          description: OK
+      tags:
+      - chat-controller
+  /api/messages/{messageId}/sources:
+    get:
+      operationId: sources
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: messageId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                type: object
+          description: OK
+      tags:
+      - chat-controller
+  /api/timeline:
+    get:
+      operationId: get
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: query
+        name: topic
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                type: object
+          description: OK
+      tags:
+      - timeline-controller
+components:
+  schemas:
+    AskRequest:
+      type: object
+      properties:
+        content:
+          type: string
+          maxLength: 2000
+          minLength: 0
+      required:
+      - content
+    Conversation:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+    FeedbackRequest:
+      type: object
+      properties:
+        rating:
+          type: string
+          minLength: 1
+          pattern: HELPFUL|NOT_HELPFUL
+        reason:
+          type: string
+          maxLength: 1000
+          minLength: 0
+      required:
+      - rating
+    PageResponseConversation:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/Conversation"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+    SseEmitter:
+      type: object
+      properties:
+        timeout:
+          type: integer
+          format: int64

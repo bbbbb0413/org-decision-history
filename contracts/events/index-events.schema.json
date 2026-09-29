@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "contracts/events/index-events.schema.json",
+  "title": "stream:index-events 항목",
+  "description": "index-worker 가 문서 색인(청크·벡터 저장)을 마친 뒤 발행하고, governance-worker 가 stream:document-events 대신 구독한다. 색인이 끝난 뒤에만 상충 감지가 청크 본문과 벡터를 읽을 수 있게 하려는 것이다. 항목 모양은 stream:document-events 와 같게 둔다(필드 3개, payload 는 JSON 문자열).",
+  "x-status": "current",
+  "x-stream": "stream:index-events",
+  "x-producer": "index-worker (Python, M4)",
+  "x-consumers": ["governance-worker"],
+  "x-delivery": "발행 실패 시 색인 항목을 재시도 대상으로 되돌린다(IndexStage.EVENT_PUBLISH). 재색인은 멱등이므로 같은 이벤트가 두 번 발행될 수 있다. governance-worker 는 documentId+version 으로 이벤트를 거르지 않는다 — 대신 저장 단계(document.decision_conflicts, source_doc_id+target_doc_id+md5(source_clause) 유일 인덱스)에서 같은 조항 조합이면 갱신한다. LLM 추출은 결정적이지 않아 같은 문서를 다시 분석하면 다른 조항 문구가 나와 새 행이 생길 수 있다.",
+  "type": "object",
+  "required": ["aggregateId", "eventType", "payload"],
+  "properties": {
+    "aggregateId": {
+      "description": "문서 ID 의 10진 문자열",
+      "type": "string",
+      "pattern": "^[0-9]+$"
+    },
+    "eventType": {
+      "const": "DOCUMENT_INDEXED"
+    },
+    "payload": {
+      "type": "string",
+      "contentMediaType": "application/json",
+      "contentSchema": { "$ref": "#/$defs/DocumentIndexedPayload" }
+    }
+  },
+  "$defs": {
+    "DocumentIndexedPayload": {
+      "type": "object",
+      "required": ["documentId", "version", "chunkCount", "organizationId", "teamId"],
+      "properties": {
+        "documentId": { "type": "integer", "minimum": 1 },
+        "version": { "description": "색인한 문서 버전", "type": "integer", "minimum": 1 },
+        "chunkCount": { "description": "저장한 청크 수. 색인이 성공했으므로 1 이상이다", "type": "integer", "minimum": 1 },
+        "organizationId": { "type": "integer" },
+        "teamId": {
+          "description": "팀이 없으면 null. stream:document-events 의 빈 문자열 관례를 따르지 않는다",
+          "type": ["integer", "null"]
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

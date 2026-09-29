@@ -1,0 +1,458 @@
+name: org-decision-history
+
+# 저장소 4종은 프로파일 없이 항상 기동한다.
+#   docker compose up -d                          → 저장소만 (일상 개발)
+#   docker compose --profile app up -d --wait     → 저장소 + 서비스 5개 + front
+x-app-common: &app-common
+  profiles: ["app"]
+  restart: unless-stopped
+  env_file: [.env]
+  networks: [backend]
+  read_only: true                      # 런타임 파일시스템을 읽기 전용으로 고정한다
+  tmpfs: ["/tmp"]                      # 읽기 전용 상태에서 Spring Boot 임시 파일 쓰기를 허용한다
+  cap_drop: ["ALL"]
+  security_opt: ["no-new-privileges:true"]
+  logging:
+    driver: json-file
+    options: { max-size: "10m", max-file: "3" }
+
+x-app-health: &app-health
+  # JRE alpine 베이스에 curl 이 없으므로 busybox wget 을 쓴다
+  interval: 10s
+  timeout: 3s
+  retries: 12
+  start_period: 40s
+
+# HTTP 앱이 없는 Python 워커(rag-service·governance-worker)용.
+#
+# healthcheck 가 없으면 프로세스가 죽거나 컨슈머 루프가 멈춰도 compose 상태는 계속
+# "Up" 이다. 메트릭 서버(start_metrics_server, 기본 9100)를 생존 신호로 쓴다: 그 스레드가 응답한다는 것은
+# 적어도 프로세스가 살아 있다는 뜻이다.
+#
+# 두 이미지는 python:3.12-slim 이라 wget·curl 이 없다(index-worker 만 wget 을 따로 깐다).
+# 엔트리포인트 인터프리터인 python 을 그대로 쓴다.
+x-worker-health: &worker-health
+  interval: 15s
+  timeout: 5s
+  retries: 6
+  start_period: 60s
+
+# METRICS_ENABLED=false 로 끄면 이 검사도 실패한다. 다만 이 두 워커에 depends_on 으로
+# 묶인 서비스가 없어 기동을 막지는 않고, 상태만 unhealthy 로 보인다.
+x-worker-health-probe: &worker-health-probe
+  ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:9100/actuator/prometheus',timeout=3)"]
+
+services:
+
+  # ────────────────────────── 저장소 ──────────────────────────
+  postgres:
+    image: postgres:16.4-alpine
+    deploy:
+      resources:
+        limits: { cpus: "1.0", memory: 512M }
+    environment:
+      POSTGRES_DB: knowledge
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports: ["127.0.0.1:5432:5432"]     # 호스트 루프백에만 노출한다
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./deploy/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d knowledge"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    networks: [backend]
+
+  redis:
+    image: redis:7.4-alpine
+    deploy:
+      resources:
+        limits: { cpus: "0.3", memory: 128M }
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD}"]
+    environment:
+      # 헬스체크가 컨테이너 안에서 redis-cli 로 인증할 때 참조한다
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    ports: ["127.0.0.1:6379:6379"]
+    volumes: [redis-data:/data]
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping | grep -q PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    networks: [backend]
+
+  qdrant:
+    image: qdrant/qdrant:v1.12.4
+    deploy:
+      resources:
+        limits: { cpus: "1.0", memory: 512M }
+    ports: ["127.0.0.1:6333:6333"]
+    volumes: [qdrant-data:/qdrant/storage]
+    healthcheck:
+      # qdrant 이미지에 curl 이 없으므로 셸의 TCP 연결로 대체한다
+      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/6333'"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    networks: [backend]
+
+  minio:
+    image: minio/minio:RELEASE.2024-10-13T13-34-11Z
+    deploy:
+      resources:
+        limits: { cpus: "0.3", memory: 256M }
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "127.0.0.1:9000:9000"          # S3 API
+      - "127.0.0.1:9001:9001"          # 개발용 콘솔
+    volumes: [minio-data:/data]
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    networks: [backend]
+
+  neo4j:
+    image: neo4j:5.26.0-community
+    deploy:
+      resources:
+        # heap max(512m) + pagecache(128m) = 640m 가 이미 설정돼 있다. JVM 자체 오버헤드
+        # (메타스페이스·스레드 등) 몫으로 여유를 더 둔다
+        limits: { cpus: "1.0", memory: 900M }
+    environment:
+      NEO4J_AUTH: ${NEO4J_AUTH:-neo4j/password123}
+      NEO4J_server_memory_heap_initial__size: 256m
+      NEO4J_server_memory_heap_max__size: 512m
+      NEO4J_server_memory_pagecache_size: 128m
+    ports:
+      - "127.0.0.1:7474:7474"          # Neo4j Browser UI
+      - "127.0.0.1:7687:7687"          # Bolt 프로토콜
+    volumes: [neo4j-data:/data]
+    healthcheck:
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p \"$${NEO4J_PASSWORD:-password123}\" 'RETURN 1;' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 25s
+    networks: [backend]
+
+  # 답변 생성 job 분산. KRaft 단일 브로커라 Zookeeper 는 필요 없다.
+  # rag-service 를 독립적으로 여러 대 띄우기 위한 job 큐로만 쓴다.
+  kafka:
+    image: apache/kafka:3.8.0
+    deploy:
+      resources:
+        limits: { cpus: "1.0", memory: 1G }
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports: ["127.0.0.1:9092:9092"]
+    volumes: [kafka-data:/var/lib/kafka/data]
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    networks: [backend]
+
+  # ────────────────────────── 애플리케이션 ──────────────────────────
+  auth-service:
+    <<: *app-common
+    build: { context: ., dockerfile: server/spring/auth-service/Dockerfile }
+    image: history/auth-service:${IMAGE_TAG:-dev}
+    # Spring 서비스는 ENTRYPOINT에 -XX:MaxRAMPercentage=75 가 박혀 있어, 힙 상한이 이
+    # memory 리밋의 75%로 정해진다(나머지 25%는 메타스페이스·스레드 등 non-heap 몫).
+    deploy:
+      resources:
+        limits: { cpus: "0.5", memory: 640M }
+    environment:
+      SERVER_PORT: 8081
+      # dev 프로파일에서만 개발용 시드 계정을 넣는다
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/knowledge
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      # 운영 현황 상태 확인과 로그아웃 토큰 무효화 워터마크에 쓴다.
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD}
+      QDRANT_URL: http://qdrant:6333
+      STORAGE_ENDPOINT: http://minio:9000
+      # actuator 는 게이트웨이의 관리 포트(9090)에 있다 — 서비스 포트(8080)에 두면
+      # 호스트에 노출돼 인증 없이 열린다.
+      GATEWAY_SERVICE_URL: http://gateway:9090
+      DOCUMENT_SERVICE_URL: http://document-service:8082
+      INDEX_SERVICE_URL: http://index-worker:8083
+      CHAT_SERVICE_URL: http://chat-service:8084
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis:    { condition: service_healthy }
+    healthcheck:
+      <<: *app-health
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8081/actuator/health"]
+
+  document-service:
+    <<: *app-common
+    build: { context: ., dockerfile: server/spring/document-service/Dockerfile }
+    image: history/document-service:${IMAGE_TAG:-dev}
+    deploy:
+      resources:
+        limits: { cpus: "0.5", memory: 640M }
+    environment:
+      SERVER_PORT: 8082
+      # currentSchema 를 URL 에 넣는다. 환경변수가 application.yml 의 url 을 통째로 덮어쓰므로
+      # YAML 쪽에 붙여 둔 질의 문자열은 적용되지 않는다.
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/knowledge?currentSchema=document,public
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD}
+      AUTH_SERVICE_URL: http://auth-service:8081
+      STORAGE_ENDPOINT: http://minio:9000
+      # 브라우저가 접근하는 주소로 서명한다. 컨테이너 내부 이름으로 서명하면 사용자 쪽에서 쓸 수 없다.
+      STORAGE_PUBLIC_ENDPOINT: http://localhost:9000
+      STORAGE_BUCKET: documents
+      NEO4J_HTTP_URL: http://neo4j:7474
+      NEO4J_USER: ${NEO4J_USER:-neo4j}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD:-password123}
+    depends_on:
+      postgres:     { condition: service_healthy }
+      redis:        { condition: service_healthy }
+      minio:        { condition: service_healthy }
+      auth-service: { condition: service_healthy }
+      neo4j:        { condition: service_healthy }
+    healthcheck:
+      <<: *app-health
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8082/actuator/health"]
+
+  # indexing 스키마 마이그레이션. index-worker 보다 먼저 한 번 돌고 끝난다.
+  index-migrate:
+    image: flyway/flyway:10.20.0-alpine
+    profiles: ["app"]
+    restart: "no"
+    networks: [backend]
+    deploy:
+      resources:
+        limits: { cpus: "0.5", memory: 256M }
+    volumes:
+      - ./server/python/index-worker/migrations:/flyway/sql:ro
+    command:
+      - -url=jdbc:postgresql://postgres:5432/knowledge
+      - -schemas=indexing
+      - -defaultSchema=indexing
+      - -user=${POSTGRES_USER}
+      - -password=${POSTGRES_PASSWORD}
+      - -connectRetries=10
+      - migrate
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  index-worker:
+    <<: *app-common
+    build: { context: ., dockerfile: server/python/index-worker/Dockerfile }
+    image: history/index-worker:${IMAGE_TAG:-dev}
+    deploy:
+      resources:
+        limits: { cpus: "0.75", memory: 640M }
+    environment:
+      SERVER_PORT: 8083
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: knowledge
+      REDIS_HOST: redis
+      QDRANT_URL: http://qdrant:6333
+      STORAGE_ENDPOINT: http://minio:9000
+      STORAGE_BUCKET: documents
+      # 비우면 대체 임베딩으로 동작한다. 키를 넣으면 Gemini 를 쓴다.
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      # Redis Stream 소비자 그룹(대기 항목은 XAUTOCLAIM으로 회수)
+      CONSUMER_GROUP: index-worker
+    depends_on:
+      postgres:      { condition: service_healthy }
+      redis:         { condition: service_healthy }
+      qdrant:        { condition: service_healthy }
+      minio:         { condition: service_healthy }
+      index-migrate: { condition: service_completed_successfully }
+    healthcheck:
+      <<: *app-health
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8083/actuator/health"]
+
+  chat-service:
+    <<: *app-common
+    build: { context: ., dockerfile: server/spring/chat-service/Dockerfile }
+    image: history/chat-service:${IMAGE_TAG:-dev}
+    deploy:
+      resources:
+        limits: { cpus: "0.75", memory: 640M }
+    environment:
+      SERVER_PORT: 8084
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/knowledge?currentSchema=chat,public
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD}
+      AUTH_SERVICE_URL: http://auth-service:8081
+      QDRANT_URL: http://qdrant:6333
+      # index-worker 와 같은 임베딩 설정을 써야 검색이 성립한다
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      # 비우면 근거 발췌 방식으로 답한다
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      postgres:     { condition: service_healthy }
+      redis:        { condition: service_healthy }
+      qdrant:       { condition: service_healthy }
+      auth-service: { condition: service_healthy }
+      kafka:        { condition: service_healthy }
+    healthcheck:
+      <<: *app-health
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8084/actuator/health"]
+
+  # 답변 생성 워커(Python·LangGraph). chat-service 가 Kafka 로 넘긴 job 을 소비하고
+  # 결과를 Redis Stream 에 쓴다. consumer group 은 rag-answer-workers(app/settings.py 참고).
+  # POSTGRES_PASSWORD/REDIS_PASSWORD/GEMINI_API_KEY/GROQ_API_KEY/INTERNAL_API_KEY 는
+  # env_file(.env)에서 그대로 주입된다(app-common) — pydantic Settings 필드명이
+  # 그 변수명과 그대로 일치해 여기서 다시 옮겨 적을 필요가 없다.
+  rag-service:
+    <<: *app-common
+    build: { context: ., dockerfile: server/python/rag-service/Dockerfile }
+    image: history/rag-service:${IMAGE_TAG:-dev}
+    # 임베딩·재순위화 모델을 로드해 두고 있어 유휴 상태에서도 다른 앱 서비스보다 메모리를
+    # 많이 쓴다(관측치 기준). 하이브리드 검색·그래프 질의도 여기서 돈다
+    deploy:
+      resources:
+        limits: { cpus: "1.0", memory: 1536M }
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: knowledge
+      REDIS_HOST: redis
+      AUTH_SERVICE_URL: http://auth-service:8081
+      QDRANT_URL: http://qdrant:6333
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: ${NEO4J_USER:-neo4j}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD:-password123}
+      GRAPHRAG_ENABLED: ${GRAPHRAG_ENABLED:-true}
+    depends_on:
+      postgres:     { condition: service_healthy }
+      redis:        { condition: service_healthy }
+      qdrant:       { condition: service_healthy }
+      neo4j:        { condition: service_healthy }
+      auth-service: { condition: service_healthy }
+      kafka:        { condition: service_healthy }
+    healthcheck:
+      <<: *worker-health
+      test: *worker-health-probe
+      # 임베딩·재순위화 모델을 로드한 뒤에야 메트릭 서버가 뜬다. 공통값(60s)보다 넉넉히 준다.
+      start_period: 180s
+
+  governance-worker:
+    <<: *app-common
+    build: { context: ., dockerfile: server/python/governance-worker/Dockerfile }
+    image: history/governance-worker:${IMAGE_TAG:-dev}
+    deploy:
+      resources:
+        limits: { cpus: "0.3", memory: 384M }
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: knowledge
+      REDIS_HOST: redis
+      QDRANT_URL: http://qdrant:6333
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      NOTIFICATION_ENABLED: ${NOTIFICATION_ENABLED:-true}
+      SLACK_WEBHOOK_ENABLED: ${SLACK_WEBHOOK_ENABLED:-false}
+      SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL:-}
+      TEAMS_WEBHOOK_ENABLED: ${TEAMS_WEBHOOK_ENABLED:-false}
+      TEAMS_WEBHOOK_URL: ${TEAMS_WEBHOOK_URL:-}
+      EMAIL_NOTIFICATION_ENABLED: ${EMAIL_NOTIFICATION_ENABLED:-false}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_USE_TLS: ${SMTP_USE_TLS:-true}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@company.com}
+      EMAIL_TO: ${EMAIL_TO:-}
+      NEO4J_ENABLED: ${NEO4J_ENABLED:-true}
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: ${NEO4J_USER:-neo4j}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD:-password123}
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis:    { condition: service_healthy }
+      qdrant:   { condition: service_healthy }
+      neo4j:    { condition: service_healthy }
+    healthcheck:
+      <<: *worker-health
+      test: *worker-health-probe
+
+  gateway:
+    <<: *app-common
+    build: { context: ., dockerfile: server/spring/gateway/Dockerfile }
+    image: history/gateway:${IMAGE_TAG:-dev}
+    deploy:
+      resources:
+        limits: { cpus: "0.75", memory: 640M }
+    ports: ["127.0.0.1:8080:8080"]
+    environment:
+      SERVER_PORT: 8080
+      AUTH_SERVICE_URL: http://auth-service:8081
+      DOCUMENT_SERVICE_URL: http://document-service:8082
+      INDEX_SERVICE_URL: http://index-worker:8083
+      CHAT_SERVICE_URL: http://chat-service:8084
+      # 프론트가 게이트웨이를 직접 호출하며 생기는 CORS 허용 origin. front 의 호스트 노출 포트와 맞춘다.
+      FRONT_ORIGIN: http://localhost:5173
+      # 로그인 rate limiting(RedisRateLimiter)이 쓰는 연결
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD}
+    depends_on:
+      auth-service:     { condition: service_healthy }
+      document-service: { condition: service_healthy }
+      index-worker:     { condition: service_healthy }
+      chat-service:     { condition: service_healthy }
+      redis:            { condition: service_healthy }
+    healthcheck:
+      <<: *app-health
+      # 관리 포트다. publish 하지 않으므로 컨테이너 안에서만 닿는다.
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:9090/actuator/health"]
+
+  front:
+    <<: *app-common
+    build:
+      context: .
+      dockerfile: front/Dockerfile
+      # 게이트웨이의 호스트 노출 주소. 프론트 정적 파일에 빌드 시점에 굳혀 들어간다.
+      args: { VITE_GATEWAY_URL: http://localhost:8080 }
+    image: history/front:${IMAGE_TAG:-dev}
+    deploy:
+      resources:
+        limits: { cpus: "0.25", memory: 128M }
+    ports: ["127.0.0.1:5173:8080"]
+    depends_on:
+      gateway: { condition: service_healthy }
+    healthcheck:
+      <<: *app-health
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8080/"]
+
+volumes:
+  postgres-data:
+  redis-data:
+  qdrant-data:
+  minio-data:
+  kafka-data:
+  neo4j-data:
+
+networks:
+  backend:
+    driver: bridge

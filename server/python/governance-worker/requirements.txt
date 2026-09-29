@@ -1,0 +1,14 @@
+# 정책 거버넌스 및 지식그래프 동기화 워커 (Redis Stream 컨슈머)
+# RAG 답변 생성(LangGraph, FlashRank, Kafka) 의존성을 배제하여 초경량화 유지
+redis==5.2.1
+asyncpg==0.30.0
+qdrant-client==1.12.1
+groq==0.13.0
+httpx==0.28.1
+structlog==24.4.0
+pydantic-settings==2.7.1
+# 메트릭 노출
+prometheus-client==0.21.1
+neo4j>=5.26.0
+pytest==8.3.4
+pytest-asyncio==0.24.0

@@ -1,0 +1,27 @@
+# 답변 생성 worker 전용 의존성. HTTP 서버는 열지 않는다(Kafka consumer로만 동작).
+#
+# RRF 융합은 LangChain의 EnsembleRetriever를 쓴다(id_key/weights/c를 명시적으로 지정해
+# ReciprocalRankFusion.java의 K=60·동일 가중치와 정확히 맞춘다 — search/hybrid.py 참고).
+# Qdrant는 이 프로젝트 고유의 scope 필터·payload 구조 때문에 langchain-qdrant 래퍼 대신
+# qdrant-client를 직접 써서 커스텀 BaseRetriever로 감쌌다(VectorSearchClient.java의
+# 필터 구조를 그대로 재현하는 게 목적이라, 범용 래퍼보다 이쪽이 더 정확하다).
+langgraph==0.2.60
+langchain==0.3.14
+qdrant-client==1.12.1
+groq==0.13.0
+aiokafka==0.11.0
+redis==5.2.1
+asyncpg==0.30.0
+httpx==0.28.1
+structlog==24.4.0
+pydantic-settings==2.7.1
+# 메트릭 노출
+prometheus-client==0.21.1
+pytest==8.3.4
+pytest-asyncio==0.24.0
+numpy>=1.26.0
+flashrank==0.2.10
+neo4j>=5.26.0
+# AuthClient의 권한 범위 캐시가 TTL만 있고 최대 크기가 없어 장기 실행 시
+# 서서히 메모리가 늘었다. TTLCache로 상한을 둔다
+cachetools==5.5.0

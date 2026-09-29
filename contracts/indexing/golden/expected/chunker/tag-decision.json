@@ -1,0 +1,10 @@
+{
+  "id" : "tag-decision",
+  "chunks" : [ {
+    "chunkNo" : 0,
+    "sectionPath" : "",
+    "chunkTag" : "DECISION",
+    "tokenCount" : 34,
+    "content" : "[문서] 결제 정책 회의록 | 작성일 2024-03-15 | 프로젝트 결제팀 프로젝트\n\n이번 안건은 A안으로 확정 결정했다."
+  } ]
+}

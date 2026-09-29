@@ -1,0 +1,1775 @@
+openapi: 3.1.0
+info:
+  description: "로그인·JWT 발급, 사용자·조직·권한 관리, 감사, 운영 현황"
+  title: auth-service API
+  version: 0.1.0
+servers:
+- description: Generated server url
+  url: http://localhost
+paths:
+  /.well-known/jwks.json:
+    get:
+      operationId: jwks
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties: {}
+          description: OK
+      tags:
+      - auth-controller
+  /api/access-policies:
+    get:
+      operationId: list_1
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: query
+        name: includeRevoked
+        required: false
+        schema:
+          type: boolean
+          default: false
+      - in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageResponsePolicy"
+          description: OK
+      tags:
+      - policy-controller
+    post:
+      operationId: create
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PolicyRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                type: object
+          description: OK
+      tags:
+      - policy-controller
+  /api/access-policies/{policyId}:
+    delete:
+      operationId: revoke
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: policyId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+      tags:
+      - policy-controller
+  /api/admin/metrics:
+    get:
+      operationId: metrics
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: query
+        name: days
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 30
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProductMetrics"
+          description: OK
+      tags:
+      - product-metrics-controller
+  /api/admin/metrics/feedback:
+    get:
+      operationId: feedback
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: query
+        name: rating
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageResponseFeedbackItem"
+          description: OK
+      tags:
+      - product-metrics-controller
+  /api/admin/metrics/feedback/{messageId}:
+    get:
+      operationId: feedbackDetail
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: messageId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                type: object
+          description: OK
+      tags:
+      - product-metrics-controller
+  /api/admin/ops/dlq:
+    get:
+      operationId: dlqStatuses
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DlqStatus"
+          description: OK
+      tags:
+      - ops-controller
+  /api/admin/ops/dlq/{streamKey}/discard:
+    post:
+      operationId: dlqDiscard
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: streamKey
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DlqActionRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/DlqActionResult"
+          description: OK
+      tags:
+      - ops-controller
+  /api/admin/ops/dlq/{streamKey}/entries:
+    get:
+      operationId: dlqEntries
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: streamKey
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: limit
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DlqEntry"
+          description: OK
+      tags:
+      - ops-controller
+  /api/admin/ops/dlq/{streamKey}/replay:
+    post:
+      operationId: dlqReplay
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: streamKey
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DlqActionRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/DlqActionResult"
+          description: OK
+      tags:
+      - ops-controller
+  /api/admin/ops/errors:
+    get:
+      operationId: errors
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: query
+        name: service
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageResponseOpsError"
+          description: OK
+      tags:
+      - ops-controller
+  /api/admin/ops/health:
+    get:
+      operationId: health
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OpsHealth"
+          description: OK
+      tags:
+      - ops-controller
+  /api/admin/ops/index-status:
+    get:
+      operationId: indexStatus
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OpsIndexStatus"
+          description: OK
+      tags:
+      - ops-controller
+  /api/admin/ops/trace/{correlationId}:
+    get:
+      operationId: trace
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: correlationId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                type: object
+          description: OK
+      tags:
+      - ops-controller
+  /api/audit-logs:
+    get:
+      operationId: audit
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 30
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageResponseAuditEntry"
+          description: OK
+      tags:
+      - policy-controller
+  /api/auth/login:
+    post:
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+          description: OK
+      tags:
+      - auth-controller
+  /api/auth/logout:
+    post:
+      operationId: logout
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+      tags:
+      - auth-controller
+  /api/auth/me:
+    get:
+      operationId: me
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CurrentUser"
+          description: OK
+      tags:
+      - auth-controller
+  /api/auth/password:
+    post:
+      operationId: changePassword
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangePasswordRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+      tags:
+      - auth-controller
+  /api/auth/refresh:
+    post:
+      operationId: refresh
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: header
+        name: Authorization
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+          description: OK
+      tags:
+      - auth-controller
+  /api/organizations:
+    get:
+      operationId: listOrganizations
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OrganizationRef"
+          description: OK
+      tags:
+      - user-controller
+    post:
+      operationId: createOrganization
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrganizationRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OrganizationRef"
+          description: OK
+      tags:
+      - user-controller
+  /api/organizations/{organizationId}/teams:
+    get:
+      operationId: listTeams
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: organizationId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TeamRef"
+          description: OK
+      tags:
+      - user-controller
+  /api/teams/{teamId}/notification-channel:
+    get:
+      operationId: get
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: teamId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TeamNotificationChannel"
+          description: OK
+      tags:
+      - team-notification-channel-controller
+    put:
+      operationId: update
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: teamId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TeamNotificationChannel"
+          description: OK
+      tags:
+      - team-notification-channel-controller
+  /api/users:
+    get:
+      operationId: list
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: query
+        name: q
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageResponseUserSummary"
+          description: OK
+      tags:
+      - user-controller
+    post:
+      operationId: issueUserAccount
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserAccountRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/IssuedUserAccount"
+          description: OK
+      tags:
+      - user-controller
+  /api/users/{userId}:
+    get:
+      operationId: get_1
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: userId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserDetail"
+          description: OK
+      tags:
+      - user-controller
+  /api/users/{userId}/membership:
+    put:
+      operationId: updateMembership
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: userId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MembershipRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserDetail"
+          description: OK
+      tags:
+      - user-controller
+  /api/users/{userId}/password-reset:
+    post:
+      operationId: resetPassword
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: userId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/IssuedTemporaryPassword"
+          description: OK
+      tags:
+      - user-controller
+  /api/users/{userId}/roles:
+    put:
+      operationId: updateRoles
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: userId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RolesRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserDetail"
+          description: OK
+      tags:
+      - user-controller
+  /api/users/{userId}/status:
+    put:
+      operationId: updateStatus
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: userId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StatusRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserDetail"
+          description: OK
+      tags:
+      - user-controller
+  /internal/audit:
+    post:
+      operationId: recordAudit
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuditRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+      tags:
+      - policy-controller
+  /internal/permission-scope/{userId}:
+    get:
+      operationId: permissionScope
+      parameters:
+      - in: path
+        name: userId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PermissionScope"
+          description: OK
+      tags:
+      - policy-controller
+components:
+  schemas:
+    AccessDenials:
+      type: object
+      properties:
+        byAction:
+          type: array
+          items:
+            $ref: "#/components/schemas/ActionCount"
+        total:
+          type: integer
+          format: int64
+    ActionCount:
+      type: object
+      properties:
+        action:
+          type: string
+        count:
+          type: integer
+          format: int64
+    Adoption:
+      type: object
+      properties:
+        activeUsers:
+          type: integer
+          format: int64
+        askedUsers:
+          type: integer
+          format: int64
+        questions:
+          type: integer
+          format: int64
+    AnswerQuality:
+      type: object
+      properties:
+        assistantMessages:
+          type: integer
+          format: int64
+        byStatus:
+          type: array
+          items:
+            $ref: "#/components/schemas/StatusCount"
+        ok:
+          type: integer
+          format: int64
+        okWithSources:
+          type: integer
+          format: int64
+        withSources:
+          type: integer
+          format: int64
+    AuditEntry:
+      type: object
+      properties:
+        action:
+          type: string
+        actorId:
+          type: integer
+          format: int64
+        actorName:
+          type: string
+        correlationId:
+          type: string
+        id:
+          type: integer
+          format: int64
+        occurredAt:
+          type: string
+          format: date-time
+        reason:
+          type: string
+        result:
+          type: string
+        targetId:
+          type: integer
+          format: int64
+        targetType:
+          type: string
+    AuditRequest:
+      type: object
+      properties:
+        action:
+          type: string
+          minLength: 1
+        actorId:
+          type: integer
+          format: int64
+        allowed:
+          type: boolean
+        reason:
+          type: string
+        targetId:
+          type: integer
+          format: int64
+        targetType:
+          type: string
+      required:
+      - action
+    ChangePasswordRequest:
+      type: object
+      properties:
+        currentPassword:
+          type: string
+          minLength: 1
+        newPassword:
+          type: string
+          maxLength: 100
+          minLength: 8
+      required:
+      - currentPassword
+      - newPassword
+    ComponentHealth:
+      type: object
+      properties:
+        latencyMs:
+          type: integer
+          format: int64
+        name:
+          type: string
+        status:
+          type: string
+          enum:
+          - UP
+          - DEGRADED
+          - DOWN
+          - UNKNOWN
+    CreateOrganizationRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          minLength: 0
+      required:
+      - name
+    CreateUserAccountRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          minLength: 0
+        name:
+          type: string
+          maxLength: 100
+          minLength: 0
+        organizationId:
+          type: integer
+          format: int64
+        roles:
+          type: array
+          items:
+            type: string
+            enum:
+            - SYSTEM_ADMIN
+            - ORG_ADMIN
+            - TEAM_ADMIN
+            - MEMBER
+          minItems: 1
+        teamIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+      required:
+      - email
+      - name
+      - organizationId
+      - roles
+    CurrentUser:
+      type: object
+      properties:
+        email:
+          type: string
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        organizationId:
+          type: integer
+          format: int64
+        organizationName:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+        teams:
+          type: array
+          items:
+            $ref: "#/components/schemas/TeamDto"
+    DlqActionRequest:
+      type: object
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+          minItems: 1
+      required:
+      - ids
+    DlqActionResult:
+      type: object
+      properties:
+        failedIds:
+          type: array
+          items:
+            type: string
+        succeeded:
+          type: integer
+          format: int32
+    DlqEntry:
+      type: object
+      properties:
+        addedAt:
+          type: string
+          format: date-time
+        consumerGroup:
+          type: string
+        deliveries:
+          type: integer
+          format: int32
+        id:
+          type: string
+        payload:
+          type: object
+          additionalProperties:
+            type: string
+        reason:
+          type: string
+        sourceId:
+          type: string
+        sourceStream:
+          type: string
+        streamKey:
+          type: string
+    DlqStatus:
+      type: object
+      properties:
+        consumerService:
+          type: string
+        count:
+          type: integer
+          format: int64
+        dlqStream:
+          type: string
+        key:
+          type: string
+        oldestAt:
+          type: string
+          format: date-time
+        stream:
+          type: string
+    Feedback:
+      type: object
+      properties:
+        assistantMessages:
+          type: integer
+          format: int64
+        helpful:
+          type: integer
+          format: int64
+        notHelpful:
+          type: integer
+          format: int64
+        responded:
+          type: integer
+          format: int64
+    FeedbackItem:
+      type: object
+      properties:
+        answerPreview:
+          type: string
+        answerStatus:
+          type: string
+        conversationId:
+          type: integer
+          format: int64
+        createdAt:
+          type: string
+          format: date-time
+        latencyMs:
+          type: integer
+          format: int32
+        messageId:
+          type: integer
+          format: int64
+        question:
+          type: string
+        raterName:
+          type: string
+        rating:
+          type: string
+        reason:
+          type: string
+        sourceCount:
+          type: integer
+          format: int64
+    IssuedTemporaryPassword:
+      type: object
+      properties:
+        email:
+          type: string
+        temporaryPassword:
+          type: string
+        userId:
+          type: integer
+          format: int64
+    IssuedUserAccount:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        email:
+          type: string
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        organizationId:
+          type: integer
+          format: int64
+        organizationName:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+            enum:
+            - SYSTEM_ADMIN
+            - ORG_ADMIN
+            - TEAM_ADMIN
+            - MEMBER
+        status:
+          type: string
+        teams:
+          type: array
+          items:
+            $ref: "#/components/schemas/TeamRef"
+        temporaryPassword:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+    Latency:
+      type: object
+      properties:
+        averageMs:
+          type: integer
+          format: int64
+        measured:
+          type: integer
+          format: int64
+        overTargetCount:
+          type: integer
+          format: int64
+        p95Ms:
+          type: integer
+          format: int64
+        targetMs:
+          type: integer
+          format: int64
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          minLength: 0
+        password:
+          type: string
+          maxLength: 100
+          minLength: 8
+      required:
+      - email
+      - password
+    MembershipRequest:
+      type: object
+      properties:
+        organizationId:
+          type: integer
+          format: int64
+        teamIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+      required:
+      - organizationId
+      - teamIds
+    OpsError:
+      type: object
+      properties:
+        correlationId:
+          type: string
+        message:
+          type: string
+        occurredAt:
+          type: string
+          format: date-time
+        service:
+          type: string
+    OpsHealth:
+      type: object
+      properties:
+        checkedAt:
+          type: string
+          format: date-time
+        services:
+          type: array
+          items:
+            $ref: "#/components/schemas/ComponentHealth"
+        storages:
+          type: array
+          items:
+            $ref: "#/components/schemas/ComponentHealth"
+    OpsIndexStatus:
+      type: object
+      properties:
+        failCount:
+          type: integer
+          format: int32
+        indexLagSeconds:
+          type: integer
+          format: int64
+        pendingCount:
+          type: integer
+          format: int32
+        runningCount:
+          type: integer
+          format: int32
+    OrganizationRef:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+    PageResponseAuditEntry:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuditEntry"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+    PageResponseFeedbackItem:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/FeedbackItem"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+    PageResponseOpsError:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/OpsError"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+    PageResponsePolicy:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/Policy"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+    PageResponseUserSummary:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserSummary"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+    PermissionScope:
+      type: object
+      properties:
+        deniedDocumentIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+          uniqueItems: true
+        documentIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+          uniqueItems: true
+        empty:
+          type: boolean
+        organizationIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+          uniqueItems: true
+        systemAdmin:
+          type: boolean
+        teamIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+          uniqueItems: true
+    Policy:
+      type: object
+      properties:
+        canRead:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: integer
+          format: int64
+        id:
+          type: integer
+          format: int64
+        revokedAt:
+          type: string
+          format: date-time
+        scopeDocumentId:
+          type: integer
+          format: int64
+        scopeName:
+          type: string
+        scopeOrganizationId:
+          type: integer
+          format: int64
+        scopeTeamId:
+          type: integer
+          format: int64
+        scopeType:
+          type: string
+          enum:
+          - ORGANIZATION
+          - TEAM
+          - DOCUMENT
+        subjectName:
+          type: string
+        subjectRole:
+          type: string
+          enum:
+          - SYSTEM_ADMIN
+          - ORG_ADMIN
+          - TEAM_ADMIN
+          - MEMBER
+        subjectTeamId:
+          type: integer
+          format: int64
+        subjectType:
+          type: string
+          enum:
+          - USER
+          - ROLE
+          - TEAM
+        subjectUserId:
+          type: integer
+          format: int64
+    PolicyRequest:
+      type: object
+      properties:
+        canRead:
+          type: boolean
+        scopeDocumentId:
+          type: integer
+          format: int64
+        scopeOrganizationId:
+          type: integer
+          format: int64
+        scopeTeamId:
+          type: integer
+          format: int64
+        scopeType:
+          type: string
+          enum:
+          - ORGANIZATION
+          - TEAM
+          - DOCUMENT
+        subjectRole:
+          type: string
+          enum:
+          - SYSTEM_ADMIN
+          - ORG_ADMIN
+          - TEAM_ADMIN
+          - MEMBER
+        subjectTeamId:
+          type: integer
+          format: int64
+        subjectType:
+          type: string
+          enum:
+          - USER
+          - ROLE
+          - TEAM
+        subjectUserId:
+          type: integer
+          format: int64
+      required:
+      - scopeType
+      - subjectType
+    ProductMetrics:
+      type: object
+      properties:
+        adoption:
+          $ref: "#/components/schemas/Adoption"
+        answerQuality:
+          $ref: "#/components/schemas/AnswerQuality"
+        days:
+          type: integer
+          format: int32
+        degraded:
+          type: array
+          items:
+            type: string
+        denials:
+          $ref: "#/components/schemas/AccessDenials"
+        feedback:
+          $ref: "#/components/schemas/Feedback"
+        from:
+          type: string
+          format: date-time
+        latency:
+          $ref: "#/components/schemas/Latency"
+        sources:
+          $ref: "#/components/schemas/SourceVerifiability"
+        to:
+          type: string
+          format: date-time
+    RolesRequest:
+      type: object
+      properties:
+        roles:
+          type: array
+          items:
+            type: string
+            enum:
+            - SYSTEM_ADMIN
+            - ORG_ADMIN
+            - TEAM_ADMIN
+            - MEMBER
+          minItems: 1
+      required:
+      - roles
+    SourceVerifiability:
+      type: object
+      properties:
+        citedSources:
+          type: integer
+          format: int64
+        withCoordinates:
+          type: integer
+          format: int64
+        withOriginalFile:
+          type: integer
+          format: int64
+    StatusCount:
+      type: object
+      properties:
+        count:
+          type: integer
+          format: int64
+        status:
+          type: string
+    StatusRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - DISABLED
+      required:
+      - status
+    TeamDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        organizationId:
+          type: integer
+          format: int64
+    TeamNotificationChannel:
+      type: object
+      properties:
+        notificationEmails:
+          type: array
+          items:
+            type: string
+        slackWebhookUrl:
+          type: string
+        teamId:
+          type: integer
+          format: int64
+        teamsWebhookUrl:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+    TeamRef:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        organizationId:
+          type: integer
+          format: int64
+    TokenResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        expiresIn:
+          type: integer
+          format: int64
+        refreshToken:
+          type: string
+        user:
+          $ref: "#/components/schemas/CurrentUser"
+    UpdateRequest:
+      type: object
+      properties:
+        notificationEmails:
+          type: array
+          items:
+            type: string
+            format: email
+        slackWebhookUrl:
+          type: string
+        teamsWebhookUrl:
+          type: string
+    UserDetail:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        email:
+          type: string
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        organizationId:
+          type: integer
+          format: int64
+        organizationName:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+            enum:
+            - SYSTEM_ADMIN
+            - ORG_ADMIN
+            - TEAM_ADMIN
+            - MEMBER
+        status:
+          type: string
+        teams:
+          type: array
+          items:
+            $ref: "#/components/schemas/TeamRef"
+        updatedAt:
+          type: string
+          format: date-time
+    UserSummary:
+      type: object
+      properties:
+        email:
+          type: string
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        organizationId:
+          type: integer
+          format: int64
+        organizationName:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+            enum:
+            - SYSTEM_ADMIN
+            - ORG_ADMIN
+            - TEAM_ADMIN
+            - MEMBER
+        status:
+          type: string
+        teams:
+          type: array
+          items:
+            $ref: "#/components/schemas/TeamRef"

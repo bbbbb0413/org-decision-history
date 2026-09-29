@@ -1,0 +1,9 @@
+{
+  "id" : "error-corrupt-xlsx",
+  "filename" : "broken.xlsx",
+  "scopeKey" : "org:1",
+  "error" : {
+    "retryable" : false,
+    "messagePrefix" : "xlsx 를 읽을 수 없습니다"
+  }
+}

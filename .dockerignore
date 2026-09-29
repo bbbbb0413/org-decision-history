@@ -1,0 +1,25 @@
+# 버전 관리와 편집기
+.git
+.gitignore
+.idea
+.vscode
+
+# 비밀값 — 이미지 레이어 유입을 막는다
+.env
+.env.*
+!.env.example
+
+# 빌드 산출물과 캐시
+**/build
+**/out
+**/.gradle
+**/dist
+**/node_modules
+**/*.log
+
+# 이미지 빌드에 불필요한 파일
+**/*.md
+**/*.pdf
+docs/
+compose.yml
+**/src/test

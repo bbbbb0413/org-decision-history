@@ -1,0 +1,32 @@
+{
+  "id" : "content-crlf",
+  "filename" : "content.md",
+  "scopeKey" : "org:1",
+  "parsed" : {
+    "text" : "# 결제\r\n환불 규정을 확정했다.\r\n## 세부\r\n담당자 지정\r\n",
+    "headings" : [ {
+      "level" : 1,
+      "title" : "결제",
+      "offset" : 0
+    }, {
+      "level" : 2,
+      "title" : "세부",
+      "offset" : 20
+    } ]
+  },
+  "chunks" : [ {
+    "chunkNo" : 0,
+    "sectionPath" : "결제",
+    "chunkTag" : "DECISION",
+    "tokenCount" : 24,
+    "pointId" : "503b2e82-ca52-3d71-886e-19a8c1f9b46e",
+    "content" : "[문서] CRLF 문서 | 작성일 2024-01-02 | 절 결제\n\n# 결제\r\n환불 규정을 확정했다."
+  }, {
+    "chunkNo" : 1,
+    "sectionPath" : "결제 > 세부",
+    "chunkTag" : "ACTION_ITEM",
+    "tokenCount" : 23,
+    "pointId" : "5e8424a6-3304-3a48-9e7e-6a8bb8f648e7",
+    "content" : "[문서] CRLF 문서 | 작성일 2024-01-02 | 절 결제 > 세부\n\n## 세부\r\n담당자 지정"
+  } ]
+}

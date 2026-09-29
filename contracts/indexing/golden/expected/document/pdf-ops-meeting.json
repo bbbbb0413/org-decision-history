@@ -1,0 +1,65 @@
+{
+  "id" : "pdf-ops-meeting",
+  "filename" : "ops-meeting.pdf",
+  "scopeKey" : "team:3",
+  "parsed" : {
+    "text" : "분기 운영 회의록\n일시: 2024-05-02 / 참석: 플랫폼팀, 결제팀\n1. 배경\n01) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 3%.\n02) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 6%.\n03) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 9%.\n04) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 12%.\n05) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 15%.\n06) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 18%.\n07) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 21%.\n08) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 24%.\n09) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 27%.\n10) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 30%.\n11) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 33%.\n12) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 36%.\n13) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 39%.\n14) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 42%.\n15) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 45%.\n16) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 48%.\n17) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 51%.\n18) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 54%.\n19) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 57%.\n20) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 60%.\n21) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 63%.\n22) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 66%.\n23) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 69%.\n24) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 72%.\n2. 결정 사항\n모니터링 도구는 B안을 채택하기로 최종 결정했다.\n3. 지표 표\n지표 현재 목표\nMTTR 42분 30분\n오탐률 18% 5%\n4. 후속 조치\n담당자: 플랫폼팀, 기한: 2024-06-30\n",
+    "headings" : [ {
+      "level" : 1,
+      "title" : "분기 운영 회의록",
+      "offset" : 0
+    }, {
+      "level" : 2,
+      "title" : "1. 배경",
+      "offset" : 41
+    }, {
+      "level" : 2,
+      "title" : "2. 결정 사항",
+      "offset" : 1508
+    }, {
+      "level" : 2,
+      "title" : "3. 지표 표",
+      "offset" : 1545
+    }, {
+      "level" : 2,
+      "title" : "4. 후속 조치",
+      "offset" : 1586
+    } ]
+  },
+  "chunks" : [ {
+    "chunkNo" : 0,
+    "sectionPath" : "분기 운영 회의록",
+    "chunkTag" : "BACKGROUND",
+    "tokenCount" : 47,
+    "pointId" : "ab437eb1-da7f-3d64-af75-c83eb9fee8d3",
+    "content" : "[문서] 분기 운영 회의록 | 작성일 2024-05-02 | 프로젝트 플랫폼 운영 | 절 분기 운영 회의록\n\n분기 운영 회의록\n일시: 2024-05-02 / 참석: 플랫폼팀, 결제팀"
+  }, {
+    "chunkNo" : 1,
+    "sectionPath" : "분기 운영 회의록 > 1. 배경",
+    "chunkTag" : "BACKGROUND",
+    "tokenCount" : 593,
+    "pointId" : "8a02f082-f970-3fed-a3f1-6a2b4f4d0032",
+    "content" : "[문서] 분기 운영 회의록 | 작성일 2024-05-02 | 프로젝트 플랫폼 운영 | 절 분기 운영 회의록 > 1. 배경\n\n1. 배경\n01) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 3%.\n02) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 6%.\n03) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 9%.\n04) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 12%.\n05) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 15%.\n06) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 18%.\n07) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 21%.\n08) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 24%.\n09) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 27%.\n10) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 30%.\n11) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 33%.\n12) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 36%.\n13) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 39%.\n14) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 42%.\n15) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 45%.\n16) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 48%.\n17) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 51%.\n18) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 54%.\n19) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 57%.\n20) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 60%.\n21) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 63%.\n22) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 66%.\n23) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 69%.\n24) 장애 대응 절차와 모니터링 지표를 점검했다. Alert noise was reduced by 72%."
+  }, {
+    "chunkNo" : 2,
+    "sectionPath" : "분기 운영 회의록 > 2. 결정 사항",
+    "chunkTag" : "DECISION",
+    "tokenCount" : 53,
+    "pointId" : "ed638224-fd75-3955-b99c-1cae428735c4",
+    "content" : "[문서] 분기 운영 회의록 | 작성일 2024-05-02 | 프로젝트 플랫폼 운영 | 절 분기 운영 회의록 > 2. 결정 사항\n\n2. 결정 사항\n모니터링 도구는 B안을 채택하기로 최종 결정했다."
+  }, {
+    "chunkNo" : 3,
+    "sectionPath" : "분기 운영 회의록 > 3. 지표 표",
+    "chunkTag" : "BACKGROUND",
+    "tokenCount" : 49,
+    "pointId" : "dc76a475-119c-34c5-940b-1a80f6d1c155",
+    "content" : "[문서] 분기 운영 회의록 | 작성일 2024-05-02 | 프로젝트 플랫폼 운영 | 절 분기 운영 회의록 > 3. 지표 표\n\n3. 지표 표\n지표 현재 목표\nMTTR 42분 30분\n오탐률 18% 5%"
+  }, {
+    "chunkNo" : 4,
+    "sectionPath" : "분기 운영 회의록 > 4. 후속 조치",
+    "chunkTag" : "ACTION_ITEM",
+    "tokenCount" : 48,
+    "pointId" : "eefd0ad7-d18b-3ca7-b9a1-7fafcea65352",
+    "content" : "[문서] 분기 운영 회의록 | 작성일 2024-05-02 | 프로젝트 플랫폼 운영 | 절 분기 운영 회의록 > 4. 후속 조치\n\n4. 후속 조치\n담당자: 플랫폼팀, 기한: 2024-06-30"
+  } ]
+}

@@ -1,0 +1,10 @@
+{
+  "id" : "tag-action-item",
+  "chunks" : [ {
+    "chunkNo" : 0,
+    "sectionPath" : "",
+    "chunkTag" : "ACTION_ITEM",
+    "tokenCount" : 40,
+    "content" : "[문서] 결제 정책 회의록 | 작성일 2024-03-15 | 프로젝트 결제팀 프로젝트\n\n담당자는 다음 주까지 문서를 정리한다. 기한을 지킨다."
+  } ]
+}

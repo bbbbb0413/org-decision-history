@@ -1,0 +1,86 @@
+spring:
+  application:
+    name: document-service
+  datasource:
+    # document 스키마를 먼저 찾고 없으면 public 을 본다.
+    # auth-service 소유 테이블(app_user 등)은 public 에 그대로 두고 참조만 한다.
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/knowledge?currentSchema=document,public}
+    username: ${SPRING_DATASOURCE_USERNAME:history}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate.jdbc.time_zone: UTC
+      hibernate.default_schema: document
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    # 서비스마다 자기 스키마를 소유한다.
+    # public 을 공유하면 나중에 도는 Flyway 가 남의 테이블을 보고 기동을 거부하고,
+    # baseline 으로 우회하면 마이그레이션이 조용히 건너뛰어진다.
+    schemas: document
+    default-schema: document
+    create-schemas: true
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      password: ${SPRING_DATA_REDIS_PASSWORD:}
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      # 일괄 가져오기는 여러 파일을 한 요청에 담는다. 파일당 상한은 그대로 50MB다.
+      max-request-size: 300MB
+
+server:
+  port: ${SERVER_PORT:8082}
+
+internal:
+  api-key: ${INTERNAL_API_KEY:}
+
+auth:
+  service-url: ${AUTH_SERVICE_URL:http://localhost:8081}
+
+storage:
+  # 서비스가 파일을 넣고 뺄 때 쓰는 내부 주소
+  endpoint: ${STORAGE_ENDPOINT:http://localhost:9000}
+  # 브라우저에 주는 서명 경로의 주소. 내부 주소로 서명하면 사용자 쪽에서 403 이 난다
+  public-endpoint: ${STORAGE_PUBLIC_ENDPOINT:http://localhost:9000}
+  bucket: ${STORAGE_BUCKET:documents}
+  access-key: ${MINIO_ROOT_USER:history}
+  secret-key: ${MINIO_ROOT_PASSWORD:}
+  # 다운로드 경로 유효 시간
+  url-ttl: 60s
+  max-file-size: 52428800
+
+neo4j:
+  http-url: ${NEO4J_HTTP_URL:http://localhost:7474}
+  user: ${NEO4J_USER:neo4j}
+  password: ${NEO4J_PASSWORD:password123}
+
+# OpenAPI 스펙 생성. `/v3/api-docs(.yaml)` 는 내부 키 필터 뒤에 있어
+# 게이트웨이를 통해서는 닿지 않는다. 스펙 원본은 contracts/openapi 에 떠서 커밋한다.
+springdoc:
+  # 키 정렬을 켜야 엔드포인트가 추가돼도 스냅샷 diff 가 실제 변경만 보여준다
+  writer-with-order-by-keys: true
+  swagger-ui:
+    enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  metrics:
+    tags:
+      # 여러 서비스를 한 Prometheus 로 긁을 때 시계열을 구분한다
+      application: document-service
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+logging:
+  pattern:
+    console: "%d{HH:mm:ss.SSS} %-5level [%X{correlationId:-}] %logger{36} - %msg%n"

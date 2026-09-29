@@ -1,0 +1,30 @@
+[versions]
+java        = "21"
+springBoot  = "3.5.9"
+springCloud = "2025.0.3"
+# Boot BOM 관리 대상이 아니라 직접 고정한다
+nimbus      = "10.9.1"
+awsSdk      = "2.54.13"   # 객체 저장소. MinIO 는 S3 API 호환이다
+tika        = "3.3.2"     # 파일 시그니처 검사. 확장자를 믿지 않기 위해 쓴다
+pdfbox      = "3.0.8"     # PDF 본문 추출
+poi         = "5.5.1"     # docx 본문과 헤딩 추출
+caffeine    = "3.2.0"     # TTL·최대 크기가 있는 인메모리 캐시(PermissionScopeClient)
+springdoc   = "2.8.13"    # 코드에서 OpenAPI 스펙을 뽑는다(contracts/openapi). Swagger UI 는 쓰지 않는다
+
+[libraries]
+springBootBom  = { module = "org.springframework.boot:spring-boot-dependencies",  version.ref = "springBoot" }
+springCloudBom = { module = "org.springframework.cloud:spring-cloud-dependencies", version.ref = "springCloud" }
+
+# 버전은 Spring Boot BOM 이 관리한다
+nimbusJose     = { module = "com.nimbusds:nimbus-jose-jwt", version.ref = "nimbus" }
+springCrypto   = { module = "org.springframework.security:spring-security-crypto" }
+postgresql     = { module = "org.postgresql:postgresql" }
+awsS3          = { module = "software.amazon.awssdk:s3", version.ref = "awsSdk" }
+tikaCore       = { module = "org.apache.tika:tika-core", version.ref = "tika" }
+pdfbox         = { module = "org.apache.pdfbox:pdfbox", version.ref = "pdfbox" }
+poiOoxml       = { module = "org.apache.poi:poi-ooxml", version.ref = "poi" }
+caffeine       = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
+springdocMvc   = { module = "org.springdoc:springdoc-openapi-starter-webmvc-api", version.ref = "springdoc" }
+
+[plugins]
+springBoot = { id = "org.springframework.boot", version.ref = "springBoot" }

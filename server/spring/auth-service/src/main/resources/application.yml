@@ -1,0 +1,94 @@
+spring:
+  application:
+    name: auth-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/knowledge}
+    username: ${SPRING_DATASOURCE_USERNAME:history}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+  jpa:
+    # 스키마는 Flyway 가 소유한다. Hibernate 는 DDL 을 만들지 않는다.
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      password: ${SPRING_DATA_REDIS_PASSWORD:}
+
+server:
+  port: ${SERVER_PORT:8081}
+
+internal:
+  api-key: ${INTERNAL_API_KEY:}
+
+auth:
+  jwt:
+    private-key: ${JWT_PRIVATE_KEY:}
+    issuer: org-decision-history
+    access-ttl: ${JWT_ACCESS_TTL_SECONDS:1800}s
+    refresh-ttl: ${JWT_REFRESH_TTL_SECONDS:1209600}s
+    # 재발급 토큰을 처음 쓴 뒤 이 시간 안의 재사용은 "탭 여러 개의 동시 재발급"으로 보고
+    # 통과시킨다. 0 으로 두면 엄격 모드다 — 경합까지 재사용으로 판정해 세션을 끊는다.
+    # 유예 구간 안에서는 탈취된 토큰도 통과하는 것이 대가다(RefreshTokenRotation 참고).
+    refresh-reuse-grace: ${JWT_REFRESH_REUSE_GRACE_SECONDS:10}s
+
+# 운영 현황 집계. auth-service 가 다른 서비스의 헬스체크와
+# 색인 스키마를 조회 전용으로 들여다본다. 쓰기는 하지 않는다.
+qdrant:
+  url: ${QDRANT_URL:http://localhost:6333}
+
+storage:
+  endpoint: ${STORAGE_ENDPOINT:http://localhost:9000}
+
+ops:
+  gateway-url:  ${GATEWAY_SERVICE_URL:http://localhost:8080}
+  document-url: ${DOCUMENT_SERVICE_URL:http://localhost:8082}
+  index-url:    ${INDEX_SERVICE_URL:http://localhost:8083}
+  chat-url:     ${CHAT_SERVICE_URL:http://localhost:8084}
+
+# OpenAPI 스펙 생성. `/v3/api-docs(.yaml)` 는 내부 키 필터 뒤에 있어
+# 게이트웨이를 통해서는 닿지 않는다. 스펙 원본은 contracts/openapi 에 떠서 커밋한다.
+springdoc:
+  # 키 정렬을 켜야 엔드포인트가 추가돼도 스냅샷 diff 가 실제 변경만 보여준다
+  writer-with-order-by-keys: true
+  swagger-ui:
+    enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  metrics:
+    tags:
+      # 여러 서비스를 한 Prometheus 로 긁을 때 시계열을 구분한다
+      application: auth-service
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  health:
+    # 로그인·재발급·내 정보 조회는 Redis 없이도 동작한다(로그아웃 무효화만 Redis를 쓴다).
+    # 그래서 컨테이너 헬스체크까지 Redis에 묶지 않는다 — 여기 묶으면
+    # 로그인 자체는 멀쩡한데 Redis 만 느릴 때 다른 서비스의 depends_on 체인이 불필요하게
+    # 느려진다. 운영 현황도 참고용으로만 연결을 확인하며 실패해도 UNKNOWN 으로 표시한다.
+    redis:
+      enabled: false
+
+logging:
+  pattern:
+    console: "%d{HH:mm:ss.SSS} %-5level [%X{correlationId:-}] %logger{36} - %msg%n"
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  flyway:
+    # 개발 시드는 dev 프로파일에서만 적용한다
+    locations: classpath:db/migration,classpath:db/seed

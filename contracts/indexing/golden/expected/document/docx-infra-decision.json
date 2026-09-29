@@ -1,0 +1,61 @@
+{
+  "id" : "docx-infra-decision",
+  "filename" : "infra-decision.docx",
+  "scopeKey" : "org:1",
+  "parsed" : {
+    "text" : "인프라 이전 결정 기록\n이 문서는 사내 배포 인프라를 옮기는 과정의 판단 근거를 남긴다.\n배경\n기존 VM 기반 배포는 확장 시간이 길고 비용 예측이 어렵다.\n\n대안 비교\nA안(관리형 쿠버네티스)과 B안(서버리스 컨테이너)을 비교했다.\n| 구분 | A안 | B안 |\n| 월 비용 | 120만원 | 80만원 |\n결정\n운영 부담이 적은 B안을 채택하기로 최종 결정했다.\n후속 조치\n담당자: 인프라팀, 기한: 다음 분기 말\n",
+    "headings" : [ {
+      "level" : 1,
+      "title" : "배경",
+      "offset" : 50
+    }, {
+      "level" : 2,
+      "title" : "대안 비교",
+      "offset" : 89
+    }, {
+      "level" : 1,
+      "title" : "결정",
+      "offset" : 172
+    }, {
+      "level" : 3,
+      "title" : "후속 조치",
+      "offset" : 204
+    } ]
+  },
+  "chunks" : [ {
+    "chunkNo" : 0,
+    "sectionPath" : "",
+    "chunkTag" : "DECISION",
+    "tokenCount" : 51,
+    "pointId" : "e8b7d219-bd37-3858-b5fb-997e251284b8",
+    "content" : "[문서] 인프라 이전 결정 기록 | 작성일 2024-06-10 | 프로젝트 인프라 이전\n\n인프라 이전 결정 기록\n이 문서는 사내 배포 인프라를 옮기는 과정의 판단 근거를 남긴다."
+  }, {
+    "chunkNo" : 1,
+    "sectionPath" : "배경",
+    "chunkTag" : "BACKGROUND",
+    "tokenCount" : 46,
+    "pointId" : "667d93bd-48d1-3635-8467-9e488a03c65c",
+    "content" : "[문서] 인프라 이전 결정 기록 | 작성일 2024-06-10 | 프로젝트 인프라 이전 | 절 배경\n\n배경\n기존 VM 기반 배포는 확장 시간이 길고 비용 예측이 어렵다."
+  }, {
+    "chunkNo" : 2,
+    "sectionPath" : "배경 > 대안 비교",
+    "chunkTag" : "DISCUSSION",
+    "tokenCount" : 68,
+    "pointId" : "1daa2a5e-98f3-36e4-bdb9-a6d16c8f9921",
+    "content" : "[문서] 인프라 이전 결정 기록 | 작성일 2024-06-10 | 프로젝트 인프라 이전 | 절 배경 > 대안 비교\n\n대안 비교\nA안(관리형 쿠버네티스)과 B안(서버리스 컨테이너)을 비교했다.\n| 구분 | A안 | B안 |\n| 월 비용 | 120만원 | 80만원 |"
+  }, {
+    "chunkNo" : 3,
+    "sectionPath" : "결정",
+    "chunkTag" : "DECISION",
+    "tokenCount" : 44,
+    "pointId" : "d7115b1b-d21e-305b-9151-0ff14649d40f",
+    "content" : "[문서] 인프라 이전 결정 기록 | 작성일 2024-06-10 | 프로젝트 인프라 이전 | 절 결정\n\n결정\n운영 부담이 적은 B안을 채택하기로 최종 결정했다."
+  }, {
+    "chunkNo" : 4,
+    "sectionPath" : "결정 > 후속 조치",
+    "chunkTag" : "ACTION_ITEM",
+    "tokenCount" : 45,
+    "pointId" : "879f8fc5-f534-335d-ae7b-b5e10fe2e520",
+    "content" : "[문서] 인프라 이전 결정 기록 | 작성일 2024-06-10 | 프로젝트 인프라 이전 | 절 결정 > 후속 조치\n\n후속 조치\n담당자: 인프라팀, 기한: 다음 분기 말"
+  } ]
+}

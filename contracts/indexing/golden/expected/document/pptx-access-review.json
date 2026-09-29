@@ -1,0 +1,65 @@
+{
+  "id" : "pptx-access-review",
+  "filename" : "access-review-deck.pptx",
+  "scopeKey" : "team:3",
+  "parsed" : {
+    "text" : "접근권한 관리 개선 제안\n정보보안팀 · 2026-05\n현황\n분기 권한 검토를 수동으로 하고 있어 누락이 생긴다.\n지난 분기 검토 대상 240건 중 18건이 기한을 넘겼다.\n대안 비교\n| 구분 | A안(사내 구축) | B안(SaaS 연동) |\n| 도입 기간 | 4개월 | 6주 |\n| 연 비용 | 9,600만원 | 4,200만원 |\n검토 주기를 월 1회로 줄인다\n예외 승인은 팀장 결재로 남긴다\n결정\n운영 부담이 적은 B안을 채택하기로 확정했다.\n",
+    "headings" : [ {
+      "level" : 1,
+      "title" : "접근권한 관리 개선 제안",
+      "offset" : 0
+    }, {
+      "level" : 1,
+      "title" : "현황",
+      "offset" : 30
+    }, {
+      "level" : 1,
+      "title" : "대안 비교",
+      "offset" : 96
+    }, {
+      "level" : 1,
+      "title" : "슬라이드 4",
+      "offset" : 185
+    }, {
+      "level" : 1,
+      "title" : "결정",
+      "offset" : 220
+    } ]
+  },
+  "chunks" : [ {
+    "chunkNo" : 0,
+    "sectionPath" : "접근권한 관리 개선 제안",
+    "chunkTag" : "DISCUSSION",
+    "tokenCount" : 49,
+    "pointId" : "180d94bd-ddb9-324d-ab27-201e998de70f",
+    "content" : "[문서] 접근권한 관리 개선 제안 | 작성일 2026-05-18 | 프로젝트 권한검토 자동화 | 절 접근권한 관리 개선 제안\n\n접근권한 관리 개선 제안\n정보보안팀 · 2026-05"
+  }, {
+    "chunkNo" : 1,
+    "sectionPath" : "현황",
+    "chunkTag" : "ACTION_ITEM",
+    "tokenCount" : 63,
+    "pointId" : "2f4d1b7c-b190-3085-be71-a914a351b2e0",
+    "content" : "[문서] 접근권한 관리 개선 제안 | 작성일 2026-05-18 | 프로젝트 권한검토 자동화 | 절 현황\n\n현황\n분기 권한 검토를 수동으로 하고 있어 누락이 생긴다.\n지난 분기 검토 대상 240건 중 18건이 기한을 넘겼다."
+  }, {
+    "chunkNo" : 2,
+    "sectionPath" : "대안 비교",
+    "chunkTag" : "DISCUSSION",
+    "tokenCount" : 65,
+    "pointId" : "9b665c22-1f64-333d-8e62-da893a13a106",
+    "content" : "[문서] 접근권한 관리 개선 제안 | 작성일 2026-05-18 | 프로젝트 권한검토 자동화 | 절 대안 비교\n\n대안 비교\n| 구분 | A안(사내 구축) | B안(SaaS 연동) |\n| 도입 기간 | 4개월 | 6주 |\n| 연 비용 | 9,600만원 | 4,200만원 |"
+  }, {
+    "chunkNo" : 3,
+    "sectionPath" : "슬라이드 4",
+    "chunkTag" : "DECISION",
+    "tokenCount" : 50,
+    "pointId" : "e347cec5-7559-39d4-90d9-a2ae0daa7f96",
+    "content" : "[문서] 접근권한 관리 개선 제안 | 작성일 2026-05-18 | 프로젝트 권한검토 자동화 | 절 슬라이드 4\n\n검토 주기를 월 1회로 줄인다\n예외 승인은 팀장 결재로 남긴다"
+  }, {
+    "chunkNo" : 4,
+    "sectionPath" : "결정",
+    "chunkTag" : "DECISION",
+    "tokenCount" : 45,
+    "pointId" : "1ed129d9-d068-381e-a06d-1e8f393e9370",
+    "content" : "[문서] 접근권한 관리 개선 제안 | 작성일 2026-05-18 | 프로젝트 권한검토 자동화 | 절 결정\n\n결정\n운영 부담이 적은 B안을 채택하기로 확정했다."
+  } ]
+}

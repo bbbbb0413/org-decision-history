@@ -1,0 +1,23 @@
+# 문서 색인 워커
+# 공통 모듈은 ../shared (history-shared) 로 따로 설치한다. 그 런타임 의존성도 여기서 고정한다.
+fastapi==0.115.6
+uvicorn==0.34.0
+asyncpg==0.30.0
+redis==5.2.1
+qdrant-client==1.12.1
+httpx==0.28.1
+structlog==24.4.0
+pydantic-settings==2.7.1
+# /actuator/prometheus 노출
+prometheus-client==0.21.1
+# 객체 저장소(MinIO) 읽기
+boto3==1.35.99
+# 파싱. PyMuPDF 는 AGPL 이라 쓰지 않는다
+pdfplumber==0.11.4
+python-docx==1.1.2
+# pptx·xlsx 본문과 표
+python-pptx==1.0.2
+openpyxl==3.1.5
+pytest==8.3.4
+pytest-asyncio==0.24.0
+jsonschema==4.23.0

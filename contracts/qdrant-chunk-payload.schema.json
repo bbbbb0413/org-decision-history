@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "contracts/qdrant-chunk-payload.schema.json",
+  "title": "Qdrant document_chunks point payload",
+  "description": "index-worker 가 청크 벡터와 함께 저장하는 payload. 검색 서비스는 scope_key 로 권한을 거르고 document_id·chunk_no 로 indexing.document_chunk 행과 잇는다. 규칙 설명은 contracts/indexing/README.md.",
+  "x-status": "current",
+  "x-producer": "index-worker (IndexingPipeline.storeVectors)",
+  "x-consumers": ["rag-service app/search/vector_retriever.py", "governance-worker app/vector_retriever.py"],
+  "x-collection": {
+    "name": "document_chunks",
+    "vectors": { "size": 768, "distance": "Cosine" },
+    "pointId": "UUID 문자열. VectorStore.pointIdOf(document_id, document_version, chunk_no) 로 결정한다(contracts/indexing/README.md#point-id)"
+  },
+  "type": "object",
+  "required": [
+    "document_id",
+    "document_version",
+    "chunk_no",
+    "scope_key",
+    "chunk_tag",
+    "document_type",
+    "authored_at",
+    "model_name",
+    "dim"
+  ],
+  "properties": {
+    "document_id": {
+      "description": "document.document.id. 문서 단위 삭제 필터의 키다",
+      "type": "integer",
+      "minimum": 1
+    },
+    "organization_id": {
+      "description": "document.document.organization_id. M4에서 추가했다(로드맵 §0 M4). scope_key는 team이 있으면 조직을 가리지 않아, governance-worker가 조직 전체를 비교 대상으로 거르려면 이 필드가 필요하다. 필수로 두지 않은 이유: M4 이전에 색인한 point에는 없다(재색인하면 채워진다)",
+      "type": "integer",
+      "minimum": 1
+    },
+    "document_version": {
+      "description": "색인한 문서 버전(document.document.current_version)",
+      "type": "integer",
+      "minimum": 1
+    },
+    "chunk_no": {
+      "description": "문서 버전 안의 0부터 시작하는 청크 순번",
+      "type": "integer",
+      "minimum": 0
+    },
+    "scope_key": {
+      "description": "권한 스코프. 팀이 있으면 team:{teamId}, 없으면 org:{organizationId}. indexing.document_chunk.scope_key 와 같은 값이다",
+      "type": "string",
+      "pattern": "^(team|org):[0-9]+$"
+    },
+    "chunk_tag": {
+      "description": "indexing.chunk_tag enum 과 같은 값",
+      "enum": ["DECISION", "DISCUSSION", "ACTION_ITEM", "BACKGROUND"]
+    },
+    "document_type": {
+      "description": "document.document_type enum 과 같은 값",
+      "enum": ["MEETING_NOTE", "DECISION_RECORD", "DESIGN_DOC", "POLICY_DOC"]
+    },
+    "authored_at": {
+      "description": "작성일 yyyy-MM-dd. DB 는 NOT NULL 이지만 코드는 null 을 허용한다",
+      "type": ["string", "null"],
+      "format": "date"
+    },
+    "model_name": {
+      "description": "임베딩 모델명. Gemini 는 gemini-embedding-001, API 키가 없을 때의 대체 임베딩은 local-hashing-ngram. 두 모델의 벡터를 섞으면 검색이 무너지므로 모델을 바꾸면 전체 재색인한다",
+      "type": "string",
+      "examples": ["gemini-embedding-001", "local-hashing-ngram"]
+    },
+    "dim": {
+      "description": "벡터 차원",
+      "const": 768
+    }
+  },
+  "additionalProperties": true
+}

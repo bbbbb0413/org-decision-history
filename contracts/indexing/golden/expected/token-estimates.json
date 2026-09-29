@@ -1,0 +1,34 @@
+[ {
+  "text" : "",
+  "estimate" : 0
+}, {
+  "text" : "abcd",
+  "estimate" : 1
+}, {
+  "text" : "abcde",
+  "estimate" : 2
+}, {
+  "text" : "한글",
+  "estimate" : 2
+}, {
+  "text" : "ㄱㄴㄷ",
+  "estimate" : 3
+}, {
+  "text" : "漢字",
+  "estimate" : 2
+}, {
+  "text" : "😀",
+  "estimate" : 1
+}, {
+  "text" : "a😀",
+  "estimate" : 1
+}, {
+  "text" : " ",
+  "estimate" : 1
+}, {
+  "text" : "혼합 text 123",
+  "estimate" : 4
+}, {
+  "text" : "결제 정책 회의록",
+  "estimate" : 6
+} ]

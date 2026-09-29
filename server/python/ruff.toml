@@ -1,0 +1,11 @@
+# server/python 아래 모든 Python 서비스에 적용하는 린트 설정.
+# CI 는 확실한 결함만 막는다 — 정의되지 않은 이름, 쓰지 않는 import·변수, 문법 오류.
+# 스타일 규칙은 넣지 않는다. 기존 코드 전체를 다시 쓰게 만들어 결함 신호가 묻힌다.
+target-version = "py312"
+
+[lint]
+select = ["F", "E9"]
+
+[lint.per-file-ignores]
+# 알려진 결함: 서브그래프 노드 목록을 선언만 하고 채우지 않는 변수가 있다. 고친 뒤 이 예외를 지운다.
+"shared/history_shared/graph/client.py" = ["F841"]

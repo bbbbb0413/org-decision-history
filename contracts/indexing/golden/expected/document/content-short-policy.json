@@ -1,0 +1,17 @@
+{
+  "id" : "content-short-policy",
+  "filename" : "content.md",
+  "scopeKey" : "team:1",
+  "parsed" : {
+    "text" : "인증 게이트웨이의 세션 토큰 유효 기간을 24시간에서 30분으로 줄인다. 장시간 배치는 토큰 갱신이 필요하다.",
+    "headings" : [ ]
+  },
+  "chunks" : [ {
+    "chunkNo" : 0,
+    "sectionPath" : "",
+    "chunkTag" : "BACKGROUND",
+    "tokenCount" : 57,
+    "pointId" : "d207d53a-b2f4-3129-96ef-f81346ee7f89",
+    "content" : "[문서] 세션 타임아웃 단축 정책 | 작성일 2025-09-15 | 프로젝트 인증보안\n\n인증 게이트웨이의 세션 토큰 유효 기간을 24시간에서 30분으로 줄인다. 장시간 배치는 토큰 갱신이 필요하다."
+  } ]
+}

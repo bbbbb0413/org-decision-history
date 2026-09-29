@@ -1,0 +1,54 @@
+# Spring 멀티모듈 컴파일 + 테스트.
+# 한 모듈만 바뀌어도 전체를 빌드한다 — common 변경이 다른 모듈을 깨는지 함께 봐야 하기 때문이다.
+name: ci-spring
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "server/spring/**"
+      # OpenAPI 스냅샷을 손으로 고쳐 커밋하면 여기서 잡아야 한다
+      - "contracts/openapi/**"
+      - "build.gradle.kts"
+      - "settings.gradle.kts"
+      - "gradle/**"
+      - "gradlew"
+      - ".github/workflows/ci-spring.yml"
+  pull_request:
+    paths:
+      - "server/spring/**"
+      # OpenAPI 스냅샷을 손으로 고쳐 커밋하면 여기서 잡아야 한다
+      - "contracts/openapi/**"
+      - "build.gradle.kts"
+      - "settings.gradle.kts"
+      - "gradle/**"
+      - "gradlew"
+      - ".github/workflows/ci-spring.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: gradle build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      # 컨테이너 이미지(temurin 21)와 같은 JDK 로 빌드한다
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      # build = compileJava + test + bootJar. 러너에 Docker 가 있어 Testcontainers 도 그대로 돈다
+      - name: Build and test
+        run: ./gradlew build --console=plain

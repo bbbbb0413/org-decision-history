@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    "types": ["vite/client"]
+  },
+  "include": ["src"],
+  // 운영 빌드(이미지 포함)는 앱 코드만 검사한다. 테스트는 tsconfig.test.json 이 맡는다 —
+  // .dockerignore 가 src/test 를 걷어내는 탓에 이미지 빌드에서만 테스트 타입 증강이 사라져
+  // tsc 가 깨졌다. 어차피 이미지에 테스트 코드가 들어갈 이유도 없다.
+  "exclude": ["src/test", "src/**/*.test.ts", "src/**/*.test.tsx"]
+}

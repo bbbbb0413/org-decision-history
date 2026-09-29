@@ -1,0 +1,1066 @@
+openapi: 3.1.0
+info:
+  description: "문서 CRUD·파일·일괄 가져오기, 상충 조회·처리, 결정 그래프"
+  title: document-service API
+  version: 0.1.0
+servers:
+- description: Generated server url
+  url: http://localhost
+paths:
+  /api/document-files/{fileId}/download-url:
+    post:
+      operationId: downloadUrl
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: fileId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/DownloadUrl"
+          description: OK
+      tags:
+      - document-controller
+  /api/document-imports:
+    post:
+      operationId: create_1
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: query
+        name: defaultDocumentType
+        required: true
+        schema:
+          type: string
+          enum:
+          - MEETING_NOTE
+          - DECISION_RECORD
+          - DESIGN_DOC
+          - POLICY_DOC
+      - in: query
+        name: organizationId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: query
+        name: teamId
+        required: false
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+              required:
+              - files
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Job"
+          description: OK
+      tags:
+      - import-controller
+  /api/document-imports/{jobKey}:
+    get:
+      operationId: get
+      parameters:
+      - in: path
+        name: jobKey
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/JobDetail"
+          description: OK
+      tags:
+      - import-controller
+  /api/document-imports/{jobKey}/retry:
+    post:
+      operationId: retry
+      parameters:
+      - in: path
+        name: jobKey
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Job"
+          description: OK
+      tags:
+      - import-controller
+  /api/documents:
+    get:
+      operationId: list
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: query
+        name: q
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: documentType
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - MEETING_NOTE
+            - DECISION_RECORD
+            - DESIGN_DOC
+            - POLICY_DOC
+      - in: query
+        name: decisionStatus
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - CURRENT
+            - CHANGED
+            - DEPRECATED
+            - UNDECIDED
+      - in: query
+        name: organizationId
+        required: false
+        schema:
+          type: integer
+          format: int64
+      - in: query
+        name: teamId
+        required: false
+        schema:
+          type: integer
+          format: int64
+      - in: query
+        name: mine
+        required: false
+        schema:
+          type: boolean
+          default: false
+      - in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Page"
+          description: OK
+      tags:
+      - document-controller
+    post:
+      operationId: create
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Detail"
+          description: OK
+      tags:
+      - document-controller
+  /api/documents/graph:
+    get:
+      operationId: getMultiDocumentGraph
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: query
+        name: ids
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/GraphResponse"
+          description: OK
+      tags:
+      - decision-graph-controller
+  /api/documents/{documentId}:
+    delete:
+      operationId: delete
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: documentId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+      tags:
+      - document-controller
+    get:
+      operationId: detail
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: documentId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Detail"
+          description: OK
+      tags:
+      - document-controller
+    put:
+      operationId: update
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: documentId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Detail"
+          description: OK
+      tags:
+      - document-controller
+  /api/documents/{documentId}/file:
+    post:
+      operationId: upload
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: documentId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+              - file
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/FileInfo"
+          description: OK
+      tags:
+      - document-controller
+  /api/documents/{documentId}/graph:
+    get:
+      operationId: getDocumentGraph
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: documentId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/GraphResponse"
+          description: OK
+      tags:
+      - decision-graph-controller
+  /api/documents/{documentId}/versions:
+    get:
+      operationId: versions
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: documentId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VersionInfo"
+          description: OK
+      tags:
+      - document-controller
+  /api/documents/{documentId}/versions/{version}:
+    get:
+      operationId: version
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: documentId
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: version
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/VersionDetail"
+          description: OK
+      tags:
+      - document-controller
+  /api/governance/conflicts:
+    get:
+      operationId: list_1
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: query
+        name: status
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: mine
+        required: false
+        schema:
+          type: boolean
+          default: false
+      - in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - in: query
+        name: size
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageResponseConflictItem"
+          description: OK
+      tags:
+      - conflict-controller
+  /api/governance/conflicts/{id}:
+    get:
+      operationId: getOne
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictItem"
+          description: OK
+      tags:
+      - conflict-controller
+    patch:
+      operationId: resolve
+      parameters:
+      - in: header
+        name: X-User-Id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - in: header
+        name: X-User-Roles
+        required: false
+        schema:
+          type: string
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResolveConflictRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConflictItem"
+          description: OK
+      tags:
+      - conflict-controller
+components:
+  schemas:
+    ConflictItem:
+      type: object
+      properties:
+        affectedTeams:
+          type: array
+          items:
+            type: string
+        conflictType:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        id:
+          type: integer
+          format: int64
+        reasoning:
+          type: string
+        resolutionNote:
+          type: string
+        resolvedAt:
+          type: string
+          format: date-time
+        resolvedBy:
+          type: string
+        severityScore:
+          type: number
+          format: double
+        sourceClause:
+          type: string
+        sourceDocId:
+          type: integer
+          format: int64
+        sourceDocTitle:
+          type: string
+        status:
+          type: string
+        targetClause:
+          type: string
+        targetDocId:
+          type: integer
+          format: int64
+        targetDocTitle:
+          type: string
+    CreateRequest:
+      type: object
+      properties:
+        authoredAt:
+          type: string
+          format: date
+        content:
+          type: string
+          minLength: 1
+        decisionStatus:
+          type: string
+          enum:
+          - CURRENT
+          - CHANGED
+          - DEPRECATED
+          - UNDECIDED
+        documentType:
+          type: string
+          enum:
+          - MEETING_NOTE
+          - DECISION_RECORD
+          - DESIGN_DOC
+          - POLICY_DOC
+        organizationId:
+          type: integer
+          format: int64
+        projectName:
+          type: string
+          maxLength: 100
+          minLength: 0
+        teamId:
+          type: integer
+          format: int64
+        title:
+          type: string
+          maxLength: 200
+          minLength: 0
+      required:
+      - authoredAt
+      - content
+      - decisionStatus
+      - documentType
+      - organizationId
+      - title
+    Detail:
+      type: object
+      properties:
+        authorId:
+          type: integer
+          format: int64
+        authorName:
+          type: string
+        authoredAt:
+          type: string
+          format: date
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        currentVersion:
+          type: integer
+          format: int32
+        decisionStatus:
+          type: string
+          enum:
+          - CURRENT
+          - CHANGED
+          - DEPRECATED
+          - UNDECIDED
+        documentType:
+          type: string
+          enum:
+          - MEETING_NOTE
+          - DECISION_RECORD
+          - DESIGN_DOC
+          - POLICY_DOC
+        file:
+          $ref: "#/components/schemas/FileInfo"
+        id:
+          type: integer
+          format: int64
+        organizationId:
+          type: integer
+          format: int64
+        origin:
+          type: string
+          enum:
+          - MANUAL
+          - IMPORT
+          - EXTERNAL_SYNC
+        projectName:
+          type: string
+        teamId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+    DownloadUrl:
+      type: object
+      properties:
+        downloadUrl:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        mimeType:
+          type: string
+        originalFilename:
+          type: string
+        sizeBytes:
+          type: integer
+          format: int64
+    FileInfo:
+      type: object
+      properties:
+        checksumSha256:
+          type: string
+        documentId:
+          type: integer
+          format: int64
+        id:
+          type: integer
+          format: int64
+        mimeType:
+          type: string
+        originalFilename:
+          type: string
+        sizeBytes:
+          type: integer
+          format: int64
+        uploadedAt:
+          type: string
+          format: date-time
+        version:
+          type: integer
+          format: int32
+    GraphEdge:
+      type: object
+      properties:
+        label:
+          type: string
+        properties:
+          type: object
+          additionalProperties: {}
+        relType:
+          type: string
+        source:
+          type: string
+        target:
+          type: string
+    GraphNode:
+      type: object
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        name:
+          type: string
+        properties:
+          type: object
+          additionalProperties: {}
+    GraphResponse:
+      type: object
+      properties:
+        edges:
+          type: array
+          items:
+            $ref: "#/components/schemas/GraphEdge"
+        nodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/GraphNode"
+    Item:
+      type: object
+      properties:
+        documentId:
+          type: integer
+          format: int64
+        extractedAuthorName:
+          type: string
+        extractedAuthoredAt:
+          type: string
+          format: date
+        extractedTitle:
+          type: string
+        failureReason:
+          type: string
+        filename:
+          type: string
+        id:
+          type: integer
+          format: int64
+        retryable:
+          type: boolean
+        status:
+          type: string
+    Job:
+      type: object
+      properties:
+        defaultDocumentType:
+          type: string
+          enum:
+          - MEETING_NOTE
+          - DECISION_RECORD
+          - DESIGN_DOC
+          - POLICY_DOC
+        failCount:
+          type: integer
+          format: int32
+        fileCount:
+          type: integer
+          format: int32
+        finishedAt:
+          type: string
+          format: date-time
+        jobKey:
+          type: string
+          format: uuid
+        organizationId:
+          type: integer
+          format: int64
+        requestedAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+        successCount:
+          type: integer
+          format: int32
+        teamId:
+          type: integer
+          format: int64
+    JobDetail:
+      type: object
+      properties:
+        defaultDocumentType:
+          type: string
+          enum:
+          - MEETING_NOTE
+          - DECISION_RECORD
+          - DESIGN_DOC
+          - POLICY_DOC
+        failCount:
+          type: integer
+          format: int32
+        fileCount:
+          type: integer
+          format: int32
+        finishedAt:
+          type: string
+          format: date-time
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Item"
+        jobKey:
+          type: string
+          format: uuid
+        organizationId:
+          type: integer
+          format: int64
+        requestedAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+        successCount:
+          type: integer
+          format: int32
+        teamId:
+          type: integer
+          format: int64
+    Page:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/Summary"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        typeCounts:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int32
+    PageResponseConflictItem:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConflictItem"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+    ResolveConflictRequest:
+      type: object
+      properties:
+        resolutionNote:
+          type: string
+          maxLength: 1000
+          minLength: 0
+        status:
+          type: string
+          minLength: 1
+      required:
+      - resolutionNote
+      - status
+    Summary:
+      type: object
+      properties:
+        authorId:
+          type: integer
+          format: int64
+        authorName:
+          type: string
+        authoredAt:
+          type: string
+          format: date
+        currentVersion:
+          type: integer
+          format: int32
+        decisionStatus:
+          type: string
+          enum:
+          - CURRENT
+          - CHANGED
+          - DEPRECATED
+          - UNDECIDED
+        documentType:
+          type: string
+          enum:
+          - MEETING_NOTE
+          - DECISION_RECORD
+          - DESIGN_DOC
+          - POLICY_DOC
+        hasFile:
+          type: boolean
+        id:
+          type: integer
+          format: int64
+        organizationId:
+          type: integer
+          format: int64
+        projectName:
+          type: string
+        teamId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+    UpdateRequest:
+      type: object
+      properties:
+        changeNote:
+          type: string
+          maxLength: 300
+          minLength: 0
+        content:
+          type: string
+          minLength: 1
+        currentVersion:
+          type: integer
+          format: int32
+        decisionStatus:
+          type: string
+          enum:
+          - CURRENT
+          - CHANGED
+          - DEPRECATED
+          - UNDECIDED
+        projectName:
+          type: string
+          maxLength: 100
+          minLength: 0
+        teamId:
+          type: integer
+          format: int64
+        title:
+          type: string
+          maxLength: 200
+          minLength: 0
+      required:
+      - content
+      - currentVersion
+      - decisionStatus
+      - title
+    VersionDetail:
+      type: object
+      properties:
+        changeNote:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: integer
+          format: int64
+        decisionStatus:
+          type: string
+          enum:
+          - CURRENT
+          - CHANGED
+          - DEPRECATED
+          - UNDECIDED
+        title:
+          type: string
+        version:
+          type: integer
+          format: int32
+    VersionInfo:
+      type: object
+      properties:
+        changeNote:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: integer
+          format: int64
+        decisionStatus:
+          type: string
+          enum:
+          - CURRENT
+          - CHANGED
+          - DEPRECATED
+          - UNDECIDED
+        fileId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        version:
+          type: integer
+          format: int32

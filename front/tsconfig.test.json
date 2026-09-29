@@ -1,0 +1,10 @@
+{
+  // 테스트까지 포함해 타입을 검사한다. vitest 는 트랜스파일만 하고 타입은 보지 않으므로,
+  // 이 설정으로 CI 에서 따로 검사한다(`npm run typecheck`).
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./tsconfig.test.tsbuildinfo"
+  },
+  "include": ["src"],
+  "exclude": []
+}

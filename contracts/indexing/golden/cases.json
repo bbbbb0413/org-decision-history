@@ -1,0 +1,412 @@
+{
+  "version": 1,
+  "chunkerCases": [
+    {
+      "id": "no-headings-short",
+      "header": {
+        "title": "결제 정책 회의록",
+        "authoredAt": "2024-03-15",
+        "projectName": "결제팀 프로젝트"
+      },
+      "text": "짧은 본문입니다.",
+      "headings": []
+    },
+    {
+      "id": "blank-no-headings",
+      "header": {
+        "title": "결제 정책 회의록",
+        "authoredAt": "2024-03-15",
+        "projectName": "결제팀 프로젝트"
+      },
+      "text": "   ",
+      "headings": []
+    },
+    {
+      "id": "nbsp-only",
+      "header": {
+        "title": "결제 정책 회의록",
+        "authoredAt": "2024-03-15",
+        "projectName": "결제팀 프로젝트"
+      },
+      "text": "\u00a0",
+      "headings": []
+    },
+    {
+      "id": "whitespace-strip",
+      "header": {
+        "title": "결제 정책 회의록",
+        "authoredAt": "2024-03-15",
+        "projectName": "결제팀 프로젝트"
+      },
+      "text": "\u3000 본문 앞뒤 공백 \u00a0\n\t",
+      "headings": []
+    },
+    {
+      "id": "header-title-only",
+      "header": {
+        "title": "제목만",
+        "authoredAt": null,
+        "projectName": "  "
+      },
+      "text": "본문",
+      "headings": []
+    },
+    {
+      "id": "intro-before-first-heading",
+      "header": {
+        "title": "결제 정책 회의록",
+        "authoredAt": "2024-03-15",
+        "projectName": "결제팀 프로젝트"
+      },
+      "text": "도입부입니다.\n# 첫 절\n본문 내용.",
+      "headings": [
+        {
+          "level": 1,
+          "title": "첫 절",
+          "at": "# 첫 절"
+        }
+      ]
+    },
+    {
+      "id": "nested-headings",
+      "header": {
+        "title": "결제 정책 회의록",
+        "authoredAt": "2024-03-15",
+        "projectName": "결제팀 프로젝트"
+      },
+      "text": "# 결제 정책\n상위 절 본문\n## 환불 규정\n하위 절 본문",
+      "headings": [
+        {
+          "level": 1,
+          "title": "결제 정책",
+          "at": "# 결제 정책"
+        },
+        {
+          "level": 2,
+          "title": "환불 규정",
+          "at": "## 환불 규정"
+        }
+      ]
+    },
+    {
+      "id": "sibling-heading-drops-deeper-path",
+      "header": {
+        "title": "결제 정책 회의록",
+        "authoredAt": "2024-03-15",
+        "projectName": "결제팀 프로젝트"
+      },
+      "text": "# 결제\n## 환불\n환불 본문\n# 배송\n배송 본문",
+      "headings": [
+        {
+          "level": 1,
+          "title": "결제",
+          "at": "# 결제"
+        },
+        {
+          "level": 2,
+          "title": "환불",
+          "at": "## 환불"
+        },
+        {
+          "level": 1,
+          "title": "배송",
+          "at": "# 배송"
+        }
+      ]
+    },
+    {
+      "id": "tag-decision",
+      "header": {
+        "title": "결제 정책 회의록",
+        "authoredAt": "2024-03-15",
+        "projectName": "결제팀 프로젝트"
+      },
+      "text": "이번 안건은 A안으로 확정 결정했다.",
+      "headings": []
+    },
+    {
+      "id": "tag-action-item",
+      "header": {
+        "title": "결제 정책 회의록",
+        "authoredAt": "2024-03-15",
+        "projectName": "결제팀 프로젝트"
+      },
+      "text": "담당자는 다음 주까지 문서를 정리한다. 기한을 지킨다.",
+      "headings": []
+    },
+    {
+      "id": "tag-discussion",
+      "header": {
+        "title": "결제 정책 회의록",
+        "authoredAt": "2024-03-15",
+        "projectName": "결제팀 프로젝트"
+      },
+      "text": "여러 대안을 놓고 논의했으나 결론은 못 냈다.",
+      "headings": []
+    },
+    {
+      "id": "tag-background",
+      "header": {
+        "title": "결제 정책 회의록",
+        "authoredAt": "2024-03-15",
+        "projectName": "결제팀 프로젝트"
+      },
+      "text": "오늘 참석자는 다섯 명이었다.",
+      "headings": []
+    },
+    {
+      "id": "tag-decision-over-action",
+      "header": {
+        "title": "결제 정책 회의록",
+        "authoredAt": "2024-03-15",
+        "projectName": "결제팀 프로젝트"
+      },
+      "text": "A안으로 결정했다. 담당자는 다음 주까지 후속 조치한다.",
+      "headings": []
+    },
+    {
+      "id": "tag-english-case-insensitive",
+      "header": {
+        "title": "결제 정책 회의록",
+        "authoredAt": "2024-03-15",
+        "projectName": "결제팀 프로젝트"
+      },
+      "text": "The committee APPROVED the Follow-Up plan.",
+      "headings": []
+    },
+    {
+      "id": "long-body-split-with-overlap",
+      "header": {
+        "title": "결제 정책 회의록",
+        "authoredAt": "2024-03-15",
+        "projectName": "결제팀 프로젝트"
+      },
+      "text": "0000 line of filler text for split \n0001 line of filler text for split \n0002 line of filler text for split \n0003 line of filler text for split \n0004 line of filler text for split \n0005 line of filler text for split \n0006 line of filler text for split \n0007 line of filler text for split \n0008 line of filler text for split \n0009 line of filler text for split \n0010 line of filler text for split \n0011 line of filler text for split \n0012 line of filler text for split \n0013 line of filler text for split \n0014 line of filler text for split \n0015 line of filler text for split \n0016 line of filler text for split \n0017 line of filler text for split \n0018 line of filler text for split \n0019 line of filler text for split \n0020 line of filler text for split \n0021 line of filler text for split \n0022 line of filler text for split \n0023 line of filler text for split \n0024 line of filler text for split \n0025 line of filler text for split \n0026 line of filler text for split \n0027 line of filler text for split \n0028 line of filler text for split \n0029 line of filler text for split \n0030 line of filler text for split \n0031 line of filler text for split \n0032 line of filler text for split \n0033 line of filler text for split \n0034 line of filler text for split \n0035 line of filler text for split \n0036 line of filler text for split \n0037 line of filler text for split \n0038 line of filler text for split \n0039 line of filler text for split \n0040 line of filler text for split \n0041 line of filler text for split \n0042 line of filler text for split \n0043 line of filler text for split \n0044 line of filler text for split \n0045 line of filler text for split \n0046 line of filler text for split \n0047 line of filler text for split \n0048 line of filler text for split \n0049 line of filler text for split \n0050 line of filler text for split \n0051 line of filler text for split \n0052 line of filler text for split \n0053 line of filler text for split \n0054 line of filler text for split \n0055 line of filler text for split \n0056 line of filler text for split \n0057 line of filler text for split \n0058 line of filler text for split \n0059 line of filler text for split \n0060 line of filler text for split \n0061 line of filler text for split \n0062 line of filler text for split \n0063 line of filler text for split \n0064 line of filler text for split \n0065 line of filler text for split \n0066 line of filler text for split \n0067 line of filler text for split \n0068 line of filler text for split \n0069 line of filler text for split \n0070 line of filler text for split \n0071 line of filler text for split \n0072 line of filler text for split \n0073 line of filler text for split \n0074 line of filler text for split \n0075 line of filler text for split \n0076 line of filler text for split \n0077 line of filler text for split \n0078 line of filler text for split \n0079 line of filler text for split \n0080 line of filler text for split \n0081 line of filler text for split \n0082 line of filler text for split \n0083 line of filler text for split \n0084 line of filler text for split \n0085 line of filler text for split \n0086 line of filler text for split \n0087 line of filler text for split \n0088 line of filler text for split \n0089 line of filler text for split \n0090 line of filler text for split \n0091 line of filler text for split \n0092 line of filler text for split \n0093 line of filler text for split \n0094 line of filler text for split \n0095 line of filler text for split \n0096 line of filler text for split \n0097 line of filler text for split \n0098 line of filler text for split \n0099 line of filler text for split \n",
+      "headings": []
+    },
+    {
+      "id": "code-block-not-split",
+      "header": {
+        "title": "결제 정책 회의록",
+        "authoredAt": "2024-03-15",
+        "projectName": "결제팀 프로젝트"
+      },
+      "text": "도입 설명 줄입니다.\n```\ncode line 0000 of a long fenced block here\ncode line 0001 of a long fenced block here\ncode line 0002 of a long fenced block here\ncode line 0003 of a long fenced block here\ncode line 0004 of a long fenced block here\ncode line 0005 of a long fenced block here\ncode line 0006 of a long fenced block here\ncode line 0007 of a long fenced block here\ncode line 0008 of a long fenced block here\ncode line 0009 of a long fenced block here\ncode line 0010 of a long fenced block here\ncode line 0011 of a long fenced block here\ncode line 0012 of a long fenced block here\ncode line 0013 of a long fenced block here\ncode line 0014 of a long fenced block here\ncode line 0015 of a long fenced block here\ncode line 0016 of a long fenced block here\ncode line 0017 of a long fenced block here\ncode line 0018 of a long fenced block here\ncode line 0019 of a long fenced block here\ncode line 0020 of a long fenced block here\ncode line 0021 of a long fenced block here\ncode line 0022 of a long fenced block here\ncode line 0023 of a long fenced block here\ncode line 0024 of a long fenced block here\ncode line 0025 of a long fenced block here\ncode line 0026 of a long fenced block here\ncode line 0027 of a long fenced block here\ncode line 0028 of a long fenced block here\ncode line 0029 of a long fenced block here\ncode line 0030 of a long fenced block here\ncode line 0031 of a long fenced block here\ncode line 0032 of a long fenced block here\ncode line 0033 of a long fenced block here\ncode line 0034 of a long fenced block here\ncode line 0035 of a long fenced block here\ncode line 0036 of a long fenced block here\ncode line 0037 of a long fenced block here\ncode line 0038 of a long fenced block here\ncode line 0039 of a long fenced block here\ncode line 0040 of a long fenced block here\ncode line 0041 of a long fenced block here\ncode line 0042 of a long fenced block here\ncode line 0043 of a long fenced block here\ncode line 0044 of a long fenced block here\ncode line 0045 of a long fenced block here\ncode line 0046 of a long fenced block here\ncode line 0047 of a long fenced block here\ncode line 0048 of a long fenced block here\ncode line 0049 of a long fenced block here\ncode line 0050 of a long fenced block here\ncode line 0051 of a long fenced block here\ncode line 0052 of a long fenced block here\ncode line 0053 of a long fenced block here\ncode line 0054 of a long fenced block here\ncode line 0055 of a long fenced block here\ncode line 0056 of a long fenced block here\ncode line 0057 of a long fenced block here\ncode line 0058 of a long fenced block here\ncode line 0059 of a long fenced block here\ncode line 0060 of a long fenced block here\ncode line 0061 of a long fenced block here\ncode line 0062 of a long fenced block here\ncode line 0063 of a long fenced block here\ncode line 0064 of a long fenced block here\ncode line 0065 of a long fenced block here\ncode line 0066 of a long fenced block here\ncode line 0067 of a long fenced block here\ncode line 0068 of a long fenced block here\ncode line 0069 of a long fenced block here\ncode line 0070 of a long fenced block here\ncode line 0071 of a long fenced block here\ncode line 0072 of a long fenced block here\ncode line 0073 of a long fenced block here\ncode line 0074 of a long fenced block here\ncode line 0075 of a long fenced block here\ncode line 0076 of a long fenced block here\ncode line 0077 of a long fenced block here\ncode line 0078 of a long fenced block here\ncode line 0079 of a long fenced block here\ncode line 0080 of a long fenced block here\ncode line 0081 of a long fenced block here\ncode line 0082 of a long fenced block here\ncode line 0083 of a long fenced block here\ncode line 0084 of a long fenced block here\ncode line 0085 of a long fenced block here\ncode line 0086 of a long fenced block here\ncode line 0087 of a long fenced block here\ncode line 0088 of a long fenced block here\ncode line 0089 of a long fenced block here\ncode line 0090 of a long fenced block here\ncode line 0091 of a long fenced block here\ncode line 0092 of a long fenced block here\ncode line 0093 of a long fenced block here\ncode line 0094 of a long fenced block here\ncode line 0095 of a long fenced block here\ncode line 0096 of a long fenced block here\ncode line 0097 of a long fenced block here\ncode line 0098 of a long fenced block here\ncode line 0099 of a long fenced block here\n```\n마무리 설명 줄입니다.\n",
+      "headings": []
+    }
+  ],
+  "documentCases": [
+    {
+      "id": "md-edge-cases",
+      "filename": "policy-edge-cases.md",
+      "file": "fixtures/policy-edge-cases.md",
+      "documentId": 101,
+      "version": 3,
+      "organizationId": 1,
+      "teamId": 7,
+      "header": {
+        "title": "결제·배송 정책 정리",
+        "authoredAt": "2024-03-15",
+        "projectName": "결제팀 프로젝트"
+      }
+    },
+    {
+      "id": "txt-long-meeting",
+      "filename": "meeting-notes-long.txt",
+      "file": "fixtures/meeting-notes-long.txt",
+      "documentId": 102,
+      "version": 1,
+      "organizationId": 2,
+      "teamId": null,
+      "header": {
+        "title": "온보딩 회고",
+        "authoredAt": "2024-04-20",
+        "projectName": null
+      }
+    },
+    {
+      "id": "pdf-ops-meeting",
+      "filename": "ops-meeting.pdf",
+      "file": "fixtures/ops-meeting.pdf",
+      "documentId": 103,
+      "version": 2,
+      "organizationId": 1,
+      "teamId": 3,
+      "header": {
+        "title": "분기 운영 회의록",
+        "authoredAt": "2024-05-02",
+        "projectName": "플랫폼 운영"
+      }
+    },
+    {
+      "id": "docx-infra-decision",
+      "filename": "infra-decision.docx",
+      "file": "fixtures/infra-decision.docx",
+      "documentId": 104,
+      "version": 1,
+      "organizationId": 1,
+      "teamId": null,
+      "header": {
+        "title": "인프라 이전 결정 기록",
+        "authoredAt": "2024-06-10",
+        "projectName": "인프라 이전"
+      }
+    },
+    {
+      "id": "pptx-access-review",
+      "filename": "access-review-deck.pptx",
+      "file": "fixtures/access-review-deck.pptx",
+      "documentId": 109,
+      "version": 1,
+      "organizationId": 1,
+      "teamId": 3,
+      "header": {
+        "title": "접근권한 관리 개선 제안",
+        "authoredAt": "2026-05-18",
+        "projectName": "권한검토 자동화"
+      }
+    },
+    {
+      "id": "xlsx-access-review",
+      "filename": "access-review-log.xlsx",
+      "file": "fixtures/access-review-log.xlsx",
+      "documentId": 110,
+      "version": 1,
+      "organizationId": 1,
+      "teamId": 3,
+      "header": {
+        "title": "분기 권한 검토 이력",
+        "authoredAt": "2026-05-18",
+        "projectName": null
+      }
+    },
+    {
+      "id": "error-corrupt-pptx",
+      "filename": "broken.pptx",
+      "content": "not a pptx",
+      "documentId": 111,
+      "version": 1,
+      "organizationId": 1,
+      "teamId": null,
+      "header": {
+        "title": "손상된 pptx",
+        "authoredAt": "2024-01-02",
+        "projectName": null
+      }
+    },
+    {
+      "id": "error-corrupt-xlsx",
+      "filename": "broken.xlsx",
+      "content": "not an xlsx",
+      "documentId": 112,
+      "version": 1,
+      "organizationId": 1,
+      "teamId": null,
+      "header": {
+        "title": "손상된 xlsx",
+        "authoredAt": "2024-01-02",
+        "projectName": null
+      }
+    },
+    {
+      "id": "content-crlf",
+      "filename": "content.md",
+      "content": "# 결제\r\n환불 규정을 확정했다.\r\n## 세부\r\n담당자 지정\r\n",
+      "documentId": 105,
+      "version": 1,
+      "organizationId": 1,
+      "teamId": null,
+      "header": {
+        "title": "CRLF 문서",
+        "authoredAt": "2024-01-02",
+        "projectName": null
+      }
+    },
+    {
+      "id": "error-unsupported-extension",
+      "filename": "legacy.hwp",
+      "content": "HWP 바이너리 흉내",
+      "documentId": 106,
+      "version": 1,
+      "organizationId": 1,
+      "teamId": null,
+      "header": {
+        "title": "지원하지 않는 형식",
+        "authoredAt": "2024-01-02",
+        "projectName": null
+      }
+    },
+    {
+      "id": "error-corrupt-pdf",
+      "filename": "broken.pdf",
+      "content": "not a pdf",
+      "documentId": 107,
+      "version": 1,
+      "organizationId": 1,
+      "teamId": null,
+      "header": {
+        "title": "손상된 PDF",
+        "authoredAt": "2024-01-02",
+        "projectName": null
+      }
+    },
+    {
+      "id": "content-short-policy",
+      "filename": "content.md",
+      "content": "인증 게이트웨이의 세션 토큰 유효 기간을 24시간에서 30분으로 줄인다. 장시간 배치는 토큰 갱신이 필요하다.",
+      "documentId": 108,
+      "version": 1,
+      "organizationId": 1,
+      "teamId": 1,
+      "header": {
+        "title": "세션 타임아웃 단축 정책",
+        "authoredAt": "2025-09-15",
+        "projectName": "인증보안"
+      }
+    }
+  ],
+  "tokenCases": [
+    "",
+    "abcd",
+    "abcde",
+    "한글",
+    "ㄱㄴㄷ",
+    "漢字",
+    "😀",
+    "a😀",
+    "\u00a0",
+    "혼합 text 123",
+    "결제 정책 회의록"
+  ],
+  "pointIdCases": [
+    {
+      "documentId": 16,
+      "version": 1,
+      "chunkNo": 0
+    },
+    {
+      "documentId": 11,
+      "version": 2,
+      "chunkNo": 2
+    },
+    {
+      "documentId": 1,
+      "version": 1,
+      "chunkNo": 0
+    },
+    {
+      "documentId": 123456789012,
+      "version": 7,
+      "chunkNo": 42
+    }
+  ],
+  "localEmbeddingCases": [
+    "결제 정책 회의록",
+    "Refund Policy APPROVED",
+    "  공백   여러 칸\t\n정리  ",
+    "끝에 전각 공백　",
+    "😀 이모지 포함",
+    "ab",
+    ""
+  ]
+}

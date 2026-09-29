@@ -1,0 +1,9 @@
+{
+  "id" : "error-unsupported-extension",
+  "filename" : "legacy.hwp",
+  "scopeKey" : "org:1",
+  "error" : {
+    "retryable" : false,
+    "messagePrefix" : "지원하지 않는 파일 형식입니다"
+  }
+}

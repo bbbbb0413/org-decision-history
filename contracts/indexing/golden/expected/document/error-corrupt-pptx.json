@@ -1,0 +1,9 @@
+{
+  "id" : "error-corrupt-pptx",
+  "filename" : "broken.pptx",
+  "scopeKey" : "org:1",
+  "error" : {
+    "retryable" : false,
+    "messagePrefix" : "pptx 를 읽을 수 없습니다"
+  }
+}

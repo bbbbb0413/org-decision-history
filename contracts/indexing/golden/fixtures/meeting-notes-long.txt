@@ -1,0 +1,53 @@
+[1-01] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[1-02] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[1-03] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[1-04] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[1-05] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[1-06] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[1-07] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[1-08] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[1-09] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[1-10] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[1-11] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[1-12] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[1-13] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[1-14] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[1-15] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[1-16] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+
+[2-01] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[2-02] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[2-03] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[2-04] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[2-05] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+# 이 줄은 txt 파일이라 헤딩으로 보지 않는다
+[2-06] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[2-07] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[2-08] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+Action item: 온보딩 체크리스트를 문서로 옮긴다.
+[2-09] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[2-10] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[2-11] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[2-12] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[2-13] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[2-14] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[2-15] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[2-16] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+
+[3-01] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[3-02] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[3-03] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+Let's discuss the paging policy next week.
+[3-04] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[3-05] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[3-06] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[3-07] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[3-08] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[3-09] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[3-10] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[3-11] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[3-12] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[3-13] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[3-14] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[3-15] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.
+[3-16] 온보딩 절차의 병목 구간과 개선 아이디어를 공유했다. The on-call rotation must stay documented.

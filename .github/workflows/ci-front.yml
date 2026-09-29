@@ -1,0 +1,47 @@
+# 프론트 타입 검사 + 프로덕션 빌드 (npm run build = tsc -b && vite build).
+name: ci-front
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "front/**"
+      - ".github/workflows/ci-front.yml"
+  pull_request:
+    paths:
+      - "front/**"
+      - ".github/workflows/ci-front.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: tsc + vite build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: front
+    steps:
+      - uses: actions/checkout@v7
+
+      # front/Dockerfile 의 node:22 와 맞춘다
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: front/package-lock.json
+
+      # npm ci 는 package.json 과 lock 파일이 어긋나면 실패한다 — 그 자체가 검사다
+      - run: npm ci
+      # vitest 는 트랜스파일만 하고 타입을 보지 않는다. 테스트 코드의 타입은 여기서 검사한다
+      # (운영 빌드용 tsconfig 는 테스트를 제외한다 — 이미지에 들어갈 코드가 아니다).
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
