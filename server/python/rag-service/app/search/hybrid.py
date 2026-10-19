@@ -30,7 +30,7 @@ class HybridSearchService:
         vector_client: VectorSearchClient,
         keyword_client: KeywordSearchClient,
         candidates: int = 20,
-        min_vector_similarity: float = 0.5,
+        min_vector_similarity: float | None = 0.5,
     ):
         self._embedder = embedder
         self._vector_client = vector_client
@@ -39,6 +39,7 @@ class HybridSearchService:
         # limit 이 이보다 크면 limit 만큼 가져온다 — 호출부가 요청한 수가 조용히 잘리지 않게
         self._candidates = candidates
         # 벡터 검색에서만 걸리고(키워드 일치가 전혀 없고) 코사인 유사도가 이 미만이면 버린다.
+        # None 이면 보정된 기준이 없는 임베딩(대체 해시)이다 — 겹치는 n-gram 이 하나도 없는(유사도 0) 것만 버린다
         self._min_vector_similarity = min_vector_similarity
 
     async def search(self, query: str, scope: PermissionScope, limit: int) -> list[SearchHit]:
@@ -98,4 +99,8 @@ class HybridSearchService:
         if hit.key in keyword_matched:
             return True
         sim = hit.vector_similarity
-        return sim is not None and sim >= self._min_vector_similarity
+        if sim is None:
+            return False
+        if self._min_vector_similarity is None:
+            return sim > 0.0
+        return sim >= self._min_vector_similarity

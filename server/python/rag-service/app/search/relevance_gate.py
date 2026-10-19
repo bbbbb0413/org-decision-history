@@ -24,6 +24,16 @@ class EvidenceGate:
     # 점수로 못 가리면 질문 낱말 중 이 비율 이상이 근거에 나타나야 통과
     min_coverage: float = 0.34
 
+
+@dataclass(frozen=True)
+class VectorFloors:
+    """임베딩 모델로 잰 벡터 유사도 하한. 운영 값은 설정(Settings.vector_floors)에서 온다."""
+
+    # 키워드 일치 없이 벡터로만 걸린 청크를 남기는 하한(검색)
+    search: float
+    # 근거의 벡터 유사도 최댓값이 이 미만이면 LLM 없이 거절(근거 판정)
+    evidence: float
+
 _NON_WORD = re.compile(r"[^\w\s]", re.UNICODE)
 
 

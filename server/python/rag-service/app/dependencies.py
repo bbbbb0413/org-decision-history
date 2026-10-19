@@ -1,7 +1,7 @@
 """의존성 조립. Spring의 @Configuration 빈 등록에 해당하는 부분을 한 곳에 모았다."""
 import redis.asyncio as redis
 from history_shared.db import create_pool
-from history_shared.embeddings import LOCAL_MODEL_NAME, Embedder, create_embedder
+from history_shared.embeddings import create_embedder
 
 from app.answer_cache import AnswerCache
 from app.auth_client import AuthClient
@@ -22,16 +22,6 @@ from app.search.reranker import CrossEncoderReranker, HttpRerankClient
 from app.search.source_resolver import SourceResolver
 from app.search.vector_retriever import VectorSearchClient
 from app.settings import Settings, settings
-
-
-def similarity_floor(value: float, embedder: Embedder) -> float:
-    """벡터 유사도 기준(검색 하한·근거 판정 하한)을 이 임베딩에 적용할지 정한다.
-
-    기준값은 실제 임베딩 모델(Gemini)로 평가셋에서 잰 값이다. 키가 없을 때 쓰는 대체 임베딩(글자 3-gram 해시)은
-    정답 문서와 질문 사이도 0.2~0.3 이라, 기준을 그대로 두면 모든 질문이 근거 없음으로 끝난다. 대체 임베딩이면
-    기준을 끄고 리랭커·낱말 겹침 거름에 맡긴다.
-    """
-    return 0.0 if embedder.model_name == LOCAL_MODEL_NAME else value
 
 
 class Dependencies:
@@ -68,6 +58,8 @@ class Dependencies:
         self.auth = AuthClient(self.settings)
         # 키가 없으면 index-worker 와 같은 대체 임베딩을 쓴다(contracts/indexing/README.md §10)
         self.embedder = create_embedder(self.settings)
+        # 벡터 유사도 기준은 그 기준을 잰 임베딩 모델에만 쓴다. None 이면 대체 임베딩이라 유사도로 거르지 않는다
+        floors = self.settings.vector_floors(self.embedder.model_name)
         self.vector_client = VectorSearchClient(self.settings)
         self.keyword_client = KeywordSearchClient(self.pool)
         self.hybrid_search = HybridSearchService(
@@ -75,7 +67,7 @@ class Dependencies:
             self.vector_client,
             self.keyword_client,
             candidates=self.settings.search_candidates,
-            min_vector_similarity=similarity_floor(self.settings.search_min_vector_similarity, self.embedder),
+            min_vector_similarity=floors.search if floors else None,
         )
         self.source_resolver = SourceResolver(self.pool)
         self.answer_cache = AnswerCache(self.redis, ttl_seconds=self.settings.answer_cache_ttl_seconds)
@@ -139,7 +131,7 @@ class Dependencies:
                 if self.settings.evidence_judge_enabled
                 else None
             ),
-            min_vector_similarity=similarity_floor(self.settings.evidence_min_vector_similarity, self.embedder),
+            min_vector_similarity=floors.evidence if floors else None,
             query_planner=self.query_planner,
         )
         self.graph = build_graph(self.nodes)

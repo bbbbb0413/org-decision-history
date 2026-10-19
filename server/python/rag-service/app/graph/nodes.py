@@ -74,7 +74,7 @@ class GraphNodes:
         graphrag_enabled: bool = True,
         graphrag_max_hops: int = 2,
         evidence_judge: EvidenceJudge | None = None,
-        min_vector_similarity: float = 0.62,
+        min_vector_similarity: float | None = 0.62,
     ):
         self._db = db
         self._auth = auth
@@ -97,7 +97,8 @@ class GraphNodes:
         self._evidence_gate = evidence_gate
         # 근거 충분성 판정기. None 이면 1차 거름(evidence_gate) 결과만 쓴다
         self._evidence_judge = evidence_judge
-        # 근거의 벡터 유사도 최댓값이 이 미만이면 LLM 을 부르지 않고 거절한다
+        # 근거의 벡터 유사도 최댓값이 이 미만이면 LLM 을 부르지 않고 거절한다.
+        # None 이면 유사도가 보정되지 않은 임베딩(대체 해시)이라 유사도로 거르지 못한다 — 대신 리랭커 점수가 있어야 근거로 본다
         self._min_vector_similarity = min_vector_similarity
         # 자가 비판 신뢰도가 이 미만이면 답변 상태를 LOW_CONFIDENCE 로 낮춘다
         self._critique_min_confidence = critique_min_confidence
@@ -239,8 +240,13 @@ class GraphNodes:
         question, hits = state["rewritten_question"], state.get("hits", [])
         similarities = [h.vector_similarity for h in hits if h.vector_similarity is not None]
         top_similarity = max(similarities, default=None)
-        if not hits or (top_similarity is not None and top_similarity < self._min_vector_similarity):
+        floor = self._min_vector_similarity
+        if not hits or (floor is not None and top_similarity is not None and top_similarity < floor):
             outcome = "low_similarity"
+        elif floor is None and all(h.rerank_score is None for h in hits):
+            # 유사도도 리랭커 점수도 믿을 신호가 없다(대체 임베딩 + 리랭커 실패). 낱말 겹침만으로는 관계없는 질문이
+            # 흔한 낱말('절차'·'변경')로 통과하므로 답하지 않는다
+            outcome = "unscored"
         elif self._evidence_judge is None:
             outcome = "gate_passed" if has_evidence(question, hits, self._evidence_gate) else "gate_rejected"
         else:
@@ -251,7 +257,7 @@ class GraphNodes:
                 # 판정 실패(한도 초과 등)는 1차 거름으로 정한다
                 passed = has_evidence(question, hits, self._evidence_gate)
                 outcome = "unjudged_gate_passed" if passed else "unjudged_gate_rejected"
-            log.info("근거 충분성 판정", outcome=outcome, top_similarity=top_similarity)
+        log.info("근거 충분성 판정", outcome=outcome, top_similarity=top_similarity)
         EVIDENCE_VERDICTS.labels(outcome=outcome).inc()
         passed = outcome in ("judged_answerable", "gate_passed", "unjudged_gate_passed")
         return {"evidence_verdict": "pass" if passed else outcome, "evidence_outcome": outcome}

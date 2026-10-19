@@ -217,23 +217,51 @@ async def test_judge_cache_is_not_shared_across_prompts():
     assert result.answerable is False and new.calls == 1
 
 
-def test_similarity_floor_is_off_for_fallback_embedding():
-    """기준값은 실제 임베딩 모델로 잰 값이다. 대체 임베딩(해시)에는 적용하지 않는다."""
-    from history_shared.embeddings import LocalHashingEmbedder
 
-    from app.dependencies import similarity_floor
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "hits, route, outcome",
+    [
+        # 대체 임베딩: 정답 문단도 유사도가 0.2~0.3 이라 유사도로 거르지 않고, 리랭커 점수가 있으면 1차 거름으로 간다
+        ([hit("보안 로그 보관 기간은 1년", 0.05, similarity=0.28)], "resolve_sources", "unjudged_gate_passed"),
+        # 리랭커도 실패했으면(점수 없음) 믿을 신호가 없다 — 낱말이 겹쳐도 답하지 않는다
+        ([hit("보안 로그 보관 기간은 1년", None, similarity=0.28)], "no_evidence_no_hits", "unscored"),
+    ],
+)
+async def test_uncalibrated_embedding_needs_reranker_scores(hits, route, outcome):
+    gen = FakeGenerator(None)  # LLM 없음 — 입력을 그대로 돌려받는다
+    nodes = make_nodes(gen, min_vector_similarity=None)
+    state = {"rewritten_question": "보안 로그 보관 기간은?", "hits": hits}
+    state.update(await nodes.judge_evidence(state))
+    assert nodes.route_after_judge(state) == route
+    assert state["evidence_outcome"] == outcome
 
-    gemini = MagicMock(model_name="gemini-embedding-001")
-    assert similarity_floor(0.62, gemini) == 0.62
-    assert similarity_floor(0.62, LocalHashingEmbedder(768)) == 0.0
+
+def test_vector_floors_apply_only_to_the_model_they_were_measured_on():
+    from history_shared.embeddings import LOCAL_MODEL_NAME
+
+    from app.settings import Settings
+
+    cfg = Settings(search_min_vector_similarity=0.5, evidence_min_vector_similarity=0.62)
+    floors = cfg.vector_floors(cfg.vector_similarity_model)
+    assert (floors.search, floors.evidence) == (0.5, 0.62)
+    assert cfg.vector_floors(LOCAL_MODEL_NAME) is None
+    with pytest.raises(ValueError, match="다시 재고"):
+        cfg.vector_floors("text-embedding-3-small")
 
 
 @pytest.mark.asyncio
-async def test_fallback_embedding_question_reaches_the_gate():
-    """키 없이 돌 때: 대체 임베딩은 정답 문단도 유사도가 0.2~0.3 이라, 기준을 끄면 LLM 없이 1차 거름으로 정한다."""
-    gen = FakeGenerator(None)  # LLM 없음 — 입력을 그대로 돌려받는다
-    nodes = make_nodes(gen, min_vector_similarity=0.0)
-    state = {"rewritten_question": "보안 로그 보관 기간은?", "hits": [hit("보안 로그 보관 기간은 1년", 0.05, similarity=0.28)]}
-    state.update(await nodes.judge_evidence(state))
-    assert nodes.route_after_judge(state) == "resolve_sources"
-    assert state["evidence_outcome"] == "unjudged_gate_passed"
+@pytest.mark.parametrize("gemini_key, search_floor, evidence_floor", [("", None, None), ("test-key", 0.5, 0.62)])
+async def test_dependencies_wire_floors_from_the_embedder(monkeypatch, gemini_key, search_floor, evidence_floor):
+    """기준은 Dependencies 가 실제로 만든 임베딩으로 고른다 — 키가 없으면 검색·판정 모두 기준을 쓰지 않는다."""
+    from unittest.mock import AsyncMock
+
+    import app.dependencies as deps
+    from app.settings import Settings
+
+    monkeypatch.setattr(deps, "create_pool", AsyncMock(return_value=MagicMock()))
+    cfg = Settings(gemini_api_key=gemini_key, graphrag_enabled=False,
+                   search_min_vector_similarity=0.5, evidence_min_vector_similarity=0.62)
+    d = await deps.Dependencies(cfg).start()
+    assert d.hybrid_search._min_vector_similarity == search_floor
+    assert d.nodes._min_vector_similarity == evidence_floor

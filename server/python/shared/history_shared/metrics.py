@@ -100,6 +100,7 @@ EVIDENCE_VERDICTS = Counter(
     # outcome: low_similarity(벡터 유사도가 낮아 바로 거절) / judged_answerable / judged_unanswerable(경량 LLM 판정)
     #          unjudged_gate_passed / unjudged_gate_rejected(판정 실패 — 1차 거름으로 정함, 한도 초과가 잦으면 오른다)
     #          gate_passed / gate_rejected(판정기를 끈 경우)
+    #          unscored(대체 임베딩인데 리랭커 점수도 없음 — 믿을 신호가 없어 거절)
     ["outcome"],
 )
 

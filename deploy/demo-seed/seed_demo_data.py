@@ -35,6 +35,7 @@ SQL 로 `document_file` 행만 넣으면 "원본 받기"를 눌렀을 때 저장
 제목이 같은 문서가 이미 있으면 건너뛴다. 확인은 `--check` 로 한다.
 """
 import argparse
+import datetime
 import json
 import mimetypes
 import pathlib
@@ -225,37 +226,72 @@ def existing_titles(token: str) -> set[str]:
         page += 1
 
 
-def wait_for_import(token: str, job_key: str, timeout_s: int = 60) -> dict | None:
+def poll(path: str, token: str):
+    """대기 루프용 GET. 기동 직후의 연결 거부·리셋·타임아웃은 "아직 안 됨"으로 보고 다음 회차에 다시 묻는다."""
+    try:
+        return call("GET", path, token, timeout=10)
+    except (urllib.error.URLError, ConnectionError, TimeoutError) as e:
+        print(f"  (일시 오류, 다시 시도: {e})", file=sys.stderr)
+        return None, None
+
+
+def wait_for_import(token: str, job_key: str, timeout_s: int = 300) -> dict | None:
     """가져오기 작업이 끝날 때까지 기다린다. 202 를 받은 직후에는 항목이 아직 없다(비동기 처리)."""
     deadline = time.time() + timeout_s
     while time.time() < deadline:
-        status, detail = call("GET", f"/api/document-imports/{job_key}", token)
+        status, detail = poll(f"/api/document-imports/{job_key}", token)
         if status == 200 and detail.get("status") in ("COMPLETED", "FAILED"):
             return detail
         time.sleep(1)
     return None
 
 
-def wait_for_indexing(token: str, document_ids: set[int], timeout_s: int = 180) -> bool:
+def _instant(value: str) -> datetime.datetime:
+    return datetime.datetime.fromisoformat(value.replace("Z", "+00:00"))
+
+
+def wait_for_indexing(token: str, document_ids: set[int], since: datetime.datetime, timeout_s: int = 300) -> bool:
     """문서마다 색인 항목이 끝날(COMPLETED) 때까지 기다린다.
 
     전역 색인 큐가 비었는지만 보면 안 된다 — 가져오기 직후에는 아웃박스 이벤트가 아직 색인기에 닿지 않아
     큐가 "비어" 있고, 그때 질문하면 검색할 청크가 없어 근거 없음으로 끝난다.
+    작업은 최신순으로 오므로 since(가져오기 시작 시각) 이전 작업에서 멈춘다. 끝난 작업의 항목은 한 번만 읽는다.
     """
+    finished_items: dict[str, list[dict]] = {}
     deadline = time.time() + timeout_s
     while time.time() < deadline:
-        done: set[int] = set()
-        status, page = call("GET", "/api/index-jobs?size=100", token)
-        for job in (page or {}).get("content", []) if status == 200 else []:
-            item_status, items = call("GET", f"/api/index-jobs/{job['jobKey']}/items", token)
-            for item in items if item_status == 200 else []:
-                if item.get("status") == "FAILED" and item.get("documentId") in document_ids:
-                    print(f"  색인 실패: 문서 {item['documentId']} — {item.get('failureReason')}", file=sys.stderr)
-                    return False
-                if item.get("status") == "COMPLETED":
-                    done.add(item.get("documentId"))
-        if document_ids <= done:
+        statuses: dict[int, set[str]] = {doc: set() for doc in document_ids}
+        page = 0
+        while True:
+            status, body = poll(f"/api/index-jobs?page={page}&size=50", token)
+            if status != 200:
+                break
+            jobs = body.get("content", [])
+            reached_older = False
+            for job in jobs:
+                if _instant(job["requestedAt"]) < since:
+                    reached_older = True
+                    break
+                items = finished_items.get(job["jobKey"])
+                if items is None:
+                    item_status, items = poll(f"/api/index-jobs/{job['jobKey']}/items", token)
+                    items = items if item_status == 200 else []
+                    if item_status == 200 and job["status"] in ("COMPLETED", "FAILED"):
+                        finished_items[job["jobKey"]] = items
+                for item in items:
+                    if item.get("documentId") in statuses:
+                        statuses[item["documentId"]].add(item.get("status"))
+            if reached_older or page + 1 >= body.get("totalPages", 1):
+                break
+            page += 1
+
+        # 재처리·일괄 재색인으로 같은 문서에 실패 항목과 성공 항목이 함께 있을 수 있다 — 성공이 하나라도 있으면 끝난 것이다
+        if all("COMPLETED" in s for s in statuses.values()):
             return True
+        failed = [doc for doc, s in statuses.items() if s == {"FAILED"}]
+        if failed:
+            print(f"  색인 실패: 문서 {failed} — 운영 현황에서 사유를 확인해라", file=sys.stderr)
+            return False
         time.sleep(3)
     return False
 
@@ -270,6 +306,9 @@ def seed(dry_run: bool) -> int:
     tokens: dict[str, str] = {}
     created = 0
     document_ids: set[int] = set()
+    problems: list[str] = []
+    # 작업 시각은 서버(DB) 시계다. 이 PC 시계와 어긋나도 놓치지 않게 여유를 둔다
+    since = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=5)
     for entry in MANIFEST:
         path = DOCUMENTS / entry["file"]
         if not path.exists():
@@ -305,23 +344,30 @@ def seed(dry_run: bool) -> int:
         if status != 202:
             sys.exit(f"가져오기 실패: {path.name} → {status} {body}")
 
+        # 한 파일이 늦거나 실패해도 나머지는 계속 등록한다. 끝에서 한꺼번에 알린다
         detail = wait_for_import(token, body["jobKey"])
         if detail is None:
-            sys.exit(f"가져오기가 시간 안에 끝나지 않았다: {path.name}")
+            problems.append(f"가져오기가 시간 안에 끝나지 않았다: {path.name} (작업 {body['jobKey']})")
+            continue
         items = detail.get("items", [])
         failed = [i for i in items if i.get("status") != "SUCCESS"]
         if failed or not items:
-            sys.exit(f"가져오기가 항목 단위로 실패했다: {path.name} → {failed or detail}")
+            problems.append(f"가져오기가 항목 단위로 실패했다: {path.name} → {failed or detail}")
+            continue
         document_ids.add(items[0]["documentId"])
         print(f"  등록: {expected} (문서 {items[0]['documentId']})")
         created += 1
 
     if created and not dry_run:
         print("색인을 기다린다...")
-        if wait_for_indexing(admin, document_ids):
+        if wait_for_indexing(admin, document_ids, since):
             print(f"색인이 끝났다({len(document_ids)}건).")
         else:
-            print("색인이 시간 안에 끝나지 않았다. 운영 현황에서 확인해라.", file=sys.stderr)
+            problems.append("색인이 시간 안에 끝나지 않았거나 실패했다. 운영 현황에서 확인해라.")
+    if problems:
+        for problem in problems:
+            print(f"  {problem}", file=sys.stderr)
+        sys.exit(1)
     return created
 
 

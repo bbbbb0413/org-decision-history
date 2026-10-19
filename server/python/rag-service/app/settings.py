@@ -8,7 +8,9 @@ from history_shared.config import ServiceSettings
 from pydantic import model_validator
 
 from app.generation.prompt import PromptBudget
-from app.search.relevance_gate import EvidenceGate
+from history_shared.embeddings import LOCAL_MODEL_NAME
+
+from app.search.relevance_gate import EvidenceGate, VectorFloors
 
 
 class Settings(ServiceSettings):
@@ -59,6 +61,10 @@ class Settings(ServiceSettings):
     # 0.62 는 평가셋 dev 에서 잰 값이다: 답 있는 질문 최저 0.651, 그 아래는 모두 답 없는 질문(0.561~0.614 는 확실히 거절)
     evidence_judge_enabled: bool = True
     evidence_min_vector_similarity: float = 0.62
+    # 위 두 벡터 유사도 기준(search_·evidence_min_vector_similarity)을 잰 임베딩 모델. 유사도 분포는 모델마다 달라
+    # 기준을 그대로 옮길 수 없다 — 모델을 바꾸면 기준을 다시 재고(evaluation.retrieval_eval) 이 값도 바꾼다.
+    # 다른 모델로 기동하면 실패한다. 키가 없을 때의 대체 임베딩(해시)은 기준을 쓰지 않는다(vector_floors)
+    vector_similarity_model: str = "gemini-embedding-001"
     # 판정 한 번의 입력. 근거 3건 × 400자면 약 500토큰이다(Groq 무료: 경량 모델 하루 200,000토큰을 HyDE·분해·자가비판과 나눠 쓴다)
     evidence_judge_max_evidence: int = 3
     evidence_judge_max_chars: int = 400
@@ -154,6 +160,22 @@ class Settings(ServiceSettings):
             question=self.prompt_question_budget,
             evidence_count=self.evidence_count,
         )
+
+    def vector_floors(self, embedding_model: str) -> VectorFloors | None:
+        """이 임베딩에 쓸 벡터 유사도 기준. None 이면 유사도로 거르지 않는다(보정되지 않은 대체 임베딩).
+
+        대체 임베딩(글자 3-gram 해시)은 답 있는 질문과 답 없는 질문의 유사도가 겹친다 — 평가셋에서 답 있는 질문
+        최저 0.10, 답 없는 질문 최고 0.31 — 그래서 따로 잰 기준도 둘 수 없다.
+        """
+        if embedding_model == LOCAL_MODEL_NAME:
+            return None
+        if embedding_model != self.vector_similarity_model:
+            raise ValueError(
+                f"벡터 유사도 기준은 {self.vector_similarity_model} 으로 잰 값인데 임베딩 모델이 {embedding_model} 이다. "
+                "기준을 이 모델로 다시 재고(python -m evaluation.retrieval_eval) SEARCH_MIN_VECTOR_SIMILARITY·"
+                "EVIDENCE_MIN_VECTOR_SIMILARITY·VECTOR_SIMILARITY_MODEL 을 함께 바꿔라"
+            )
+        return VectorFloors(search=self.search_min_vector_similarity, evidence=self.evidence_min_vector_similarity)
 
     def evidence_gate(self) -> EvidenceGate:
         return EvidenceGate(
