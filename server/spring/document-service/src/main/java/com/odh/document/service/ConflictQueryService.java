@@ -3,6 +3,8 @@ package com.odh.document.service;
 import com.odh.common.PermissionScope;
 import com.odh.common.web.PageRequest;
 import com.odh.common.web.PageResponse;
+import com.odh.document.domain.ConflictResolution;
+import com.odh.document.domain.ConflictSeverityLevel;
 import com.odh.document.scope.ScopePredicate;
 import com.odh.document.web.ConflictDtos.ConflictItem;
 import com.odh.document.web.ConflictDtos.ResolveConflictRequest;
@@ -18,7 +20,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * 상충 목록·상세·해소.
@@ -30,9 +31,6 @@ import java.util.Set;
 @Service
 @Transactional(readOnly = true)
 public class ConflictQueryService {
-
-    /** PATCH로 사용자가 직접 지정할 수 있는 상태값. 프론트(ConflictActionModal)가 주는 값과 같다 */
-    private static final Set<String> ALLOWED_RESOLUTION_STATUSES = Set.of("RESOLVED", "DISMISSED");
 
     private final JdbcClient jdbc;
 
@@ -80,7 +78,7 @@ public class ConflictQueryService {
                 SELECT c.id, c.source_doc_id, sd.title AS source_title,
                        c.target_doc_id, td.title AS target_title,
                        c.source_clause, c.target_clause, c.conflict_type,
-                       c.severity_score, c.reasoning, c.affected_teams,
+                       c.severity_score, c.severity_level, c.reasoning, c.affected_teams,
                        c.status, c.resolved_by, c.resolution_note,
                        c.resolved_at, c.created_at
                 FROM decision_conflicts c
@@ -105,12 +103,12 @@ public class ConflictQueryService {
         // 존재 확인 겸 권한 재확인. 없는 것과 범위 밖인 것을 구분하지 않는다
         findVisible(conflictId, scope);
 
-        String newStatus = (req.status() != null && !req.status().isBlank())
-                ? req.status().trim().toUpperCase()
-                : "RESOLVED";
-        if (!ALLOWED_RESOLUTION_STATUSES.contains(newStatus)) {
-            throw new InvalidStatusException(newStatus);
-        }
+        // 허용값은 ConflictResolution 한 곳에 있다. 비어 있으면 RESOLVED(이전 동작)
+        String newStatus = (req.status() == null || req.status().isBlank())
+                ? ConflictResolution.RESOLVED.name()
+                : ConflictResolution.parse(req.status())
+                        .orElseThrow(() -> new InvalidStatusException(req.status().trim().toUpperCase()))
+                        .name();
 
         String resolver = (userId != null) ? "user-" + userId : "system";
 
@@ -139,7 +137,7 @@ public class ConflictQueryService {
                 SELECT c.id, c.source_doc_id, sd.title AS source_title,
                        c.target_doc_id, td.title AS target_title,
                        c.source_clause, c.target_clause, c.conflict_type,
-                       c.severity_score, c.reasoning, c.affected_teams,
+                       c.severity_score, c.severity_level, c.reasoning, c.affected_teams,
                        c.status, c.resolved_by, c.resolution_note,
                        c.resolved_at, c.created_at
                 FROM decision_conflicts c
@@ -190,6 +188,7 @@ public class ConflictQueryService {
                 rs.getString("target_clause"),
                 rs.getString("conflict_type"),
                 rs.getDouble("severity_score"),
+                ConflictSeverityLevel.valueOf(rs.getString("severity_level")),
                 rs.getString("reasoning"),
                 teams,
                 rs.getString("status"),

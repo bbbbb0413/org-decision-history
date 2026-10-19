@@ -36,7 +36,9 @@
 | `CONSUMER_NAME` | `index-worker-{호스트명}` | 프로세스마다 달라야 한다 |
 | `STREAM_CLAIM_MIN_IDLE_MS`, `STREAM_MAX_DELIVERIES` | `60000`, `5` | 재처리 대기 시간, DLQ로 옮기는 전달 횟수 |
 | `RUNNER_INTERVAL_SECONDS`, `RUNNER_MAX_PER_TICK` | `1.0`, `20` | |
-| `RUNNING_TIMEOUT_MINUTES` | `30` | 이보다 오래 `RUNNING`인 항목은 워커가 중단된 것으로 본다. 속도 제한 대기를 포함한 가장 긴 색인보다 길어야 한다 |
+| `RUNNING_HEARTBEAT_SECONDS` | `10` | 처리 중 항목의 생존 신호(`heartbeat_at`)를 쓰는 간격 |
+| `RUNNING_STALE_SECONDS` | `60` | 생존 신호가 이보다 오래 끊긴 `RUNNING` 은 워커가 죽은 것으로 보고 되돌린다. 신호 간격의 두 배보다 커야 한다(아니면 기동 실패) |
+| `RUNNING_RECOVER_INTERVAL_SECONDS` | `30` | 멈춘 항목을 찾는 주기. 워커가 죽은 뒤 최악의 회수 지연은 `RUNNING_STALE_SECONDS` + 이 값 |
 
 Gemini 키가 없으면 대체 임베딩을 쓴다. rag-service 질의도 같은 대체 구현을 써 벡터 공간이 맞는다.
 

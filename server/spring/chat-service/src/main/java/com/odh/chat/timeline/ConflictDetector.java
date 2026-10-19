@@ -23,7 +23,6 @@ import java.util.List;
 public class ConflictDetector {
 
     private static final Logger log = LoggerFactory.getLogger(ConflictDetector.class);
-    private static final int MAX_DIFFERENCE_LENGTH = 500;
 
     private static final String COMPARE_SYSTEM = """
             너는 두 문서의 결정 내용을 비교하는 도구다.
@@ -35,10 +34,12 @@ public class ConflictDetector {
 
     private final AnswerGenerator generator;
     private final LlmProperties llmProperties;
+    private final int maxDifferenceLength;
 
-    public ConflictDetector(AnswerGenerator generator, LlmProperties llmProperties) {
+    public ConflictDetector(AnswerGenerator generator, LlmProperties llmProperties, TimelineProperties timeline) {
         this.generator = generator;
         this.llmProperties = llmProperties;
+        this.maxDifferenceLength = timeline.maxDifferenceLength();
     }
 
     /**
@@ -140,8 +141,8 @@ public class ConflictDetector {
     }
 
     private String clip(String text) {
-        return text.length() > MAX_DIFFERENCE_LENGTH
-                ? text.substring(0, MAX_DIFFERENCE_LENGTH - 3) + "..."
+        return text.length() > maxDifferenceLength
+                ? text.substring(0, maxDifferenceLength - 3) + "..."
                 : text;
     }
 }

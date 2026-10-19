@@ -183,3 +183,47 @@ async def test_dead_letter_is_counted_with_queue_depth(redis_client, stream):
     # 핸들러를 부르지 않고 바로 DLQ 로 간 게 아니라(PermanentMessageError) 한 번 불렀으므로 관측된다
     assert sample("stream_handler_seconds_count", stream=stream, group="g") == 1
     assert sample("stream_dead_letter_depth", stream=stream) == 1
+
+
+async def test_long_running_entry_is_not_taken_over_while_being_processed(redis_client, stream):
+    """처리가 회수 기준보다 오래 걸려도 살아 있는 처리를 다른 소비자가 가로채지 않는다."""
+    release = asyncio.Event()
+    started = asyncio.Event()
+
+    async def slow(message):
+        started.set()
+        await release.wait()
+
+    taken_over: list[str] = []
+
+    async def other(message):
+        taken_over.append(message.id)
+
+    first = consumer_for(redis_client, stream, slow, consumer="c1", claim_min_idle_ms=300)
+    second = consumer_for(redis_client, stream, other, consumer="c2", claim_min_idle_ms=300)
+    await first.ensure_group()
+    await redis_client.xadd(stream, {"k": "v"})
+
+    processing = asyncio.create_task(first.poll())
+    await started.wait()
+    for _ in range(4):  # 회수 기준(0.3초)의 네 배 동안 계속 시도한다
+        await asyncio.sleep(0.3)
+        assert await second.reclaim() == 0
+    release.set()
+    assert await processing == 1
+    assert taken_over == []
+    assert await pending_count(redis_client, stream) == 0
+
+
+async def test_keep_alive_stops_when_entry_was_taken_over(redis_client, stream):
+    """이 프로세스가 오래 멈춰 다른 소비자가 이미 가져간 항목은 되찾지 않는다."""
+    await RedisStreamConsumer(redis_client, stream=stream, group="g", handler=None, consumer="c1").ensure_group()
+    entry_id = await redis_client.xadd(stream, {"k": "v"})
+    await redis_client.xreadgroup("g", "c1", {stream: ">"}, count=1)
+    await redis_client.xclaim(stream, "g", "c2", min_idle_time=0, message_ids=[entry_id], justid=True)
+
+    consumer = consumer_for(redis_client, stream, None, consumer="c1", claim_min_idle_ms=150)
+    await asyncio.wait_for(consumer._keep_alive(entry_id), timeout=2)
+
+    [entry] = await redis_client.xpending_range(stream, "g", min=entry_id, max=entry_id, count=1)
+    assert entry["consumer"] == "c2"

@@ -7,6 +7,9 @@ import com.odh.chat.job.AnswerJob;
 import com.odh.chat.job.AnswerJobProducer;
 import com.odh.chat.job.AnswerJobStore;
 import com.odh.chat.job.JobStatus;
+import com.odh.chat.relay.AnswerRelayHub;
+import com.odh.chat.relay.RelayKeys;
+import com.odh.chat.relay.StreamSubscriber;
 import com.odh.common.ErrorCode;
 import com.odh.common.ErrorResponse;
 import com.odh.common.InternalAuth;
@@ -27,7 +30,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -46,16 +48,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ChatController {
 
     private static final Logger log = LoggerFactory.getLogger(ChatController.class);
-    /** SSE 연결 상한. 게이트웨이 응답 타임아웃 300초와 맞춘다. */
-    private static final long SSE_TIMEOUT_MS = 300_000;
-    private static final long HEARTBEAT_SECONDS = 15;
-    private static final Duration STREAM_BLOCK = Duration.ofSeconds(5);
 
     private final ConversationStore store;
     private final AskService askService;
     private final AnswerJobStore jobs;
     private final AnswerJobProducer jobProducer;
     private final StringRedisTemplate redis;
+    private final SseProperties sse;
+    private final AnswerRelayHub relay;
+    // POLL 모드 전용.
     // 상한 없는 풀(cachedThreadPool)이면 워커가 죽어 스트림에 done/error가 안 남고
     // 클라이언트도 끊기지 않을 때(또는 끊긴 걸 못 알아챌 때) 스레드가 계속 쌓인다.
     // SynchronousQueue + 상한으로 무한 증식을 막는다. 실제 누수는 tailStream의 종료 조건으로 막는다
@@ -64,12 +65,15 @@ public class ChatController {
     private final ScheduledExecutorService heartbeats = Executors.newScheduledThreadPool(2);
 
     public ChatController(ConversationStore store, AskService askService, AnswerJobStore jobs,
-                          AnswerJobProducer jobProducer, StringRedisTemplate redis) {
+                          AnswerJobProducer jobProducer, StringRedisTemplate redis, SseProperties sse,
+                          AnswerRelayHub relay) {
         this.store = store;
         this.askService = askService;
         this.jobs = jobs;
         this.jobProducer = jobProducer;
         this.redis = redis;
+        this.sse = sse;
+        this.relay = relay;
     }
 
     @jakarta.annotation.PreDestroy
@@ -131,7 +135,7 @@ public class ChatController {
                           @PathVariable Long conversationId,
                           @Valid @RequestBody ConversationDtos.AskRequest request) {
 
-        SseEmitter emitter = new SseEmitter(SSE_TIMEOUT_MS);
+        SseEmitter emitter = new SseEmitter(sse.timeout().toMillis());
         SseSink sink = new SseSink(emitter);
 
         if (store.findOwned(conversationId, userId).isEmpty()) {
@@ -144,7 +148,7 @@ public class ChatController {
         jobProducer.publish(jobKey);
         sink.conversation(conversationId, jobKey);
 
-        tailStream(emitter, sink, jobKey, ReadOffset.from("0"));
+        tailStream(emitter, sink, jobKey, RelayKeys.FROM_START);
         return emitter;
     }
 
@@ -160,7 +164,7 @@ public class ChatController {
                              @PathVariable UUID jobKey,
                              @RequestHeader(value = "Last-Event-ID", required = false) String lastEventId) {
 
-        SseEmitter emitter = new SseEmitter(SSE_TIMEOUT_MS);
+        SseEmitter emitter = new SseEmitter(sse.timeout().toMillis());
         SseSink sink = new SseSink(emitter);
 
         if (store.findOwned(conversationId, userId).isEmpty()) {
@@ -183,8 +187,7 @@ public class ChatController {
             return emitter;
         }
 
-        String from = (lastEventId == null || lastEventId.isBlank()) ? "0" : lastEventId;
-        tailStream(emitter, sink, jobKey, ReadOffset.from(from));
+        tailStream(emitter, sink, jobKey, RelayKeys.startAfter(lastEventId));
         return emitter;
     }
 
@@ -202,10 +205,26 @@ public class ChatController {
                 message.latencyMs() == null ? 0 : message.latencyMs(), List.of());
     }
 
-    /** Redis Stream "chat:answer:stream:{jobKey}" 를 tail 하며 SSE 로 relay 한다. */
-    private void tailStream(SseEmitter emitter, SseSink sink, UUID jobKey, ReadOffset from) {
+    /**
+     * Redis Stream "chat:answer:stream:{jobKey}" 의 {@code startAfter} 다음 레코드부터 SSE 로 relay 한다.
+     * 방식은 chat.sse.relay-mode 로 고른다({@link RelayMode}).
+     */
+    private void tailStream(SseEmitter emitter, SseSink sink, UUID jobKey, String startAfter) {
+        if (sse.relayMode() == RelayMode.PUBSUB) {
+            StreamSubscriber subscriber = relay.open(jobKey, startAfter, new SseRelayOutput(emitter));
+            emitter.onCompletion(subscriber::close);
+            emitter.onTimeout(subscriber::close);
+            emitter.onError(e -> subscriber.close());
+            subscriber.start();
+            return;
+        }
+        pollStream(emitter, sink, jobKey, ReadOffset.from(startAfter));
+    }
+
+    /** POLL: job 마다 블로킹 XREAD 루프. 롤백·전후 비교용 */
+    private void pollStream(SseEmitter emitter, SseSink sink, UUID jobKey, ReadOffset from) {
         ScheduledFuture<?> beat = heartbeats.scheduleAtFixedRate(
-                sink::heartbeat, HEARTBEAT_SECONDS, HEARTBEAT_SECONDS, TimeUnit.SECONDS);
+                sink::heartbeat, sse.heartbeat().toMillis(), sse.heartbeat().toMillis(), TimeUnit.MILLISECONDS);
 
         // 클라이언트가 끊기거나(하트비트 실패 → sink.isClosed()) emitter 가 타임아웃/완료돼도
         // 스트림에 새 레코드가 안 들어오면 while(true)이 그 사실을 알 길이 없어 스레드가
@@ -221,7 +240,7 @@ public class ChatController {
             try {
                 while (active.get() && !sink.isClosed()) {
                     List<MapRecord<String, Object, Object>> records = redis.opsForStream().read(
-                            StreamReadOptions.empty().count(50).block(STREAM_BLOCK),
+                            StreamReadOptions.empty().count(50).block(sse.streamBlock()),
                             StreamOffset.create(streamKey, offset));
                     if (records == null || records.isEmpty()) {
                         continue;

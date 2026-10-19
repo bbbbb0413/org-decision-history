@@ -3,13 +3,21 @@
 예산이 없으면 긴 질문 하나가 이후 모든 요청의 프롬프트를 부풀려, Groq 의 분당 토큰
 한도(413)에 막혀 그 대화가 계속 빈 답변을 낸다.
 """
+import pytest
+
 from app.generation import token_estimator
 from app.generation.prompt import (
-    RECENT_TURN_BUDGET,
-    RECENT_TURNS_BUDGET,
+    DEFAULT_BUDGET,
+    PromptBudget,
     build_user_prompt,
+    trim_evidence,
     trim_turns,
 )
+from app.search.models import SearchHit
+from app.settings import Settings
+
+RECENT_TURN_BUDGET = DEFAULT_BUDGET.recent_turn
+RECENT_TURNS_BUDGET = DEFAULT_BUDGET.recent_turns
 
 
 def test_짧은_턴은_그대로_남는다():
@@ -54,3 +62,36 @@ def test_긴_턴이_있어도_프롬프트에_그대로_들어가지_않는다()
     prompt = build_user_prompt("질문입니다", None, ["마" * 20_000], [])
     assert "[최근 대화]" in prompt
     assert token_estimator.estimate(prompt) < 1_000
+
+
+# ---- 예산·근거 수를 설정에서 받는다 ----
+
+
+def _hit(i: int) -> SearchHit:
+    return SearchHit(
+        document_id=i, document_version=1, chunk_no=0, content=f"근거 {i}",
+        section_path="", chunk_tag="", score=0.9, vector_similarity=0.9,
+    )
+
+
+def test_근거_수는_설정값을_따른다():
+    """근거 수가 리랭커 설정(top_k)과 프롬프트 상수(5)로 따로 있으면, top_k 를 8 로 올려도
+    프롬프트에는 5개만 들어간다. 한 값으로 합쳤으니 설정한 만큼 들어가야 한다."""
+    hits = [_hit(i) for i in range(10)]
+    assert len(trim_evidence(hits)) == 5
+    assert len(trim_evidence(hits, PromptBudget(evidence_count=8))) == 8
+
+
+def test_기본_예산은_요청_한도_안이다():
+    settings = Settings()
+    assert settings.prompt_budget().input_total() + settings.max_output_tokens <= settings.llm_request_token_limit
+
+
+def test_예산_합이_요청_한도를_넘으면_기동하지_않는다():
+    with pytest.raises(ValueError, match="llm_request_token_limit"):
+        Settings(prompt_evidence_budget=6000)
+
+
+def test_근거_수가_후보_수보다_많으면_기동하지_않는다():
+    with pytest.raises(ValueError, match="evidence_count"):
+        Settings(evidence_count=30, search_candidates=20)

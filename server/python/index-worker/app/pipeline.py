@@ -9,7 +9,7 @@ from typing import Protocol
 
 import structlog
 from history_shared.embeddings import DIMENSION, Embedder, EmbeddingError
-from history_shared.events import DocumentIndexedEvent
+from history_shared.events import DocumentIndexedEvent, DocumentUnindexedEvent, IndexEvent
 from history_shared.vector import ChunkPoint, ChunkVectorStore, chunk_payload, point_id
 
 from app.chunk import Chunk, ChunkHeader, chunk_document
@@ -31,9 +31,9 @@ class IndexStage(StrEnum):
 
 
 class IndexEventPublisher(Protocol):
-    """stream:index-events 발행. 실패하면 파이프라인이 재시도 대상으로 돌린다(재색인은 멱등이라 안전하다)."""
+    """stream:index-events 발행. 실패하면 파이프라인이 재시도 대상으로 돌린다(재색인·색인 제거는 멱등이라 안전하다)."""
 
-    async def publish(self, event: DocumentIndexedEvent) -> None: ...
+    async def publish(self, event: IndexEvent) -> None: ...
 
 
 class IndexingError(Exception):
@@ -74,7 +74,18 @@ class IndexingPipeline:
 
         # 삭제 여부는 이벤트 종류가 아니라 읽은 시점의 문서 상태로 판단한다
         if source.deleted:
-            return await self.remove_from_index(document_id)
+            await self.remove_from_index(document_id)
+            # governance-worker 가 이 문서를 지식 그래프에서 뺀다. 빼지 않으면 GraphRAG 가 이웃 문서에서
+            # 두 단계를 건너 삭제된 문서의 제목을 답변 문맥에 끌어온다
+            await self._publish(
+                DocumentUnindexedEvent(
+                    document_id=source.id,
+                    version=source.version,
+                    organization_id=source.organization_id,
+                    team_id=source.team_id,
+                )
+            )
+            return 0
 
         parsed = await self._parse(source)
         chunks = self._split(source, parsed)
@@ -166,17 +177,22 @@ class IndexingPipeline:
             raise IndexingError(IndexStage.KEYWORD_INDEX, f"전문검색 색인 실패: {e}", retryable=True) from e
 
     async def _publish_indexed(self, source: DocumentSource, chunk_count: int) -> None:
-        """governance-worker가 이 이벤트로 상충 검사를 이어 붙인다. 발행기가 없으면(테스트 등) 건너뛴다."""
+        """governance-worker가 이 이벤트로 상충 검사를 이어 붙인다."""
+        await self._publish(
+            DocumentIndexedEvent(
+                document_id=source.id,
+                version=source.version,
+                chunk_count=chunk_count,
+                organization_id=source.organization_id,
+                team_id=source.team_id,
+            )
+        )
+
+    async def _publish(self, event: IndexEvent) -> None:
+        """발행기가 없으면(테스트 등) 건너뛴다."""
         if self._events is None:
             return
-        event = DocumentIndexedEvent(
-            document_id=source.id,
-            version=source.version,
-            chunk_count=chunk_count,
-            organization_id=source.organization_id,
-            team_id=source.team_id,
-        )
         try:
             await self._events.publish(event)
         except Exception as e:  # noqa: BLE001 — 재시도하면 색인은 멱등이라 다시 발행해도 안전하다
-            raise IndexingError(IndexStage.EVENT_PUBLISH, f"색인 완료 이벤트 발행 실패: {e}", retryable=True) from e
+            raise IndexingError(IndexStage.EVENT_PUBLISH, f"색인 이벤트 발행 실패: {e}", retryable=True) from e

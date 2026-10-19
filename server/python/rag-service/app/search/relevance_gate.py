@@ -7,24 +7,37 @@
 이 방식은 어림짐작이다. 실제 임베딩 유사도 점수로 판정하는 편이 정확하다.
 """
 import re
+from dataclasses import dataclass
 
 from app.search.models import SearchHit
 
-MIN_COVERAGE = 0.34
 MIN_TERM_LENGTH = 2
+
+
+@dataclass(frozen=True)
+class EvidenceGate:
+    """근거 판정 기준. 운영 값은 설정(Settings.evidence_gate)에서 온다."""
+
+    # 이 점수 이상인 청크가 하나라도 있으면 겹침을 보지 않고 통과
+    rerank_score: float = 0.01
+    vector_score: float = 0.65
+    # 점수로 못 가리면 질문 낱말 중 이 비율 이상이 근거에 나타나야 통과
+    min_coverage: float = 0.34
 
 _NON_WORD = re.compile(r"[^\w\s]", re.UNICODE)
 
 
-def has_evidence(question: str, hits: list[SearchHit]) -> bool:
+def has_evidence(question: str, hits: list[SearchHit], gate: EvidenceGate = EvidenceGate()) -> bool:
     if not hits:
         return False
 
     # 1. Reranker 또는 벡터 점수가 신뢰 임계치를 넘는 고품질 근거가 있는 경우 즉시 통과
     for h in hits:
-        if h.rerank_score is not None and h.rerank_score >= 0.5:
+        if h.rerank_score is not None and h.rerank_score >= gate.rerank_score:
             return True
-        if h.score is not None and h.score >= 0.65:
+        # score 가 아니라 vector_similarity 를 본다. 재순위화가 score 를 리랭커 점수로 덮어써서, score 를 보면
+        # 이 갈래가 리랭커 점수를 벡터 기준(0.65)과 비교하게 된다
+        if h.vector_similarity is not None and h.vector_similarity >= gate.vector_score:
             return True
 
     # 2. 어휘 기반 커버리지 검사 (폴백)
@@ -34,7 +47,7 @@ def has_evidence(question: str, hits: list[SearchHit]) -> bool:
 
     haystack = " ".join(h.content for h in hits if h.content).lower()
     matched = sum(1 for term in terms if _appears(term, haystack))
-    return matched / len(terms) >= MIN_COVERAGE
+    return matched / len(terms) >= gate.min_coverage
 
 
 def _appears(term: str, haystack: str) -> bool:

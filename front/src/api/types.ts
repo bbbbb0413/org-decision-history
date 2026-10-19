@@ -479,6 +479,9 @@ export const CONFLICT_STATUS_LABEL: Record<ConflictStatus, string> = {
   SUPERSEDED: '개정으로 만료 (SUPERSEDED)',
 };
 
+/** 기록 시점 심각도 등급. governance-worker 가 점수와 그때의 구간으로 정해 저장한다. */
+export type ConflictSeverityLevel = 'CRITICAL' | 'HIGH' | 'MEDIUM';
+
 export interface ConflictItem {
   id: number;
   sourceDocId: number;
@@ -489,6 +492,7 @@ export interface ConflictItem {
   targetClause: string;
   conflictType: string;
   severityScore: number;
+  severityLevel: ConflictSeverityLevel;
   reasoning: string;
   affectedTeams: string[];
   status: ConflictStatus;

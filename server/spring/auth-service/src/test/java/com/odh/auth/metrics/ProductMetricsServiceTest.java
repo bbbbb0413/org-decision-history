@@ -195,10 +195,10 @@ class ProductMetricsServiceTest {
     @Test
     @DisplayName("days 는 기본 30, 1~365 로 보정된다")
     void clampsDays() {
-        assertThat(ProductMetricsService.clampDays(0)).isEqualTo(30);
-        assertThat(ProductMetricsService.clampDays(-5)).isEqualTo(30);
-        assertThat(ProductMetricsService.clampDays(9_999)).isEqualTo(365);
-        assertThat(ProductMetricsService.clampDays(7)).isEqualTo(7);
+        assertThat(service.clampDays(0)).isEqualTo(30);
+        assertThat(service.clampDays(-5)).isEqualTo(30);
+        assertThat(service.clampDays(9_999)).isEqualTo(365);
+        assertThat(service.clampDays(7)).isEqualTo(7);
         assertThat(service.metrics(-1).days()).isEqualTo(30);
     }
 

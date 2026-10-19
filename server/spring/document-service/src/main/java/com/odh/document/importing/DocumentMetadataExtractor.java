@@ -57,11 +57,12 @@ public class DocumentMetadataExtractor {
      * <p>PDF·pptx 는 쪽·장 수가 지나치면 거절하지만(그만큼 긴 문서는 이 시스템이 다루는 종류가
      * 아니다) 스프레드시트는 정당한 문서도 행이 수만 줄일 수 있다. 거절하면 그 문서는 지식으로
      * 아예 들어오지 못하므로 앞부분만 읽고 <b>잘랐다는 사실을 본문에 남긴다.</b>
-     * 색인기(Python {@code parse.py})와 같은 값을 쓴다.
+     * 색인기(Python {@code parse.py})와 같은 값이어야 한다 — 계약 원본은 {@code contracts/indexing/limits.json} 이고
+     * 테스트가 대조한다. 운영 중 바꿀 값이 아니라 두 단계의 약속이라 설정으로 열지 않는다.
      */
-    private static final int MAX_XLSX_ROWS = 2000;
+    static final int MAX_XLSX_ROWS = 2000;
     private static final String XLSX_TRUNCATED = "〈행이 너무 많아 이후 내용은 색인하지 않았습니다〉";
-    private static final int MAX_CELL_CHARS = 500;
+    static final int MAX_CELL_CHARS = 500;
 
     public Extracted extract(byte[] bytes, String filename) {
         String extension = extensionOf(filename);

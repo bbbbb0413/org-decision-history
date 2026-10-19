@@ -4,7 +4,7 @@ import structlog
 from neo4j import AsyncGraphDatabase, AsyncDriver
 
 from .models import GraphEdge, GraphNode, SubgraphResult
-from .schema import KEY_FIELDS, NODE_LABELS, REL_TYPES
+from .schema import EXTRACTED_REL_TYPES, KEY_FIELDS, NODE_LABELS, REL_TYPES
 
 log = structlog.get_logger()
 
@@ -77,6 +77,43 @@ class Neo4jGraphClient:
                 organization_id=organization_id,
             )
 
+    async def delete_decision(self, doc_id: int) -> int:
+        """문서 노드와 그 노드에 걸린 관계를 모두 지운다. 지운 노드 수(0 또는 1)를 돌려준다. 없으면 0 — 멱등이다."""
+        if not self._driver:
+            return 0
+        query = """
+        MATCH (d:Decision {id: $id})
+        DETACH DELETE d
+        RETURN count(d) AS removed
+        """
+        removed = 0
+        async with self._driver.session() as session:
+            result = await session.run(query, id=doc_id)
+            async for record in result:
+                removed = int(record["removed"])
+        return removed
+
+    async def clear_extracted_relations(self, doc_id: int) -> int:
+        """문서에서 나가는 관계 중 본문 추출로 만든 것(EXTRACTED_REL_TYPES)을 지운다. 지운 관계 수를 돌려준다.
+
+        다시 동기화하기 전에 부른다. MERGE 만 하면 개정으로 사라진 관계가 그래프에 남는다.
+        상충 관계(CONFLICTS_WITH)는 본문 추출이 아니라 상충 기록이 만들므로 건드리지 않는다.
+        """
+        if not self._driver:
+            return 0
+        query = """
+        MATCH (d:Decision {id: $id})-[r]->()
+        WHERE type(r) IN $types
+        DELETE r
+        RETURN count(r) AS removed
+        """
+        removed = 0
+        async with self._driver.session() as session:
+            result = await session.run(query, id=doc_id, types=sorted(EXTRACTED_REL_TYPES))
+            async for record in result:
+                removed = int(record["removed"])
+        return removed
+
     async def upsert_node(self, label: str, key_field: str, key_value: Any, properties: Optional[Dict[str, Any]] = None) -> None:
         if label not in NODE_LABELS or key_field not in KEY_FIELDS:
             log.warning("허용되지 않은 라벨·키 필드라 노드 upsert를 건너뜀", label=label, key_field=key_field)
@@ -103,7 +140,12 @@ class Neo4jGraphClient:
         target_key: str,
         target_val: Any,
         properties: Optional[Dict[str, Any]] = None,
+        create_target: bool = True,
     ) -> None:
+        """관계를 만든다. create_target=False 면 대상 노드가 이미 있을 때만 잇고, 없으면 아무것도 만들지 않는다.
+
+        LLM 이 뽑은 문서 id 를 대상으로 걸 때 쓴다 — MERGE 로 만들면 삭제돼 지운 문서 노드가 제목 없이 되살아난다.
+        """
         if (
             source_label not in NODE_LABELS
             or target_label not in NODE_LABELS
@@ -119,9 +161,11 @@ class Neo4jGraphClient:
         if not self._driver:
             return
         props = properties or {}
+        target_clause = "MERGE" if create_target else "MATCH"
         query = f"""
         MERGE (a:{source_label} {{{source_key}: $s_val}})
-        MERGE (b:{target_label} {{{target_key}: $t_val}})
+        WITH a
+        {target_clause} (b:{target_label} {{{target_key}: $t_val}})
         MERGE (a)-[r:{rel_type}]->(b)
         SET r += $props
         """

@@ -6,7 +6,11 @@ index-worker·governance-worker 가 함께 쓴다.
 - claim_min_idle_ms 이상 대기한 항목은 XAUTOCLAIM 으로 가져와 다시 처리한다. 죽은 소비자의 항목도 이렇게 넘겨받는다.
 - 전달 횟수가 max_deliveries 를 넘거나 핸들러가 PermanentMessageError 를 던지면 DLQ 스트림으로 옮기고 ACK 한다.
 
-같은 항목이 두 번 처리될 수 있으므로(ACK 직전 종료 등) 핸들러는 멱등해야 한다.
+- 핸들러가 도는 동안에는 claim_min_idle_ms 의 1/3 간격으로 그 항목의 유휴 시간을 0 으로 되돌린다(XCLAIM JUSTID).
+  처리가 claim_min_idle_ms 보다 오래 걸려도 다른 인스턴스가 살아 있는 처리를 가로채 두 번 돌리지 않는다.
+  소유자가 이미 바뀌었으면(이 프로세스가 오래 멈췄던 경우) 되찾지 않고 갱신을 멈춘다.
+
+같은 항목이 두 번 처리될 수 있으므로(ACK 직전 종료, 처리 도중 프로세스 종료 등) 핸들러는 멱등해야 한다.
 """
 import asyncio
 import socket
@@ -83,6 +87,8 @@ class RedisStreamConsumer:
         self._max_deliveries = max_deliveries
         self._dlq_stream = dlq_stream or f"{stream}:dlq"
         self._clock = clock
+        # 처리 중 항목의 유휴 시간 갱신 간격. 한 번 놓쳐도 회수 기준에 닿지 않게 기준의 1/3 로 둔다
+        self._heartbeat_seconds = max(claim_min_idle_ms / 3000, 0.05)
         self._next_claim_at = float("-inf")  # 기동 직후 한 번 회수한다
 
     @property
@@ -184,6 +190,7 @@ class RedisStreamConsumer:
             await self._dead_letter(message, f"전달 {message.deliveries}회로 한도 {self._max_deliveries}회를 넘었다")
             return
         started = time.monotonic()
+        heartbeat = asyncio.create_task(self._keep_alive(message.id))
         try:
             await self._handler(message)
         except asyncio.CancelledError:
@@ -202,12 +209,37 @@ class RedisStreamConsumer:
             )
             return
         finally:
+            heartbeat.cancel()
             # 실패한 처리도 얼마나 걸렸는지가 알고 싶은 정보다(타임아웃으로 죽는지 등)
             STREAM_HANDLER_SECONDS.labels(stream=self._stream, group=self._group).observe(
                 time.monotonic() - started
             )
         await self._redis.xack(self._stream, self._group, message.id)
         self._count("processed")
+
+    async def _keep_alive(self, message_id: str) -> None:
+        """처리 중인 항목을 아직 이 소비자가 붙잡고 있다고 알린다. 실패해도 처리 자체는 계속한다."""
+        while True:
+            await asyncio.sleep(self._heartbeat_seconds)
+            try:
+                pending = await self._redis.xpending_range(
+                    self._stream, self._group, min=message_id, max=message_id, count=1
+                )
+                if not pending or _text(pending[0]["consumer"]) != self._consumer:
+                    log.warning(
+                        "처리 중 항목의 소유가 바뀌어 갱신을 멈춘다",
+                        stream=self._stream,
+                        message_id=message_id,
+                        owner=_text(pending[0]["consumer"]) if pending else None,
+                    )
+                    return
+                await self._redis.xclaim(
+                    self._stream, self._group, self._consumer, min_idle_time=0, message_ids=[message_id], justid=True
+                )
+            except asyncio.CancelledError:
+                raise
+            except Exception as e:  # noqa: BLE001 — 갱신 실패로 처리를 깨지 않는다. 다음 간격에 다시 한다
+                log.debug("처리 중 항목 갱신 실패", stream=self._stream, message_id=message_id, error=str(e))
 
     async def _dead_letter(self, message: StreamMessage, reason: str) -> None:
         entry = dict(message.fields)

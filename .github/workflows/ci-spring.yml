@@ -9,6 +9,8 @@ on:
       - "server/spring/**"
       # OpenAPI 스냅샷을 손으로 고쳐 커밋하면 여기서 잡아야 한다
       - "contracts/openapi/**"
+      # document-service 가 index-worker 와 같은 원본 읽기 상한을 쓰는지 테스트가 대조한다
+      - "contracts/indexing/limits.json"
       - "build.gradle.kts"
       - "settings.gradle.kts"
       - "gradle/**"
@@ -19,6 +21,8 @@ on:
       - "server/spring/**"
       # OpenAPI 스냅샷을 손으로 고쳐 커밋하면 여기서 잡아야 한다
       - "contracts/openapi/**"
+      # document-service 가 index-worker 와 같은 원본 읽기 상한을 쓰는지 테스트가 대조한다
+      - "contracts/indexing/limits.json"
       - "build.gradle.kts"
       - "settings.gradle.kts"
       - "gradle/**"

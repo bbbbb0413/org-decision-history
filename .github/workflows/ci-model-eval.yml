@@ -1,0 +1,73 @@
+# 리랭커 모델 평가 관문. 리랭커 이미지(모델·리비전·가중치 파일)나 평가셋이 바뀌면 이미지를 빌드해 띄우고,
+# 고정 후보 문단으로 한국어 평가셋을 돌려 MRR 이 기준보다 낮으면 실패한다.
+# 평가는 인덱스·비밀값이 필요 없다(server/python/rag-service/evaluation/rerank_eval.py, 표준 라이브러리만 쓴다).
+name: ci-model-eval
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "server/inference/reranker/**"
+      - "server/python/rag-service/evaluation/**"
+      - ".github/workflows/ci-model-eval.yml"
+  pull_request:
+    paths:
+      - "server/inference/reranker/**"
+      - "server/python/rag-service/evaluation/**"
+      - ".github/workflows/ci-model-eval.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # 131문항 평가셋(바꿔 말하기 포함)에서 int8 bge-reranker-base 가 0.759(원 질문만 0.89, 바꿔 말하기 0.51, 문단을 한 건씩 매긴 값).
+  # 이보다 크게 떨어지는 교체를 막는다
+  MIN_MRR: "0.70"
+
+jobs:
+  rerank:
+    name: rerank eval
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: crazy-max/ghaction-github-runtime@v3
+      - uses: docker/setup-buildx-action@v4
+
+      # ci-images 와 같은 캐시 스코프를 쓴다 — 같은 이미지를 두 번 받지 않는다
+      - name: Build reranker image
+        run: >
+          docker buildx bake reranker-service --load
+          --set reranker-service.cache-from=type=gha,scope=reranker-service
+          --set reranker-service.tags=history/reranker-service:eval
+
+      # 운영(compose)과 같은 자원 한도로 띄운다 — 지연 수치도 그 조건의 값이 된다
+      - name: Start reranker
+        run: |
+          docker run -d --name reranker --cpus 1 --memory 1g --read-only --tmpfs /tmp \
+            -e API_KEY=ci-eval -p 8090:8090 history/reranker-service:eval
+          for i in $(seq 120); do curl -sf localhost:8090/health && exit 0; sleep 2; done
+          docker logs reranker; exit 1
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Evaluate
+        working-directory: server/python/rag-service
+        env:
+          RERANKER_API_KEY: ci-eval
+        run: python -m evaluation.rerank_eval --url http://localhost:8090 --min-mrr "$MIN_MRR" --out rerank-report.json
+
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: rerank-report
+          path: server/python/rag-service/rerank-report.json
+          if-no-files-found: ignore

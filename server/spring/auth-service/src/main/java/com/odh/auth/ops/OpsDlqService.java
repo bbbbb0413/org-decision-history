@@ -39,8 +39,6 @@ public class OpsDlqService {
 
     private static final Logger log = LoggerFactory.getLogger(OpsDlqService.class);
 
-    /** 목록 한 번에 읽어올 최대 항목 수. 화면은 최근 것만 보면 되고, 큰 DLQ 를 통째로 끌어오면 안 된다. */
-    private static final int MAX_ENTRY_LIMIT = 100;
     /** 한 번에 되돌리거나 버릴 수 있는 항목 수. */
     static final int MAX_BATCH = 50;
     private static final String FIELD_PREFIX = "dlq.";
@@ -101,9 +99,12 @@ public class OpsDlqService {
     }
 
     private final StringRedisTemplate redis;
+    /** 목록 한 번에 읽어올 최대 항목 수(ops.dlq-max-entries) */
+    private final int maxEntries;
 
-    public OpsDlqService(StringRedisTemplate redis) {
+    public OpsDlqService(StringRedisTemplate redis, OpsProperties props) {
         this.redis = redis;
+        this.maxEntries = props.dlqMaxEntries();
     }
 
     /** 스트림별 DLQ 건수와 가장 오래된 항목 시각. Redis 에 접근하지 못해도 화면이 비지 않게 0 으로 내려간다. */
@@ -140,7 +141,7 @@ public class OpsDlqService {
 
     /** 최근 항목부터 {@code limit} 건. */
     public List<OpsDtos.DlqEntry> entries(Target target, int limit) {
-        int capped = Math.max(1, Math.min(limit, MAX_ENTRY_LIMIT));
+        int capped = Math.max(1, Math.min(limit, maxEntries));
         try {
             List<MapRecord<String, Object, Object>> records = redis.opsForStream()
                     .reverseRange(target.dlqStream(), Range.unbounded(), Limit.limit().count(capped));

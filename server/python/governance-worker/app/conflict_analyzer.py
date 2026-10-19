@@ -2,35 +2,24 @@
 import json
 import re
 import structlog
+from history_shared.llm import LlmUnavailableError
 
 from app.generation import AnswerGenerator
 from app.models import ConflictDetectionResult
+from app.prompt_files import prompt
 
 log = structlog.get_logger()
 
-ASSERTION_EXTRACTION_SYSTEM = """너는 엔터프라이즈 사내 거버넌스 및 정책 감사 전문가다.
-문서 본문에서 다른 사내 규정이나 의사결정과 상충할 가능성이 있는 핵심 규범/정책/의사결정 조항을 최대 3~5개만 추출하라.
-단순 서술이나 소개글은 제외하고, 권한, 의무, 허용, 금지, 기준, 프로세스 관련 문장만 추출하라.
-반드시 JSON 문자열 배열 형태(예: ["조항1", "조항2"])로만 응답하라. 마크다운이나 기타 해설을 포함하지 마라."""
+# 본문은 prompts/assertion_extraction.md
+ASSERTION_EXTRACTION_SYSTEM = prompt("assertion_extraction")
 
 ASSERTION_EXTRACTION_USER = """[문서 본문]:
 {document_text}
 
 JSON 배열:"""
 
-CONFLICT_NLI_SYSTEM = """당신은 엔터프라이즈 사내 거버넌스 및 정책 감사 전문가입니다.
-새로 제안된 [신규 조항]이 과거 승인된 [기존 정책 조항]과 상충하거나 모순되는지 분석하십시오.
-반드시 아래 JSON 스키마 형식으로만 응답하십시오:
-{
-  "has_conflict": true,
-  "conflict_score": 0.85,
-  "conflict_type": "DIRECT_CONTRADICTION",
-  "reasoning": "신규 조항은 HTTP 통신을 허용하나 기존 규정은 mTLS를 필수로 요구함",
-  "affected_teams": ["인프라보안팀", "결제개발팀"],
-  "recommended_action": "보안팀 사전 승인 필요"
-}
-
-상충이나 모순이 없다면 has_conflict: false, conflict_score: 0.0, conflict_type: "NONE", reasoning: "상충 없음", affected_teams: [], recommended_action: "없음" 으로 응답하십시오."""
+# 본문은 prompts/conflict_nli.md
+CONFLICT_NLI_SYSTEM = prompt("conflict_nli")
 
 CONFLICT_NLI_USER = """[신규 조항]: {new_clause} (문서: {new_doc_title})
 [기존 정책 조항]: {existing_clause} (문서: {existing_doc_title})
@@ -84,24 +73,17 @@ class ConflictAnalyzer:
                 return [str(item).strip() for item in data if str(item).strip()]
             if isinstance(data, dict) and "assertions" in data:
                 return [str(item).strip() for item in data["assertions"] if str(item).strip()]
+        except LlmUnavailableError:
+            # 한도 초과 등은 "조항 없음"이 아니다. 재시도(XAUTOCLAIM, 5회 뒤 DLQ)에 맡긴다
+            raise
         except Exception as e:
-            log.warning("문서 핵심 조항 추출 실패 (폴백 적용)", error=str(e))
+            log.warning("문서 핵심 조항 추출 응답을 해석하지 못함 (이 창은 건너뜀)", error=str(e))
+            return []
 
-        # 폴백: 문장 단위로 분할하여 규범/정책 관련 문장 추출
-        sentences = re.split(r"(?<=[.!?\n])\s+", clipped)
-        keywords = ["한다", "하여야", "금지", "허용", "제한", "의무", "원칙", "필수", "축소", "단축", "종속", "폐지"]
-        fallback_assertions = []
-        for s in sentences:
-            s_clean = s.strip()
-            if len(s_clean) >= 15 and any(k in s_clean for k in keywords):
-                fallback_assertions.append(s_clean)
-                if len(fallback_assertions) >= 3:
-                    break
-
-        if not fallback_assertions and sentences:
-            fallback_assertions = [sentences[0].strip()]
-
-        return fallback_assertions
+        # 응답 형식이 어긋나면 키워드로 규범 문장을 골라 대신 판정하지 않는다 — 상충 판정도 같은 LLM 이 해야 하고,
+        # "한다" 같은 낱말은 거의 모든 서술문에 걸려 사실상 "앞의 몇 문장"을 엉뚱하게 판정하게 된다
+        log.warning("문서 핵심 조항 추출 응답이 배열이 아님 (이 창은 건너뜀)", response_type=type(data).__name__)
+        return []
 
     async def analyze_contradiction(
         self,
@@ -125,11 +107,12 @@ class ConflictAnalyzer:
             if not isinstance(data, dict):
                 return None
 
-            has_conflict = bool(data.get("has_conflict", False))
-            conflict_score = float(data.get("conflict_score", 0.0))
-
-            if not has_conflict and conflict_score < 0.5:
+            # has_conflict 가 판정이고 conflict_score 는 그 심각도다(프롬프트가 "상충이 없으면 false, 0.0"으로 정한다).
+            # 판정이 "상충 아님"이면 점수와 상관없이 버린다 — "아님"인데 점수가 높은 응답은 모델이 스스로 어긋난
+            # 것이라 상충으로 기록·알림할 근거가 못 된다. bool() 로 받으면 문자열 "false" 도 참이 되므로 True 만 인정한다
+            if data.get("has_conflict") is not True:
                 return None
+            conflict_score = min(max(float(data.get("conflict_score", 0.0)), 0.0), 1.0)
 
             conflict_type = str(data.get("conflict_type", "DIRECT_CONTRADICTION"))
             reasoning = str(data.get("reasoning", "정책 내용 상충"))
@@ -147,6 +130,10 @@ class ConflictAnalyzer:
                 impacted_teams=affected_teams,
                 suggested_action=recommended_action,
             )
+        except LlmUnavailableError:
+            # 한도 초과 등은 "상충 아님"이 아니다. 삼키면 상충을 조용히 놓치고, 검사가 끝난 것으로 보고
+            # 개정 전 판정 정리(SUPERSEDED)까지 돈다. 재시도에 맡긴다
+            raise
         except Exception as e:
             log.warning("NLI 상충 분석 실패", error=str(e))
             return None

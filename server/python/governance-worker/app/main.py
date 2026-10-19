@@ -97,11 +97,15 @@ async def main() -> None:
         embedder=embedder,
         vector_client=vector_client,
         generator=generator,
-        threshold=settings.notification_min_severity,
+        threshold=settings.conflict_min_severity,
+        severity_bands=settings.severity_bands(),
         dispatcher=dispatcher,
         frontend_base_url=settings.frontend_base_url,
         sync_service=graph_sync,
         settings=settings,
+        window_chars=settings.assertion_window_chars,
+        max_windows=settings.assertion_max_windows,
+        max_assertions=settings.assertion_max_count,
     )
 
     # 이벤트 컨슈머. index-worker의 색인 완료 이벤트(stream:index-events)를 구독한다

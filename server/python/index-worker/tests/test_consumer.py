@@ -29,8 +29,6 @@ def test_event_type_maps_to_trigger():
     assert trigger_for("DOCUMENT_CREATED") == IndexTrigger.DOCUMENT_UPLOAD
     assert trigger_for("DOCUMENT_UPDATED") == IndexTrigger.DOCUMENT_UPDATE
     assert trigger_for("DOCUMENT_DELETED") == IndexTrigger.DOCUMENT_DELETE
-    # 권한 변경은 payload 의 scope_key 를 새로 새겨야 하므로 재색인한다
-    assert trigger_for("PERMISSION_CHANGED") == IndexTrigger.DOCUMENT_UPDATE
 
 
 async def test_handler_accepts_event_with_idempotency_key():

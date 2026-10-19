@@ -1,8 +1,24 @@
 """PostgreSQL asyncpg 데이터베이스 클라이언트."""
+from dataclasses import dataclass
+
 import asyncpg
 import structlog
 
 log = structlog.get_logger()
+
+# 사람이 상충 처리 화면에서 닫은 상태. SUPERSEDED 는 워커가 닫는 값이라 여기 들지 않는다
+HUMAN_CLOSED = frozenset({"RESOLVED", "DISMISSED"})
+
+
+@dataclass(frozen=True)
+class RecordedConflict:
+    id: int
+    created: bool
+    status: str
+    # 알림을 보낼지. 그 문서 쌍에서 같은 원문 텍스트로 처음 감지된 새 행만 참이다
+    notify: bool
+    # 같은 원문 텍스트에 대한 사람 판정을 이어받았으면 그 행 id
+    inherited_from: int | None = None
 
 
 class Db:
@@ -25,47 +41,101 @@ class Db:
                 return None
             return dict(row)
 
+    async def find_source_chunks(self, document_id: int) -> list[str]:
+        """index-worker 가 색인한 이 문서의 청크 본문을 순서대로 돌려준다. 색인이 없으면 빈 목록.
+
+        상충 검사의 원문을 검색 색인과 같은 텍스트로 맞추려고 쓴다. document_version.content 는 폼 본문이라
+        원본 파일을 따로 올린 문서에서는 색인된 내용과 다르다. index-worker 는 문서마다 한 판의 청크만 남긴다.
+        """
+        rows = await self._pool.fetch(
+            "SELECT content FROM indexing.document_chunk WHERE document_id = $1 ORDER BY chunk_no", document_id
+        )
+        return [r["content"] for r in rows]
+
     async def record_conflict(
         self,
         source_doc_id: int,
         target_doc_id: int,
         conflict_type: str,
         severity_score: float,
+        severity_level: str,
         source_clause: str,
         target_clause: str,
         reasoning: str,
         affected_teams: list[str],
         source_doc_version: int | None = None,
-    ) -> int:
-        """document.decision_conflicts 에 기록한다.
+        target_doc_version: int | None = None,
+        source_text_hash: str | None = None,
+        target_text_hash: str | None = None,
+    ) -> "RecordedConflict":
+        """document.decision_conflicts 에 기록하고, 알려야 하는지까지 정해 돌려준다.
 
         컬럼은 reasoning(TEXT)·affected_teams(TEXT[])다.
         같은 (source_doc_id, target_doc_id, source_clause) 조합으로 다시 감지되면(재색인 등) 갱신한다.
         source_clause 는 길 수 있어 ON CONFLICT 대상은 원문 대신 md5 해시에 건다
         (server/spring/document-service V4__decision_conflicts_unique.sql 의 식 인덱스와 맞춘다).
+
+        사람의 판정을 지키는 규칙:
+        - 같은 조항이 다시 감지되면: 사람이 닫은 RESOLVED·DISMISSED 는 상태를 그대로 둔다(판정 내용만 갱신).
+          워커가 닫은 SUPERSEDED 는 다시 OPEN — 개정 뒤에도 같은 조항이 남아 있다는 뜻이다.
+        - 조항 문구가 달라 새 행이 생기면: 같은 문서 쌍에서 **판정에 쓰인 텍스트가 같은** 행이 있는지 본다
+          (조항을 뽑은 source 원문 창의 해시, 비교한 target 청크의 해시 — V8). 같은 텍스트를 다시 판정한 것이므로
+          LLM 이 같은 내용을 다른 문구로 뽑았을 가능성이 크다.
+          · 그 행들이 모두 사람이 닫은 것이면 새 행도 그 판정을 이어받아 닫힌 채로 기록한다(사람이 직접 내린 것 우선).
+          · 하나라도 열려 있으면 새 행은 OPEN 으로 두되, 이 텍스트 쌍은 이미 알렸으므로 다시 알리지 않는다.
+        - 알림은 그 텍스트 쌍에서 처음 감지된 행에만 보낸다. 판(version)이 아니라 텍스트로 보므로, 문서를 고쳐도
+          고친 곳이 그 창·청크 밖이면 다시 알리지 않는다.
+        해시를 모르는 옛 행(NULL)은 이어받기·중복 판단에 쓰지 않는다.
         """
-        query = """
+        upsert = """
         INSERT INTO document.decision_conflicts (
             source_doc_id, target_doc_id, conflict_type, severity_score,
             source_clause, target_clause, reasoning, affected_teams, status,
-            source_doc_version
+            source_doc_version, severity_level, target_doc_version, source_text_hash, target_text_hash
         ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, 'OPEN', $9
+            $1, $2, $3, $4, $5, $6, $7, $8, 'OPEN', $9, $10, $11, $12, $13
         )
         ON CONFLICT (source_doc_id, target_doc_id, (md5(source_clause)))
         DO UPDATE SET
             conflict_type = EXCLUDED.conflict_type,
             severity_score = EXCLUDED.severity_score,
+            severity_level = EXCLUDED.severity_level,
             target_clause = EXCLUDED.target_clause,
             reasoning = EXCLUDED.reasoning,
             affected_teams = EXCLUDED.affected_teams,
-            status = 'OPEN',
-            source_doc_version = EXCLUDED.source_doc_version
-        RETURNING id
+            status = CASE WHEN decision_conflicts.status IN ('RESOLVED', 'DISMISSED')
+                          THEN decision_conflicts.status ELSE 'OPEN' END,
+            source_doc_version = EXCLUDED.source_doc_version,
+            target_doc_version = EXCLUDED.target_doc_version,
+            source_text_hash = EXCLUDED.source_text_hash,
+            target_text_hash = EXCLUDED.target_text_hash
+        RETURNING id, (xmax = 0) AS created, status
         """
-        async with self._pool.acquire() as conn:
-            return await conn.fetchval(
-                query,
+        same_texts = """
+        SELECT id, status FROM document.decision_conflicts
+        WHERE source_doc_id = $1 AND target_doc_id = $2
+          AND source_text_hash = $3 AND target_text_hash = $4
+        -- 이어받을 판정은 사람이 직접 내린 것을 먼저 고른다(워커가 이어받은 행을 다시 가리키지 않게)
+        ORDER BY (COALESCE(resolved_by, '') = 'system'), resolved_at DESC NULLS LAST, id DESC
+        """
+        inherit = """
+        UPDATE document.decision_conflicts
+        SET status = $2, resolved_by = 'system', resolved_at = now(),
+            resolution_note = format('같은 원문에 대한 이전 판정(#%s)을 이어받음', $3::bigint)
+        WHERE id = $1
+        """
+        texts_known = source_text_hash is not None and target_text_hash is not None
+        async with self._pool.acquire() as conn, conn.transaction():
+            # 같은 쌍을 두 곳에서 동시에 기록하면 서로의 새 행을 못 보고 둘 다 알린다
+            await conn.execute(
+                "SELECT pg_advisory_xact_lock(hashtextextended(format('decision_conflicts:%s:%s', $1::bigint, $2::bigint), 0))",
+                source_doc_id,
+                target_doc_id,
+            )
+            prior = await conn.fetch(same_texts, source_doc_id, target_doc_id, source_text_hash, target_text_hash) \
+                if texts_known else []
+            row = await conn.fetchrow(
+                upsert,
                 source_doc_id,
                 target_doc_id,
                 conflict_type,
@@ -75,7 +145,19 @@ class Db:
                 reasoning,
                 affected_teams,
                 source_doc_version,
+                severity_level,
+                target_doc_version,
+                source_text_hash,
+                target_text_hash,
             )
+            conflict_id, created, status = row["id"], row["created"], row["status"]
+            if not created:
+                return RecordedConflict(conflict_id, created=False, status=status, notify=False)
+            if prior and all(p["status"] in HUMAN_CLOSED for p in prior):
+                decided = prior[0]
+                await conn.execute(inherit, conflict_id, decided["status"], decided["id"])
+                return RecordedConflict(conflict_id, created=True, status=decided["status"], notify=False, inherited_from=decided["id"])
+            return RecordedConflict(conflict_id, created=True, status=status, notify=not prior)
 
     async def supersede_outdated_conflicts(self, source_doc_id: int, current_version: int) -> int:
         """개정 전 판을 보고 내려진 OPEN 상충을 닫는다.

@@ -55,6 +55,15 @@ LLM_REQUEST_SECONDS = Histogram(
     buckets=(0.1, 0.5, 1, 2.5, 5, 10, 20, 40, 80),
 )
 
+# ---- 답변 자가 비판 (rag-service) ----
+
+CRITIQUE_CONFIDENCE = Histogram(
+    "answer_critique_confidence",
+    "자가 비판이 매긴 답변 신뢰도(모델이 실제로 평가한 것만)",
+    # 판정 기준(0.7) 근처를 촘촘히 본다 — 기준값을 조정할 때 이 분포를 근거로 쓴다
+    buckets=(0.1, 0.3, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0),
+)
+
 # ---- 상충 감지 (governance-worker) ----
 
 CONFLICT_DETECTIONS = Counter(
@@ -72,6 +81,32 @@ CONFLICTS_RECORDED = Counter(
 CONFLICTS_SUPERSEDED = Counter(
     "conflicts_superseded_total",
     "문서 개정으로 SUPERSEDED 처리한 상충 수",
+)
+
+# ---- 재순위화 (rag-service 호출). 서버 쪽 지표(te_predict_* 등)는 TEI 가 :8090/metrics 에 낸다 ----
+
+RERANK_FALLBACKS = Counter(
+    "rerank_fallback_total",
+    "rag-service 가 재순위화 없이 1차 검색 순서로 답한 횟수. 0 이 아니면 답변 품질이 떨어진 것이다",
+    # reason: disabled / timeout / http_error / bad_response
+    ["reason"],
+)
+
+# ---- 근거 판정 (rag-service) ----
+
+EVIDENCE_VERDICTS = Counter(
+    "evidence_verdict_total",
+    "근거 판정 결과와 그 경로. 답 없는 질문이 생성까지 가는지(새는지)를 본다",
+    # outcome: low_similarity(벡터 유사도가 낮아 바로 거절) / judged_answerable / judged_unanswerable(경량 LLM 판정)
+    #          unjudged_gate_passed / unjudged_gate_rejected(판정 실패 — 1차 거름으로 정함, 한도 초과가 잦으면 오른다)
+    #          gate_passed / gate_rejected(판정기를 끈 경우)
+    ["outcome"],
+)
+
+EVIDENCE_JUDGE_CACHE = Counter(
+    "evidence_judge_cache_total",
+    "근거 충분성 판정 캐시 조회. hit 이 많을수록 경량 모델 한도를 아낀다",
+    ["result"],  # hit / miss
 )
 
 _APP_INFO = Gauge("app_info", "서비스 정보", ["service"])

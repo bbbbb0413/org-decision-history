@@ -63,7 +63,12 @@ def build_app(cfg: Settings = settings) -> FastAPI:
         documents = DocumentReader(pool)
         events = RedisIndexEventPublisher(redis_client)
         pipeline = IndexingPipeline(documents, ObjectStorage(cfg), embedder, vectors, ChunkStore(pool), events)
-        jobs = JobService(pool, pipeline, running_timeout=timedelta(minutes=cfg.running_timeout_minutes))
+        jobs = JobService(
+            pool,
+            pipeline,
+            heartbeat_interval=timedelta(seconds=cfg.running_heartbeat_seconds),
+            stale_after=timedelta(seconds=cfg.running_stale_seconds),
+        )
         app.state.services = ApiServices(jobs=jobs, queries=IndexQueries(pool), documents=documents)
 
         stop = asyncio.Event()
@@ -71,7 +76,12 @@ def build_app(cfg: Settings = settings) -> FastAPI:
         if cfg.consumer_enabled:
             tasks.append(asyncio.create_task(_supervise("consumer", build_consumer(redis_client, jobs, cfg).run, stop)))
         if cfg.runner_enabled:
-            runner = JobRunner(jobs, interval_seconds=cfg.runner_interval_seconds, max_per_tick=cfg.runner_max_per_tick)
+            runner = JobRunner(
+                jobs,
+                interval_seconds=cfg.runner_interval_seconds,
+                max_per_tick=cfg.runner_max_per_tick,
+                recover_interval_seconds=cfg.running_recover_interval_seconds,
+            )
             tasks.append(asyncio.create_task(_supervise("runner", runner.run, stop)))
         log.info("index-worker 시작", consumer=cfg.consumer_enabled, runner=cfg.runner_enabled, model=embedder.model_name)
         try:

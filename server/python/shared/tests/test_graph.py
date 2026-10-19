@@ -277,6 +277,7 @@ async def test_graph_sync_service():
     mock_client.upsert_decision = AsyncMock()
     mock_client.upsert_node = AsyncMock()
     mock_client.upsert_edge = AsyncMock()
+    mock_client.clear_extracted_relations = AsyncMock(return_value=0)
 
     mock_extractor = MagicMock(spec=DecisionGraphExtractor)
     mock_extractor.extract_graph_elements = AsyncMock(
@@ -329,3 +330,117 @@ async def test_graph_sync_service():
             "reasoning": "출근 vs 재택",
         },
     )
+
+
+@pytest.mark.asyncio
+async def test_delete_decision_detaches_the_document_node():
+    client, driver = _client_with_fake_driver()
+
+    assert await client.delete_decision(42) == 0  # 가짜 드라이버는 결과 행이 없다
+
+    [query] = driver.session_obj.queries
+    assert "MATCH (d:Decision {id: $id})" in query and "DETACH DELETE d" in query
+
+
+@pytest.mark.asyncio
+async def test_delete_decision_without_connection_is_a_no_op():
+    assert await Neo4jGraphClient("bolt://unused", "u", "p").delete_decision(42) == 0
+
+
+@pytest.mark.asyncio
+async def test_edge_to_existing_node_only_uses_match_for_target():
+    client, driver = _client_with_fake_driver()
+
+    await client.upsert_edge("Decision", "id", 1, "SUPERSEDES", "Decision", "id", 51, create_target=False)
+    await client.upsert_edge("Decision", "id", 1, "AFFECTS", "System", "name", "결제", {})
+
+    match_only, merge = driver.session_obj.queries
+    assert "MATCH (b:Decision {id: $t_val})" in match_only and "MERGE (b:" not in match_only
+    assert "MERGE (b:System {name: $t_val})" in merge
+
+
+def _sync_with(elements_by_call):
+    client = MagicMock(spec=Neo4jGraphClient)
+    client.upsert_decision = AsyncMock()
+    client.upsert_node = AsyncMock()
+    client.upsert_edge = AsyncMock()
+    client.clear_extracted_relations = AsyncMock(return_value=0)
+    extractor = MagicMock(spec=DecisionGraphExtractor)
+    extractor.extract_graph_elements = AsyncMock(side_effect=elements_by_call)
+    return GraphSyncService(client, extractor), client, extractor
+
+
+@pytest.mark.asyncio
+async def test_sync_document_does_not_recreate_decision_targets_by_id():
+    sync, client, _ = _sync_with([{
+        "systems": [], "teams": [],
+        "relations": [
+            {"rel_type": "SUPERSEDES", "target_type": "Decision", "target_name": "51"},
+            {"rel_type": "SUPERSEDES", "target_type": "Decision", "target_name": "옛 결제 정책"},
+        ],
+    }])
+
+    await sync.sync_document(doc_id=5, title="개정안", content="본문")
+
+    by_target = {c.kwargs["target_val"]: c.kwargs["create_target"] for c in client.upsert_edge.await_args_list}
+    assert by_target == {51: False, "옛 결제 정책": True}
+
+
+@pytest.mark.asyncio
+async def test_sync_document_extracts_each_source_and_merges():
+    sync, client, extractor = _sync_with([
+        {"systems": ["결제시스템"], "teams": ["결제팀"],
+         "relations": [{"rel_type": "AFFECTS", "target_type": "System", "target_name": "결제시스템"}]},
+        {"systems": ["결제시스템", "정산서버"], "teams": [],
+         "relations": [{"rel_type": "AFFECTS", "target_type": "System", "target_name": "결제시스템"},
+                       {"rel_type": "DEPENDS_ON", "target_type": "System", "target_name": "정산서버"}]},
+    ])
+
+    await sync.sync_document(
+        doc_id=5, title="문서", content="폼 본문 요약", sources=["창 1", "창 2"], extract_max_chars=4000
+    )
+
+    assert [c.kwargs["content"] for c in extractor.extract_graph_elements.await_args_list] == ["창 1", "창 2"]
+    assert all(c.kwargs["max_chars"] == 4000 for c in extractor.extract_graph_elements.await_args_list)
+    assert client.upsert_decision.await_args.kwargs["summary"] == "폼 본문 요약"
+    assert [c.args for c in client.upsert_node.await_args_list] == [
+        ("System", "name", "결제시스템"), ("System", "name", "정산서버"), ("Team", "name", "결제팀"),
+    ]
+    assert [c.kwargs["target_val"] for c in client.upsert_edge.await_args_list] == ["결제시스템", "정산서버"]
+
+
+
+@pytest.mark.asyncio
+async def test_clear_extracted_relations_keeps_conflict_edges():
+    client, driver = _client_with_fake_driver()
+
+    await client.clear_extracted_relations(5)
+
+    [query] = driver.session_obj.queries
+    assert "MATCH (d:Decision {id: $id})-[r]->()" in query and "type(r) IN $types" in query
+    from history_shared.graph.schema import EXTRACTED_REL_TYPES
+    assert "CONFLICTS_WITH" not in EXTRACTED_REL_TYPES and "AFFECTS" in EXTRACTED_REL_TYPES
+
+
+@pytest.mark.asyncio
+async def test_resync_clears_previous_relations_before_writing_new_ones():
+    sync, client, _ = _sync_with([{"systems": ["결제시스템"], "teams": [],
+                                   "relations": [{"rel_type": "AFFECTS", "target_type": "System", "target_name": "결제시스템"}]}])
+    calls = []
+    client.clear_extracted_relations.side_effect = lambda doc_id: calls.append(("clear", doc_id)) or 2
+    client.upsert_edge.side_effect = lambda **kw: calls.append(("edge", kw["target_val"]))
+
+    await sync.sync_document(doc_id=5, title="개정판", content="본문")
+
+    assert calls == [("clear", 5), ("edge", "결제시스템")]
+
+
+@pytest.mark.asyncio
+async def test_extractor_does_not_fall_back_to_regex_when_llm_is_unavailable():
+    from history_shared.llm import LlmUnavailableError
+
+    generator = MagicMock()
+    generator.complete = AsyncMock(side_effect=LlmUnavailableError("429"))
+
+    with pytest.raises(LlmUnavailableError):
+        await DecisionGraphExtractor(generator).extract_graph_elements(1, "결제 시스템 개편", "결제시스템을 바꾼다")

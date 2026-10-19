@@ -61,6 +61,22 @@ describe('액세스 토큰 만료 시 재발급', () => {
     expect(tokenStore.access).toBe('access-new');
   });
 
+  it('503(인증 확인 불가)이면 재발급하지 않고 토큰을 그대로 둔다', async () => {
+    // 게이트웨이가 키 조회·Redis 장애로 토큰을 확인하지 못한 경우다. 401 로 다루면 재발급도 같은
+    // 이유로 실패해 토큰을 지우고, 장애가 짧아도 사용자가 로그아웃된다
+    const calls = mockFetch([
+      { status: 503, body: { code: 'AUTH_UNAVAILABLE', message: '지금은 인증을 확인할 수 없습니다.' } },
+    ]);
+
+    const error = await api.me().catch((e) => e);
+
+    expect(error).toBeInstanceOf(HttpError);
+    expect((error as HttpError).status).toBe(503);
+    expect(calls.map((c) => c.url)).toEqual(['/api/auth/me']);
+    expect(tokenStore.access).toBe('access-old');
+    expect(tokenStore.refresh).toBe('refresh-old');
+  });
+
   it('재발급도 실패하면 토큰을 지우고 401 을 그대로 올린다', async () => {
     // 로그아웃·비밀번호 변경으로 무효화된 경우다. 앱은 이 401 을 보고 로그인 화면으로 돌아간다
     mockFetch([

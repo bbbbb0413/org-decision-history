@@ -579,6 +579,12 @@ components:
           format: date-time
         resolvedBy:
           type: string
+        severityLevel:
+          type: string
+          enum:
+          - CRITICAL
+          - HIGH
+          - MEDIUM
         severityScore:
           type: number
           format: double
@@ -927,6 +933,9 @@ components:
           minLength: 0
         status:
           type: string
+          enum:
+          - RESOLVED
+          - DISMISSED
           minLength: 1
       required:
       - resolutionNote

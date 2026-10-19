@@ -8,13 +8,13 @@ import re
 
 import redis.asyncio as redis
 
-TTL_SECONDS = 3600
 _WHITESPACE = re.compile(r"\s+")
 
 
 class AnswerCache:
-    def __init__(self, redis_client: redis.Redis):
+    def __init__(self, redis_client: redis.Redis, ttl_seconds: int = 3600):
         self._redis = redis_client
+        self._ttl_seconds = ttl_seconds
 
     async def find(self, question: str, scope_keys: list[str]) -> str | None:
         return await self._redis.get(self._key(question, scope_keys))
@@ -22,7 +22,7 @@ class AnswerCache:
     async def put(self, question: str, scope_keys: list[str], answer: str) -> None:
         if not answer or not answer.strip():
             return
-        await self._redis.set(self._key(question, scope_keys), answer, ex=TTL_SECONDS)
+        await self._redis.set(self._key(question, scope_keys), answer, ex=self._ttl_seconds)
 
     def _key(self, question: str, scope_keys: list[str]) -> str:
         return f"answer:{self._hash(self._normalize(question))}:{self._hash(','.join(scope_keys))}"

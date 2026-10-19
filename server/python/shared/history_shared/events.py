@@ -7,11 +7,16 @@ import json
 from collections.abc import Mapping
 from dataclasses import dataclass
 
+# 스트림 이름은 발행자(document-service Java)와 따로 적혀 있다. 계약 파일의 x-stream 과 같은지
+# 양쪽 테스트가 확인한다(shared tests/test_events.py, document-service OutboxPublisherContractTest)
 STREAM_DOCUMENT_EVENTS = "stream:document-events"
 STREAM_INDEX_EVENTS = "stream:index-events"
 
-DOCUMENT_EVENT_TYPES = frozenset({"DOCUMENT_CREATED", "DOCUMENT_UPDATED", "DOCUMENT_DELETED", "PERMISSION_CHANGED"})
+# PERMISSION_CHANGED 는 DB enum(document.outbox_event_type)에만 남아 있다. 발행하는 곳이 없어 계약에서 뺐다 —
+# 문서의 조직·팀이 바뀌는 경로는 수정(DOCUMENT_UPDATED)이고 그 재색인이 scope_key 를 갱신한다
+DOCUMENT_EVENT_TYPES = frozenset({"DOCUMENT_CREATED", "DOCUMENT_UPDATED", "DOCUMENT_DELETED"})
 DOCUMENT_INDEXED = "DOCUMENT_INDEXED"
+DOCUMENT_UNINDEXED = "DOCUMENT_UNINDEXED"
 
 
 class EventParseError(ValueError):
@@ -119,3 +124,58 @@ class DocumentIndexedEvent:
             )
         except (KeyError, TypeError, ValueError) as e:
             raise EventParseError(f"payload 필드가 계약과 다르다: {e}") from None
+
+
+@dataclass(frozen=True)
+class DocumentUnindexedEvent:
+    """stream:index-events 의 DOCUMENT_UNINDEXED. 삭제된 문서를 색인에서 걷어낸 뒤 발행한다.
+
+    governance-worker 가 이 문서를 지식 그래프에서 빼는 데 쓴다. version 은 삭제 시점의 판이다.
+    """
+
+    document_id: int
+    version: int
+    organization_id: int
+    team_id: int | None
+
+    def to_fields(self) -> dict[str, str]:
+        return {
+            "aggregateId": str(self.document_id),
+            "eventType": DOCUMENT_UNINDEXED,
+            "payload": json.dumps(
+                {
+                    "documentId": self.document_id,
+                    "version": self.version,
+                    "organizationId": self.organization_id,
+                    "teamId": self.team_id,
+                }
+            ),
+        }
+
+    @classmethod
+    def from_fields(cls, fields: Mapping[str, str]) -> "DocumentUnindexedEvent":
+        if fields.get("eventType") != DOCUMENT_UNINDEXED:
+            raise EventParseError(f"DOCUMENT_UNINDEXED 가 아니다: {fields.get('eventType')!r}")
+        payload = _payload(fields)
+        try:
+            return cls(
+                document_id=int(payload["documentId"]),
+                version=int(payload["version"]),
+                organization_id=int(payload["organizationId"]),
+                team_id=_team_id(payload.get("teamId")),
+            )
+        except (KeyError, TypeError, ValueError) as e:
+            raise EventParseError(f"payload 필드가 계약과 다르다: {e}") from None
+
+
+IndexEvent = DocumentIndexedEvent | DocumentUnindexedEvent
+
+
+def parse_index_event(fields: Mapping[str, str]) -> IndexEvent:
+    """stream:index-events 항목을 종류에 맞는 이벤트로 읽는다. 모르는 종류는 EventParseError."""
+    event_type = fields.get("eventType")
+    if event_type == DOCUMENT_INDEXED:
+        return DocumentIndexedEvent.from_fields(fields)
+    if event_type == DOCUMENT_UNINDEXED:
+        return DocumentUnindexedEvent.from_fields(fields)
+    raise EventParseError(f"알 수 없는 eventType: {event_type!r}")

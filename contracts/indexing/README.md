@@ -69,7 +69,7 @@ flowchart LR
 - `\s+`는 줄바꿈도 포함하므로 `#` 한 글자만 있는 줄 다음 줄이 제목이 되는 경우가 있다(`#\n제목` → level 1, title `제목`).
 - docx의 머리글·바닥글, 각주, 텍스트 상자는 본문에 들어가지 않는다. **표는 들어간다**(§3.1).
 - pptx의 발표자 노트, 차트 데이터, SmartArt 는 읽지 않는다. xlsx 의 차트·이미지·주석도 읽지 않는다.
-- 상한: PDF 500쪽, pptx 300장을 넘으면 **거절**한다(`{쪽|장} 수가 너무 많습니다`, retryable=false). xlsx 는 2,000행을 넘으면 거절하지 않고 앞부분만 읽은 뒤 마지막에 `〈행이 너무 많아 이후 내용은 색인하지 않았습니다〉` 줄을 남긴다 — 쪽·장 수가 많은 문서는 이 시스템이 다루는 종류가 아니지만, 행이 많은 스프레드시트는 정당한 문서일 수 있어 거절하면 지식으로 아예 들어오지 못한다.
+- 상한: PDF 500쪽, pptx 300장을 넘으면 **거절**한다(`{쪽|장} 수가 너무 많습니다`, retryable=false). xlsx 는 2,000행을 넘으면(시트 합계) 거절하지 않고 앞부분만 읽은 뒤 마지막에 `〈행이 너무 많아 이후 내용은 색인하지 않았습니다〉` 줄을 남긴다 — 쪽·장 수가 많은 문서는 이 시스템이 다루는 종류가 아니지만, 행이 많은 스프레드시트는 정당한 문서일 수 있어 거절하면 지식으로 아예 들어오지 못한다. 셀은 500자까지만 읽는다. **xlsx 행·셀 상한은 [`limits.json`](limits.json) 이 원본이다** — 가져오기(document-service `DocumentMetadataExtractor`)와 색인(index-worker `parse.py`)이 같은 범위를 봐야 하고, 양쪽 테스트가 이 파일과 대조한다.
 - xlsx 수식은 **엑셀이 마지막에 저장한 계산 결과**를 쓴다(`data_only=True`). 계산된 적이 없는 칸은 빈 칸이 된다 — 수식 문자열(`=SUM(B2:B9)`)을 색인하면 검색이 오염된다.
 
 ### 3.1 표
@@ -262,8 +262,9 @@ L2 정규화(노름이 0이면 그대로)
 - 스트림 `stream:document-events`, 그룹 `index-worker`, 소비자 `index-worker-{호스트명}`. 항목 형식은 [`../events/document-events.schema.json`](../events/document-events.schema.json).
 - 처리 성공(중복 포함) 시 ACK, 실패 시 ACK하지 않는다. 60초 넘게 ACK되지 않은 항목은 `XAUTOCLAIM`으로 가져와 다시 처리한다(죽은 소비자의 항목도 넘겨받는다).
 - 전달 5회를 넘긴 항목과 계약을 어긴 항목은 `stream:document-events:dlq`로 옮기고 ACK한다. 운영 화면에서 조회·재처리·폐기한다.
-- 트리거: `DOCUMENT_CREATED` → `DOCUMENT_UPLOAD`, `DOCUMENT_DELETED` → `DOCUMENT_DELETE`, 그 외(`DOCUMENT_UPDATED`, `PERMISSION_CHANGED`) → `DOCUMENT_UPDATE`
+- 트리거: `DOCUMENT_CREATED` → `DOCUMENT_UPLOAD`, `DOCUMENT_DELETED` → `DOCUMENT_DELETE`, 그 외(`DOCUMENT_UPDATED`) → `DOCUMENT_UPDATE`. 조직·팀 변경도 수정 이벤트로 오고, 그 재색인이 `scope_key` 를 갱신한다
 - 멱등 키: `evt:{documentId}:{version}:{eventType}:{eventId}`. `eventId`(아웃박스 행 번호)는 선택 필드라 없으면 앞 네 부분만 쓴다. 같은 판에 원본을 다시 올려도 이벤트 ID 가 달라 재색인된다. 같은 키의 항목이 있으면 접수하지 않는다.
+- 핸들러가 도는 동안 `claim_min_idle`의 1/3 간격으로 `XCLAIM JUSTID`로 유휴 시간을 되돌려, 오래 걸리는 처리를 다른 인스턴스가 가로채지 않는다(governance-worker 와 공용).
 
 ### 12.2 작업
 
@@ -271,7 +272,7 @@ L2 정규화(노름이 0이면 그대로)
 - 일괄 색인(`POST /api/index-jobs`, body `{organizationId?, teamId?}`): 조건에 맞는 삭제되지 않은 문서를 id 순으로 한 작업에 담는다. 멱등 키 `bulk:{jobKey}:{documentId}:{version}`. 대상이 없으면 바로 `COMPLETED`. 응답 202 + 작업.
 - 선점: `status = 'PENDING' AND retryable AND (next_attempt_at IS NULL OR next_attempt_at <= now())`를 `ORDER BY id LIMIT 1 FOR UPDATE SKIP LOCKED`로 1건. 1초 주기로 깨어나 최대 20건 연속 처리.
 - 선점(`RUNNING`, `last_attempt_at = now()`)을 **짧은 트랜잭션으로 먼저 커밋**하고 작업 집계도 이때 갱신한다. 파이프라인은 트랜잭션 밖에서 돈다 — 임베딩 속도 제한을 기다리는 동안 행 잠금과 DB 연결을 붙잡지 않고, 진행 중 상태가 관리자 화면에 보인다.
-- `last_attempt_at`이 30분 지난 `RUNNING`은 워커가 중단된 것으로 보고 한 번의 시도로 세어 `PENDING`(한도를 넘으면 `FAILED`)으로 되돌린다. 60초마다 확인한다.
+- 처리하는 동안 10초마다 `heartbeat_at`을 쓴다. 이 신호가 60초 넘게 끊긴 `RUNNING`은 워커가 중단된 것으로 보고 한 번의 시도로 세어 `PENDING`(한도를 넘으면 `FAILED`)으로 되돌린다. 30초마다 확인한다. 종료 신호로 처리를 끊으면 재시도 횟수를 쓰지 않고 바로 `PENDING`으로 돌려놓는다.
 - 성공 시 `COMPLETED`(stage·failure_reason 비움).
 - 실패 시 `retry_count += 1`, `stage`, `failure_reason`(300자 초과 시 297자 + `...`, 메시지 없는 예외는 예외 클래스 이름), `retryable` 기록. retryable이고 `retry_count <= 3`이면 `PENDING` + 5초·1분·10분 뒤, 아니면 `FAILED`.
 - 작업 집계는 항목 상태에서 다시 계산한다: `COMPLETED` 수, `FAILED` 수, `PENDING`+`RUNNING` 수. 대기 0이면 실패가 있을 때 `FAILED`, 없으면 `COMPLETED`(`finished_at = now()`), 아니면 `RUNNING`.
@@ -309,4 +310,3 @@ L2 정규화(노름이 0이면 그대로)
 | PDF 헤딩은 글자 크기 추정이다. 크기 변화가 없는 문서는 헤딩이 없다 | 그런 문서는 절 경로가 비고 700토큰 이하면 청크 하나다 | `pdf-ops-meeting` |
 | 태그는 겹침 줄을 포함한 조각 전체에서 부분 일치로 정한다 | `미결정`도 `DECISION` | `tag-*` |
 | NBSP만 있는 본문도 청크가 된다 | 사실상 빈 청크 | `nbsp-only` |
-| `PERMISSION_CHANGED` 를 발행하는 곳이 없다 | 판을 올리지 않는 권한 변경은 재색인 전까지 `scope_key` 에 반영되지 않는다 | — |

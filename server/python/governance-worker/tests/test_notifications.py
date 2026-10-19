@@ -9,6 +9,7 @@ from app.notifications.channels.email import EmailNotificationChannel
 from app.notifications.dispatcher import NotificationDispatcher
 from app.notifications.factory import create_notification_dispatcher
 from app.settings import Settings
+from app.severity import SeverityBands
 
 
 def _create_sample_payload(severity: float = 0.92) -> ConflictNotificationPayload:
@@ -22,6 +23,7 @@ def _create_sample_payload(severity: float = 0.92) -> ConflictNotificationPayloa
         target_clause="전 임직원은 주 5일 100% 재택근무를 실시한다.",
         conflict_type="DIRECT_CONTRADICTION",
         severity_score=severity,
+        severity_level=SeverityBands().level_of(severity),
         reasoning="신규 문서는 전원 출근을 요구하나 기존 규정은 재택근무를 규정함.",
         affected_teams=["인사팀", "운영팀"],
         recommended_action="인사위원회 심의 필요",
@@ -59,7 +61,8 @@ def test_slack_block_kit_payload_structure():
     assert "http://localhost:5173/documents/17" in fields[0]["text"]
     assert "충돌 대상 규정" in fields[1]["text"]
     assert "http://localhost:5173/documents/16" in fields[1]["text"]
-    assert "🔴 High" in fields[2]["text"]
+    # 대시보드 배지와 같은 이름을 쓴다
+    assert "🔴 치명적 (0.92)" in fields[2]["text"]
     assert "인사팀, 운영팀" in fields[3]["text"]
 
     # Action button
@@ -262,3 +265,41 @@ def test_factory_creation_with_settings():
     assert "slack" in active_names
     assert "email" in active_names
     assert "teams" not in active_names
+
+
+# ─── 심각도 등급 (app/severity.py) ─────────────────────────
+
+
+def test_severity_bands_levels():
+    bands = SeverityBands()
+    assert bands.level_of(0.92) == "CRITICAL"
+    assert bands.level_of(0.85) == "CRITICAL"
+    assert bands.level_of(0.84) == "HIGH"
+    assert bands.level_of(0.70) == "HIGH"
+    assert bands.level_of(0.69) == "MEDIUM"
+
+
+def test_severity_bands_reject_inverted_bounds():
+    with pytest.raises(ValueError):
+        SeverityBands(critical_min=0.7, high_min=0.85)
+
+
+def test_payload_label_uses_stored_level_not_score():
+    """알림은 기록할 때 정한 등급을 보여준다. 점수로 다시 계산하면 구간을 바꾼 뒤 DB·화면과 어긋난다."""
+    payload = _create_sample_payload(severity=0.92)
+    stored_as_high = ConflictNotificationPayload(**{**payload.__dict__, "severity_level": "HIGH"})
+    assert stored_as_high.severity_label == "🟡 높음 (0.92)"
+    assert stored_as_high.is_critical is False
+
+
+def test_settings_reject_notification_threshold_below_record_threshold():
+    """기록되지 않은 상충에는 알림도 없다. 알림 기준이 더 낮으면 설정의 뜻과 동작이 어긋난다."""
+    with pytest.raises(ValueError):
+        Settings(conflict_min_severity=0.8, notification_min_severity=0.7)
+    # 알림만 더 엄격하게 하는 것은 된다
+    Settings(conflict_min_severity=0.7, notification_min_severity=0.9)
+
+
+def test_settings_reject_invalid_bands():
+    with pytest.raises(ValueError):
+        Settings(severity_critical_min=0.6, severity_high_min=0.7)

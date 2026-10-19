@@ -12,7 +12,8 @@ Java(Spring)와 Python 워커가 섞여 있어 공용 라이브러리로 묶을 
 | [`indexing/golden/`](indexing/golden/README.md) | 위 규칙의 입력과 기대 출력 스냅샷 | index-worker | `server/python/index-worker/tests/test_golden.py` |
 | [`qdrant-chunk-payload.schema.json`](qdrant-chunk-payload.schema.json) | Qdrant `document_chunks` 컬렉션의 point payload | index-worker | rag-service `vector_retriever`, governance-worker `vector_retriever` |
 | [`events/document-events.schema.json`](events/document-events.schema.json) | Redis Stream `stream:document-events` 항목 | document-service `OutboxPublisher` | index-worker |
-| [`events/index-events.schema.json`](events/index-events.schema.json) | Redis Stream `stream:index-events`의 `DOCUMENT_INDEXED` | index-worker | governance-worker |
+| [`events/index-events.schema.json`](events/index-events.schema.json) | Redis Stream `stream:index-events`의 `DOCUMENT_INDEXED`·`DOCUMENT_UNINDEXED` | index-worker | governance-worker |
+| [`reranker/README.md`](reranker/README.md) | 재순위화 API `POST /rerank`·`GET /info` (Hugging Face TEI 와 같은 모양) | reranker-service | rag-service |
 | [`openapi/`](openapi/README.md) | 각 Spring 서비스가 실제로 여는 HTTP API (springdoc 생성) | auth/document/chat-service | front, 서비스 간 호출 |
 
 ## 작성 규칙

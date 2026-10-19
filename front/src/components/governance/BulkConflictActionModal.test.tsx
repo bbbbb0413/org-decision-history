@@ -16,6 +16,7 @@ function conflict(id: number): ConflictItem {
     targetClause: '기존 조항',
     conflictType: 'DIRECT_CONTRADICTION',
     severityScore: 0.9,
+    severityLevel: 'CRITICAL',
     reasoning: '사유',
     affectedTeams: [],
     status: 'OPEN',

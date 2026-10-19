@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { api, HttpError } from '../../api/client';
-import type { ConflictItem, ConflictStatus, CurrentUser } from '../../api/types';
+import type { ConflictItem, ConflictSeverityLevel, ConflictStatus, CurrentUser } from '../../api/types';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { ConflictActionModal } from './ConflictActionModal';
@@ -14,10 +14,13 @@ interface Props {
   onFocusConsumed?: () => void;
 }
 
-// 심각도 구간. governance-worker의 notifications/models.py(severity_label)와 값을 맞춘다 —
-// 다르면 같은 점수가 알림과 화면에서 다른 등급으로 보인다
-const SEVERITY_HIGH = 0.85;
-const SEVERITY_MEDIUM = 0.7;
+// 심각도 등급은 서버가 준 severityLevel 을 그대로 쓴다. 점수로 다시 나누지 않는다 — 구간을 여기에도
+// 두면 governance-worker(알림)와 한쪽만 바뀌어 같은 상충이 알림과 화면에서 다른 등급으로 보인다
+const SEVERITY_BADGE: Record<ConflictSeverityLevel, { tone: 'err' | 'warn' | 'neutral'; label: string }> = {
+  CRITICAL: { tone: 'err', label: '치명적' },
+  HIGH: { tone: 'warn', label: '높음' },
+  MEDIUM: { tone: 'neutral', label: '보통' },
+};
 
 export function GovernanceDashboard({ user, onOpenDocument, focusConflictId, onFocusConsumed }: Props) {
   const [conflicts, setConflicts] = useState<ConflictItem[]>([]);
@@ -72,7 +75,7 @@ export function GovernanceDashboard({ user, onOpenDocument, focusConflictId, onF
     const dismissed = conflicts.filter((c) => c.status === 'DISMISSED').length;
     // 문서가 개정되어 governance-worker 가 자동으로 닫은 건(사람의 조치가 아니다)
     const superseded = conflicts.filter((c) => c.status === 'SUPERSEDED').length;
-    const highRisk = conflicts.filter((c) => c.severityScore >= SEVERITY_HIGH && c.status === 'OPEN').length;
+    const highRisk = conflicts.filter((c) => c.severityLevel === 'CRITICAL' && c.status === 'OPEN').length;
     return { total, open, resolved, dismissed, superseded, highRisk };
   }, [conflicts]);
 
@@ -80,9 +83,7 @@ export function GovernanceDashboard({ user, onOpenDocument, focusConflictId, onF
   const filteredList = useMemo(() => {
     return conflicts.filter((c) => {
       if (statusFilter !== 'ALL' && c.status !== statusFilter) return false;
-      if (severityFilter === 'CRITICAL' && c.severityScore < SEVERITY_HIGH) return false;
-      if (severityFilter === 'HIGH' && (c.severityScore < SEVERITY_MEDIUM || c.severityScore >= SEVERITY_HIGH)) return false;
-      if (severityFilter === 'MEDIUM' && c.severityScore >= SEVERITY_MEDIUM) return false;
+      if (severityFilter !== 'ALL' && c.severityLevel !== severityFilter) return false;
 
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
@@ -282,9 +283,9 @@ export function GovernanceDashboard({ user, onOpenDocument, focusConflictId, onF
             style={styles.select}
           >
             <option value="ALL">모든 심각도</option>
-            <option value="CRITICAL">치명적 (CRITICAL ≥ 85%)</option>
-            <option value="HIGH">높음 (HIGH 70%~84%)</option>
-            <option value="MEDIUM">보통 (MEDIUM &lt; 70%)</option>
+            <option value="CRITICAL">치명적</option>
+            <option value="HIGH">높음</option>
+            <option value="MEDIUM">보통</option>
           </select>
 
           <input
@@ -356,7 +357,7 @@ export function GovernanceDashboard({ user, onOpenDocument, focusConflictId, onF
                   />
                 )}
                 <span style={styles.conflictId}>상충 #{c.id}</span>
-                {renderSeverityBadge(c.severityScore)}
+                {renderSeverityBadge(c.severityLevel, c.severityScore)}
                 <Badge tone="accent">{formatConflictType(c.conflictType)}</Badge>
                 {renderStatusBadge(c.status)}
               </div>
@@ -493,11 +494,9 @@ export function GovernanceDashboard({ user, onOpenDocument, focusConflictId, onF
   );
 }
 
-function renderSeverityBadge(score: number) {
-  const percent = Math.round(score * 100);
-  if (score >= SEVERITY_HIGH) return <Badge tone="err">치명적 ({percent}%)</Badge>;
-  if (score >= SEVERITY_MEDIUM) return <Badge tone="warn">높음 ({percent}%)</Badge>;
-  return <Badge tone="neutral">보통 ({percent}%)</Badge>;
+function renderSeverityBadge(level: ConflictSeverityLevel, score: number) {
+  const { tone, label } = SEVERITY_BADGE[level] ?? SEVERITY_BADGE.MEDIUM;
+  return <Badge tone={tone}>{label} ({Math.round(score * 100)}%)</Badge>;
 }
 
 function renderStatusBadge(status: ConflictStatus) {

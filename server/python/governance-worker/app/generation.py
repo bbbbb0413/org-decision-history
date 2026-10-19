@@ -3,6 +3,7 @@ import time
 
 import httpx
 import structlog
+from history_shared.llm import LlmUnavailableError, is_transient
 from history_shared.metrics import LLM_REQUEST_SECONDS
 
 from app.settings import Settings
@@ -41,10 +42,18 @@ class AnswerGenerator:
             return await self._post(url, headers, body)
         except Exception as e:
             log.warning("Groq 기본 모델 호출 실패, fallback 시도", error=str(e))
-            if self._settings.fallback_model:
-                body["model"] = self._settings.fallback_model
+            if not self._settings.fallback_model:
+                raise self._classify(e) from e
+            body["model"] = self._settings.fallback_model
+            try:
                 return await self._post(url, headers, body)
-            raise
+            except Exception as fallback_error:
+                raise self._classify(fallback_error) from fallback_error
+
+    @staticmethod
+    def _classify(error: Exception) -> Exception:
+        """한도 초과·서버 오류·타임아웃은 LlmUnavailableError 로 바꿔 호출부가 재시도할 수 있게 한다."""
+        return LlmUnavailableError(str(error)) if is_transient(error) else error
 
     async def _post(self, url: str, headers: dict, body: dict) -> str:
         """호출 하나의 지연·성패를 메트릭으로 남긴다.

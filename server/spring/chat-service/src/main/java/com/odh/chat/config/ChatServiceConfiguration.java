@@ -3,6 +3,9 @@ package com.odh.chat.config;
 import com.odh.common.internal.InternalClientsConfiguration;
 import com.odh.common.servlet.ServiceFilterConfiguration;
 import com.odh.common.web.CommonExceptionHandler;
+import com.odh.chat.timeline.TimelineProperties;
+import com.odh.chat.web.SseProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -14,5 +17,6 @@ import org.springframework.context.annotation.Import;
  */
 @Configuration
 @Import({ServiceFilterConfiguration.class, InternalClientsConfiguration.class, CommonExceptionHandler.class})
+@EnableConfigurationProperties({SseProperties.class, TimelineProperties.class})
 public class ChatServiceConfiguration {
 }

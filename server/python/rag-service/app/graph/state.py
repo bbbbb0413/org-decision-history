@@ -21,14 +21,18 @@ class AnswerState(TypedDict, total=False):
     scope: PermissionScope
     rewritten_question: str
 
-    # 질의 지능화 (Step 2: Complexity Router, HyDE, Decomposer)
-    complexity: str  # "simple" | "complex" | "hyde"
+    # 질의 계획(plan_query): 갈래와 실제 검색 질의
+    complexity: str  # "simple" | "complex" | "abstract"
     search_queries: list[str]
 
     summary: str | None
     recent_turns: list[str]
 
     hits: list[SearchHit]
+    # 근거 판정 결과(judge_evidence). "pass" 면 답변 생성으로 간다
+    evidence_verdict: str
+    # 판정 경로(지표 evidence_verdict_total 의 outcome 과 같다)
+    evidence_outcome: str
     evidence: list[SearchHit]
     sources: list[dict]
 
@@ -46,10 +50,9 @@ class AnswerState(TypedDict, total=False):
     resume_at: datetime | None
     suggestions: list[str]
 
-    # 자가 비판 및 환각 검증 (Step 3: Self-Critique & Refine Loop)
+    # 자가 비판(답변·근거 대조). 결과는 상태 표시에만 쓰고 재검색하지 않는다
     confidence: float
     missing: list[str]
-    critique_attempts: int  # 무한 루프 방지용 (최대 1회 재검색)
 
     message_id: int
     finished: bool

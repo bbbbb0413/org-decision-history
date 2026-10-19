@@ -32,6 +32,7 @@ function conflict(overrides: Partial<ConflictItem> = {}): ConflictItem {
     targetClause: '전원 사무실 출근을 의무화한다',
     conflictType: 'DIRECT_CONTRADICTION',
     severityScore: 0.91,
+    severityLevel: 'CRITICAL',
     reasoning: '재택 허용과 전원 출근 의무가 정면으로 어긋난다',
     affectedTeams: ['인증팀'],
     status: 'OPEN',

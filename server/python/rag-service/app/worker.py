@@ -32,7 +32,7 @@ async def run_job_consumer(deps: Dependencies) -> None:
         bootstrap_servers=deps.settings.kafka_bootstrap_servers,
         group_id=deps.settings.kafka_consumer_group,
         enable_auto_commit=False,
-        auto_offset_reset="earliest",
+        auto_offset_reset="earliest",        metadata_max_age_ms=deps.settings.kafka_metadata_max_age_ms,
     )
     await consumer.start()
     log.info(
@@ -63,7 +63,7 @@ async def run_dlt_consumer(deps: Dependencies) -> None:
         bootstrap_servers=deps.settings.kafka_bootstrap_servers,
         group_id=deps.settings.kafka_dlt_consumer_group,
         enable_auto_commit=False,
-        auto_offset_reset="earliest",
+        auto_offset_reset="earliest",        metadata_max_age_ms=deps.settings.kafka_metadata_max_age_ms,
     )
     await consumer.start()
     log.info(

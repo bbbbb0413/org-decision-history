@@ -1,9 +1,12 @@
 """LLM 기반 의사결정 지식 그래프 엔티티 및 인과 관계 추출기."""
 import json
 import re
+from pathlib import Path
 from typing import Any, Dict, Protocol
 import structlog
+from ..llm import LlmUnavailableError
 from .schema import NODE_LABELS, REL_TYPES
+from ..prompts import load_prompt
 
 log = structlog.get_logger()
 
@@ -20,24 +23,8 @@ class CompletionGenerator(Protocol):
         ...
 
 
-GRAPH_EXTRACTION_SYSTEM = """너는 엔터프라이즈 사내 지식 그래프(Knowledge Graph) 및 인과 추론 전문가다.
-주어진 의사결정 문서 본문에서 주요 엔티티(시스템, 팀/부서, 규정)와 이들 간의 인과/대체/종속 관계를 추출하라.
-
-반드시 다음 JSON 스키마로만 엄격히 응답하라:
-{
-  "systems": ["시스템명1", "시스템명2"],
-  "teams": ["담당부서/팀1", "관련팀2"],
-  "relations": [
-    {
-      "source_type": "Decision",
-      "rel_type": "AFFECTS" | "DEPRECATES" | "SUPERSEDES" | "DEPENDS_ON" | "DECIDED_BY" | "IMPLEMENTS",
-      "target_type": "System" | "Team" | "Policy" | "Decision",
-      "target_name": "대상 엔티티명",
-      "description": "영향 또는 사유 간략 설명"
-    }
-  ]
-}
-추출할 수 있는 시스템이나 명시적 관계가 없다면 빈 배열로 응답하라."""
+# 본문은 graph/prompts/graph_extraction.md
+GRAPH_EXTRACTION_SYSTEM = load_prompt(Path(__file__).parent / "prompts", "graph_extraction")
 
 GRAPH_EXTRACTION_USER = """[문서 제목]: {title}
 [문서 본문]:
@@ -123,6 +110,10 @@ class DecisionGraphExtractor:
                                 "description": str(r.get("description", "")).strip(),
                             }
                         )
+        except LlmUnavailableError:
+            # 한도 초과 등으로 못 뽑은 것을 정규식 결과로 대신하면, 재동기화가 기존 관계를 지우고 빈약한
+            # 결과로 덮어쓴다. 동기화 자체를 건너뛰게 올린다(호출부가 잡고 상충 검사는 계속한다)
+            raise
         except Exception as e:
             log.warning("지식 그래프 엔티티/관계 LLM 추출 실패 (휴리스틱 정규식 폴백 적용)", doc_id=doc_id, error=str(e))
 

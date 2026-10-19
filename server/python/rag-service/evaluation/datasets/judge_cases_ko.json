@@ -1,0 +1,4085 @@
+{
+ "description": "근거 충분성 판정기 평가용 고정 근거. 2026-10-01 검색 평가(a8597e0, int8 리랭커, 색인 문서 11건)에서 질문마다 재순위화 후 근거 5건(순서대로)을 얼렸다. 본문은 rerank_passages_ko.json 의 같은 key, 질문·정답·split 은 questions_ko.jsonl 의 같은 id 다. multi 질문 12개(mul-*)는 2026-10-07 검색(문단을 한 건씩 매기는 리랭커, a97a868)에서 얼렸다. 잘못된 전제 질문 fp-05~10 도 같은 날 같은 방식으로 얼렸다. 잘못된 전제 fp-11~15(전제 값이 문서의 다른 맥락에 나오는 질문)도 같은 방식으로 얼렸다.",
+ "cases": [
+  {
+   "id": "acc-01",
+   "hits": [
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.7024,
+     "rerank": 0.528318
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.6957,
+     "rerank": 0.008184
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록",
+     "vector_similarity": 0.6424,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 근거",
+     "vector_similarity": 0.6444,
+     "rerank": 4.5e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.6414,
+     "rerank": 4.8e-05
+    }
+   ]
+  },
+  {
+   "id": "acc-02",
+   "hits": [
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.6747,
+     "rerank": 0.996827
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.6689,
+     "rerank": 0.042551
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 논의한 내용",
+     "vector_similarity": 0.6714,
+     "rerank": 3.9e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 영향 범위",
+     "vector_similarity": 0.6717,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록",
+     "vector_similarity": 0.6271,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "acc-03",
+   "hits": [
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.7338,
+     "rerank": 0.48414
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록",
+     "vector_similarity": 0.643,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 근거",
+     "vector_similarity": 0.6384,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.6115,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.6603,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "acc-04",
+   "hits": [
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.6577,
+     "rerank": 0.342951
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 근거",
+     "vector_similarity": 0.6789,
+     "rerank": 0.174398
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.6465,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.611,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.6225,
+     "rerank": 7.2e-05
+    }
+   ]
+  },
+  {
+   "id": "acc-05",
+   "hits": [
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 액션 아이템",
+     "vector_similarity": 0.6323,
+     "rerank": 0.990957
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.6818,
+     "rerank": 4.3e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.6775,
+     "rerank": 0.000188
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 영향 범위",
+     "vector_similarity": 0.6783,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록",
+     "vector_similarity": 0.6405,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "acc-06",
+   "hits": [
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 논의한 내용",
+     "vector_similarity": 0.6999,
+     "rerank": 0.001029
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 위험과 대응",
+     "vector_similarity": 0.5928,
+     "rerank": 0.000844
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 액션 아이템",
+     "vector_similarity": null,
+     "rerank": 0.000769
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.6527,
+     "rerank": 0.000118
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.6325,
+     "rerank": 5.6e-05
+    }
+   ]
+  },
+  {
+   "id": "acc-07",
+   "hits": [
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 논의한 내용",
+     "vector_similarity": 0.6919,
+     "rerank": 0.012236
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 근거",
+     "vector_similarity": 0.6588,
+     "rerank": 0.000888
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.6233,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 액션 아이템",
+     "vector_similarity": 0.6119,
+     "rerank": 7.4e-05
+    },
+    {
+     "key": "2025 Q3 인증팀 세션 타임아웃 단축 정책 개정안",
+     "vector_similarity": 0.6006,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "acc-08",
+   "hits": [
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 영향 범위",
+     "vector_similarity": 0.6488,
+     "rerank": 0.800338
+    },
+    {
+     "key": "2025 Q4 결제팀 정기결제 배치 시스템 장애 분석 및 개선안",
+     "vector_similarity": 0.6634,
+     "rerank": 0.001007
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차",
+     "vector_similarity": 0.6164,
+     "rerank": 0.000191
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 위험과 대응",
+     "vector_similarity": 0.6127,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 논의한 내용",
+     "vector_similarity": 0.5818,
+     "rerank": 4.3e-05
+    }
+   ]
+  },
+  {
+   "id": "exp-01",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.8095,
+     "rerank": 0.982445
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 적용 범위",
+     "vector_similarity": 0.7765,
+     "rerank": 0.710151
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차",
+     "vector_similarity": 0.7949,
+     "rerank": 0.489764
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 정책 내용",
+     "vector_similarity": 0.7966,
+     "rerank": 0.360418
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 문의 담당자",
+     "vector_similarity": 0.7707,
+     "rerank": 0.351217
+    }
+   ]
+  },
+  {
+   "id": "exp-02",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차",
+     "vector_similarity": 0.8159,
+     "rerank": 0.782945
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.7494,
+     "rerank": 4.4e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 정책 내용",
+     "vector_similarity": 0.7395,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2",
+     "vector_similarity": 0.7286,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 적용 범위",
+     "vector_similarity": 0.7348,
+     "rerank": 3.9e-05
+    }
+   ]
+  },
+  {
+   "id": "exp-03",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 시행일과 재검토 시점",
+     "vector_similarity": 0.7571,
+     "rerank": 0.022384
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.7483,
+     "rerank": 4.1e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 정책 내용",
+     "vector_similarity": 0.739,
+     "rerank": 4.9e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2",
+     "vector_similarity": 0.7451,
+     "rerank": 9.5e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차",
+     "vector_similarity": 0.7122,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "exp-04",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.7403,
+     "rerank": 0.887277
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 적용 범위",
+     "vector_similarity": 0.7196,
+     "rerank": 0.008126
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 정책 내용",
+     "vector_similarity": 0.7188,
+     "rerank": 0.001931
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 논의한 내용",
+     "vector_similarity": 0.6178,
+     "rerank": 4e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2",
+     "vector_similarity": 0.7016,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "exp-05",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.6959,
+     "rerank": 0.885149
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 정책 내용",
+     "vector_similarity": 0.6869,
+     "rerank": 0.000119
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2",
+     "vector_similarity": 0.6737,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 적용 범위",
+     "vector_similarity": 0.6642,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차",
+     "vector_similarity": 0.659,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "exp-06",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.6106,
+     "rerank": 0.000176
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 정책 내용",
+     "vector_similarity": 0.6744,
+     "rerank": 0.00012
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 영향 범위",
+     "vector_similarity": 0.6009,
+     "rerank": 0.000139
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 배경",
+     "vector_similarity": 0.5804,
+     "rerank": 8.1e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 근거",
+     "vector_similarity": 0.5788,
+     "rerank": 6.8e-05
+    }
+   ]
+  },
+  {
+   "id": "exp-07",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 적용 범위",
+     "vector_similarity": 0.7282,
+     "rerank": 0.081006
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.7243,
+     "rerank": 0.004206
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 정책 내용",
+     "vector_similarity": 0.7223,
+     "rerank": 0.001022
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차",
+     "vector_similarity": 0.7134,
+     "rerank": 0.003921
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2",
+     "vector_similarity": 0.7211,
+     "rerank": 3.9e-05
+    }
+   ]
+  },
+  {
+   "id": "exp-08",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차",
+     "vector_similarity": 0.7214,
+     "rerank": 0.624326
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록",
+     "vector_similarity": 0.6613,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 문의 담당자",
+     "vector_similarity": 0.6932,
+     "rerank": 0.000547
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.6892,
+     "rerank": 0.015303
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.6569,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "exp-09",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 문의 담당자",
+     "vector_similarity": 0.7751,
+     "rerank": 0.096202
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 정책 내용",
+     "vector_similarity": 0.7338,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.74,
+     "rerank": 5.3e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차",
+     "vector_similarity": 0.7267,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2",
+     "vector_similarity": 0.7271,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "mfa-01",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계",
+     "vector_similarity": 0.7186,
+     "rerank": 0.081651
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.7451,
+     "rerank": 0.036412
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계",
+     "vector_similarity": 0.7405,
+     "rerank": 0.006142
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항",
+     "vector_similarity": 0.7408,
+     "rerank": 0.000339
+    },
+    {
+     "key": "2025 Q3 인증팀 세션 타임아웃 단축 정책 개정안",
+     "vector_similarity": 0.5903,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "mfa-02",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 검토한 대안",
+     "vector_similarity": 0.7645,
+     "rerank": 0.516953
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계",
+     "vector_similarity": 0.6507,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 근거",
+     "vector_similarity": 0.6198,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 검토한 대안",
+     "vector_similarity": 0.6109,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.5884,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "mfa-03",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 위험과 대응",
+     "vector_similarity": 0.692,
+     "rerank": 0.602922
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계",
+     "vector_similarity": 0.6718,
+     "rerank": 0.010169
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항",
+     "vector_similarity": 0.6392,
+     "rerank": 3.9e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 검토한 대안",
+     "vector_similarity": 0.6217,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.591,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "mfa-04",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항",
+     "vector_similarity": 0.7,
+     "rerank": 0.000953
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.6967,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계",
+     "vector_similarity": 0.6781,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 검토한 대안",
+     "vector_similarity": 0.6601,
+     "rerank": 8.5e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 영향 범위",
+     "vector_similarity": 0.6933,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "mfa-05",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항",
+     "vector_similarity": 0.6447,
+     "rerank": 0.097409
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 재검토 시점",
+     "vector_similarity": 0.6745,
+     "rerank": 9.1e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 검토한 대안",
+     "vector_similarity": 0.6585,
+     "rerank": 0.003877
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.6434,
+     "rerank": 7.2e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 근거",
+     "vector_similarity": null,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "mfa-06",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.7466,
+     "rerank": 0.386409
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계",
+     "vector_similarity": 0.7066,
+     "rerank": 0.000692
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 검토한 대안",
+     "vector_similarity": 0.6874,
+     "rerank": 0.048835
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계",
+     "vector_similarity": 0.6993,
+     "rerank": 7.2e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항",
+     "vector_similarity": 0.7172,
+     "rerank": 0.002698
+    }
+   ]
+  },
+  {
+   "id": "mfa-07",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계",
+     "vector_similarity": 0.6263,
+     "rerank": 0.001953
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.6406,
+     "rerank": 0.00109
+    },
+    {
+     "key": "2025 Q4 결제팀 정기결제 배치 시스템 장애 분석 및 개선안",
+     "vector_similarity": null,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 영향 범위",
+     "vector_similarity": 0.5998,
+     "rerank": 0.000242
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.6403,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "mfa-08",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 영향 범위",
+     "vector_similarity": 0.7303,
+     "rerank": 0.77766
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.7557,
+     "rerank": 0.176609
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계",
+     "vector_similarity": 0.7086,
+     "rerank": 0.031189
+    },
+    {
+     "key": "2025 Q3 인증팀 세션 타임아웃 단축 정책 개정안",
+     "vector_similarity": 0.7047,
+     "rerank": 0.000463
+    },
+    {
+     "key": "2025 Q4 결제팀 정기결제 배치 시스템 장애 분석 및 개선안",
+     "vector_similarity": 0.6019,
+     "rerank": 8.8e-05
+    }
+   ]
+  },
+  {
+   "id": "mfa-09",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계",
+     "vector_similarity": 0.6024,
+     "rerank": 0.45573
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항",
+     "vector_similarity": 0.6145,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 위험과 대응",
+     "vector_similarity": 0.5928,
+     "rerank": 0.000109
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 검토한 대안",
+     "vector_similarity": 0.5782,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계",
+     "vector_similarity": 0.5604,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "log-01",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.7932,
+     "rerank": 0.878793
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 배경",
+     "vector_similarity": 0.7793,
+     "rerank": 0.992708
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 검토한 대안",
+     "vector_similarity": 0.7624,
+     "rerank": 0.949192
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 근거",
+     "vector_similarity": 0.7364,
+     "rerank": 0.421587
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록",
+     "vector_similarity": 0.7733,
+     "rerank": 0.000686
+    }
+   ]
+  },
+  {
+   "id": "log-02",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.7541,
+     "rerank": 0.038495
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 근거",
+     "vector_similarity": 0.7706,
+     "rerank": 0.010625
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 배경",
+     "vector_similarity": 0.74,
+     "rerank": 0.000192
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 검토한 대안",
+     "vector_similarity": 0.7233,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록",
+     "vector_similarity": 0.7067,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "log-03",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 재검토 시점",
+     "vector_similarity": 0.7848,
+     "rerank": 0.067257
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 검토한 대안",
+     "vector_similarity": 0.7406,
+     "rerank": 0.03577
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.7501,
+     "rerank": 0.002957
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 근거",
+     "vector_similarity": 0.7048,
+     "rerank": 0.00038
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 배경",
+     "vector_similarity": 0.7247,
+     "rerank": 0.000138
+    }
+   ]
+  },
+  {
+   "id": "log-04",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 배경",
+     "vector_similarity": 0.7758,
+     "rerank": 0.205454
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 검토한 대안",
+     "vector_similarity": 0.7453,
+     "rerank": 0.040555
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록",
+     "vector_similarity": 0.7121,
+     "rerank": 0.000573
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.734,
+     "rerank": 0.001303
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 위험과 대응",
+     "vector_similarity": 0.5937,
+     "rerank": 0.018337
+    }
+   ]
+  },
+  {
+   "id": "log-05",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 검토한 대안",
+     "vector_similarity": 0.7762,
+     "rerank": 0.027832
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.7576,
+     "rerank": 0.004176
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 배경",
+     "vector_similarity": 0.7614,
+     "rerank": 0.002155
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 근거",
+     "vector_similarity": 0.7464,
+     "rerank": 0.000808
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 재검토 시점",
+     "vector_similarity": 0.731,
+     "rerank": 0.00121
+    }
+   ]
+  },
+  {
+   "id": "log-06",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 영향 범위",
+     "vector_similarity": 0.7451,
+     "rerank": 0.889435
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.7285,
+     "rerank": 0.012521
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 근거",
+     "vector_similarity": 0.7084,
+     "rerank": 0.000192
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 배경",
+     "vector_similarity": 0.6923,
+     "rerank": 4.3e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 검토한 대안",
+     "vector_similarity": 0.6955,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "dem-01",
+   "hits": [
+    {
+     "key": "2025 Q4 결제팀 정기결제 배치 시스템 장애 분석 및 개선안",
+     "vector_similarity": 0.7485,
+     "rerank": 0.72455
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.5638,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 영향 범위",
+     "vector_similarity": 0.553,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 논의한 내용",
+     "vector_similarity": 0.5479,
+     "rerank": 3.9e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 배경",
+     "vector_similarity": 0.5463,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "dem-02",
+   "hits": [
+    {
+     "key": "2025 Q3 인증팀 세션 타임아웃 단축 정책 개정안",
+     "vector_similarity": 0.7691,
+     "rerank": 0.961019
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 영향 범위",
+     "vector_similarity": 0.6679,
+     "rerank": 0.022783
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계",
+     "vector_similarity": 0.6226,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.6677,
+     "rerank": 0.021543
+    },
+    {
+     "key": "2025 Q4 결제팀 정기결제 배치 시스템 장애 분석 및 개선안",
+     "vector_similarity": 0.6439,
+     "rerank": 0.016406
+    }
+   ]
+  },
+  {
+   "id": "neg-01",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2",
+     "vector_similarity": 0.6076,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 문의 담당자",
+     "vector_similarity": 0.6051,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 적용 범위",
+     "vector_similarity": 0.596,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 정책 내용",
+     "vector_similarity": 0.5986,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 시행일과 재검토 시점",
+     "vector_similarity": 0.587,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "neg-02",
+   "hits": [
+    {
+     "key": "2027 전사 완전 원격근무 영구 도입안",
+     "vector_similarity": 0.6076,
+     "rerank": 0.001751
+    },
+    {
+     "key": "전사 재택근무 및 원격근무 정책 가이드라인",
+     "vector_similarity": 0.6114,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 정책 내용",
+     "vector_similarity": 0.608,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정",
+     "vector_similarity": 0.6229,
+     "rerank": 0.000116
+    },
+    {
+     "key": "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정 v2",
+     "vector_similarity": 0.626,
+     "rerank": 4.5e-05
+    }
+   ]
+  },
+  {
+   "id": "neg-03",
+   "hits": [
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 액션 아이템",
+     "vector_similarity": 0.6074,
+     "rerank": 0.001481
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 적용 범위",
+     "vector_similarity": 0.6348,
+     "rerank": 0.000653
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.6369,
+     "rerank": 5e-05
+    },
+    {
+     "key": "2027 전사 완전 원격근무 영구 도입안",
+     "vector_similarity": 0.6275,
+     "rerank": 0.000485
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 논의한 내용",
+     "vector_similarity": 0.5971,
+     "rerank": 0.000281
+    }
+   ]
+  },
+  {
+   "id": "neg-04",
+   "hits": [
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 근거",
+     "vector_similarity": 0.6128,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026 하반기 전사 근무제도 개정안: 전원 사무실 의무 출근",
+     "vector_similarity": 0.6281,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정 v2",
+     "vector_similarity": 0.6269,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정",
+     "vector_similarity": 0.6229,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "전사 재택근무 및 원격근무 정책 가이드라인",
+     "vector_similarity": 0.6209,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "neg-05",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2",
+     "vector_similarity": 0.561,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정 v2",
+     "vector_similarity": 0.5603,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 적용 범위",
+     "vector_similarity": 0.5588,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "전사 재택근무 및 원격근무 정책 가이드라인",
+     "vector_similarity": 0.5563,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정",
+     "vector_similarity": 0.5549,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "neg-06",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계",
+     "vector_similarity": 0.584,
+     "rerank": 0.003177
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.6073,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.6046,
+     "rerank": 5.2e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항",
+     "vector_similarity": 0.6028,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.5991,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "neg-07",
+   "hits": [
+    {
+     "key": "2025 Q3 인증팀 세션 타임아웃 단축 정책 개정안",
+     "vector_similarity": 0.5763,
+     "rerank": 0.000772
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.6199,
+     "rerank": 0.00059
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 근거",
+     "vector_similarity": 0.5999,
+     "rerank": 0.00035
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차",
+     "vector_similarity": 0.6273,
+     "rerank": 5.6e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 시행일과 재검토 시점",
+     "vector_similarity": 0.6057,
+     "rerank": 0.000248
+    }
+   ]
+  },
+  {
+   "id": "neg-08",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 검토한 대안",
+     "vector_similarity": 0.6655,
+     "rerank": 0.134424
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.684,
+     "rerank": 0.063919
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 정책 내용",
+     "vector_similarity": 0.6436,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 배경",
+     "vector_similarity": 0.6837,
+     "rerank": 0.01897
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 재검토 시점",
+     "vector_similarity": 0.6775,
+     "rerank": 0.004395
+    }
+   ]
+  },
+  {
+   "id": "neg-09",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계",
+     "vector_similarity": 0.6193,
+     "rerank": 0.000156
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.5877,
+     "rerank": 0.000111
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 영향 범위",
+     "vector_similarity": 0.6445,
+     "rerank": 5e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.6173,
+     "rerank": 8.7e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 액션 아이템",
+     "vector_similarity": 0.5958,
+     "rerank": 6.7e-05
+    }
+   ]
+  },
+  {
+   "id": "neg-10",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록",
+     "vector_similarity": 0.6209,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 재검토 시점",
+     "vector_similarity": 0.6244,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.6174,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 배경",
+     "vector_similarity": 0.6114,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 근거",
+     "vector_similarity": 0.5873,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "acc-01-p",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.6262,
+     "rerank": 0.010508
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.6888,
+     "rerank": 0.002813
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.6822,
+     "rerank": 9.3e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.6365,
+     "rerank": 0.001988
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 영향 범위",
+     "vector_similarity": 0.6384,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "acc-02-p",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.5893,
+     "rerank": 0.002975
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.6259,
+     "rerank": 5.3e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항",
+     "vector_similarity": 0.5801,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 영향 범위",
+     "vector_similarity": 0.6311,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 논의한 내용",
+     "vector_similarity": 0.6265,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "acc-03-p",
+   "hits": [
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.7013,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 배경",
+     "vector_similarity": 0.6298,
+     "rerank": 9.4e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.6526,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차",
+     "vector_similarity": null,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 논의한 내용",
+     "vector_similarity": 0.6418,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "acc-04-p",
+   "hits": [
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.6307,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.6167,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 근거",
+     "vector_similarity": 0.6504,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.5778,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 영향 범위",
+     "vector_similarity": 0.5805,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "acc-05-p",
+   "hits": [
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.6353,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.6295,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 영향 범위",
+     "vector_similarity": 0.6525,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 액션 아이템",
+     "vector_similarity": 0.6217,
+     "rerank": 0.000109
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록",
+     "vector_similarity": 0.6184,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "acc-06-p",
+   "hits": [
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 논의한 내용",
+     "vector_similarity": 0.6668,
+     "rerank": 0.000372
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 근거",
+     "vector_similarity": 0.5786,
+     "rerank": 0.000142
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 배경",
+     "vector_similarity": 0.5793,
+     "rerank": 0.000114
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.623,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록",
+     "vector_similarity": 0.5742,
+     "rerank": 7.5e-05
+    }
+   ]
+  },
+  {
+   "id": "acc-07-p",
+   "hits": [
+    {
+     "key": "2027 전사 완전 원격근무 영구 도입안",
+     "vector_similarity": 0.6346,
+     "rerank": 0.00133
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 논의한 내용",
+     "vector_similarity": 0.6527,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026 하반기 전사 근무제도 개정안: 전원 사무실 의무 출근",
+     "vector_similarity": 0.6447,
+     "rerank": 0.000174
+    },
+    {
+     "key": "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정 v2",
+     "vector_similarity": 0.6439,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정",
+     "vector_similarity": 0.6427,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "acc-08-p",
+   "hits": [
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 영향 범위",
+     "vector_similarity": 0.6647,
+     "rerank": 0.148993
+    },
+    {
+     "key": "2025 Q4 결제팀 정기결제 배치 시스템 장애 분석 및 개선안",
+     "vector_similarity": 0.659,
+     "rerank": 4e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.6408,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차",
+     "vector_similarity": 0.6262,
+     "rerank": 0.000215
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 논의한 내용",
+     "vector_similarity": 0.6249,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "exp-01-p",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.7592,
+     "rerank": 0.044215
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 정책 내용",
+     "vector_similarity": 0.7543,
+     "rerank": 5.4e-05
+    },
+    {
+     "key": "전사 재택근무 및 원격근무 정책 가이드라인",
+     "vector_similarity": 0.6291,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2027 전사 완전 원격근무 영구 도입안",
+     "vector_similarity": 0.6248,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 적용 범위",
+     "vector_similarity": 0.7482,
+     "rerank": 8.2e-05
+    }
+   ]
+  },
+  {
+   "id": "exp-02-p",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차",
+     "vector_similarity": 0.6534,
+     "rerank": 0.000995
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 영향 범위",
+     "vector_similarity": 0.6297,
+     "rerank": 0.000588
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 논의한 내용",
+     "vector_similarity": 0.6313,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.6234,
+     "rerank": 0.00033
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 위험과 대응",
+     "vector_similarity": null,
+     "rerank": 0.000258
+    }
+   ]
+  },
+  {
+   "id": "exp-03-p",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.7362,
+     "rerank": 0.001005
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.6175,
+     "rerank": 0.001028
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차",
+     "vector_similarity": 0.7055,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 시행일과 재검토 시점",
+     "vector_similarity": 0.7086,
+     "rerank": 0.000393
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.6043,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "exp-04-p",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.7106,
+     "rerank": 0.003866
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 적용 범위",
+     "vector_similarity": 0.7162,
+     "rerank": 0.000389
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 정책 내용",
+     "vector_similarity": 0.6997,
+     "rerank": 0.001391
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.6287,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 문의 담당자",
+     "vector_similarity": 0.7123,
+     "rerank": 3.9e-05
+    }
+   ]
+  },
+  {
+   "id": "exp-05-p",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 배경",
+     "vector_similarity": 0.6895,
+     "rerank": 0.021194
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 적용 범위",
+     "vector_similarity": 0.6768,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.6898,
+     "rerank": 0.005707
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.696,
+     "rerank": 0.003619
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록",
+     "vector_similarity": 0.6966,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "exp-06-p",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.6597,
+     "rerank": 0.003332
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 정책 내용",
+     "vector_similarity": 0.6791,
+     "rerank": 7.1e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록",
+     "vector_similarity": 0.5943,
+     "rerank": 0.000694
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2",
+     "vector_similarity": 0.654,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 시행일과 재검토 시점",
+     "vector_similarity": 0.6277,
+     "rerank": 0.000284
+    }
+   ]
+  },
+  {
+   "id": "exp-07-p",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 적용 범위",
+     "vector_similarity": 0.706,
+     "rerank": 0.000135
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 근거",
+     "vector_similarity": 0.5887,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 정책 내용",
+     "vector_similarity": 0.6975,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 배경",
+     "vector_similarity": null,
+     "rerank": 8.9e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.6939,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "exp-08-p",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차",
+     "vector_similarity": 0.703,
+     "rerank": 0.001408
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.6764,
+     "rerank": 0.001019
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 액션 아이템",
+     "vector_similarity": 0.6294,
+     "rerank": 0.000708
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 문의 담당자",
+     "vector_similarity": 0.6857,
+     "rerank": 0.000232
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록",
+     "vector_similarity": 0.6422,
+     "rerank": 0.000407
+    }
+   ]
+  },
+  {
+   "id": "exp-09-p",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.7821,
+     "rerank": 0.015081
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 문의 담당자",
+     "vector_similarity": 0.7842,
+     "rerank": 0.014061
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 정책 내용",
+     "vector_similarity": 0.7796,
+     "rerank": 0.000843
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 시행일과 재검토 시점",
+     "vector_similarity": 0.7345,
+     "rerank": 0.002787
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 적용 범위",
+     "vector_similarity": 0.7788,
+     "rerank": 0.002559
+    }
+   ]
+  },
+  {
+   "id": "mfa-01-p",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.7597,
+     "rerank": 0.009403
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계",
+     "vector_similarity": 0.7619,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 검토한 대안",
+     "vector_similarity": 0.7446,
+     "rerank": 0.00022
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 위험과 대응",
+     "vector_similarity": 0.7259,
+     "rerank": 6.5e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 영향 범위",
+     "vector_similarity": 0.7358,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "mfa-02-p",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 검토한 대안",
+     "vector_similarity": 0.6932,
+     "rerank": 0.002679
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항",
+     "vector_similarity": 0.6566,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 영향 범위",
+     "vector_similarity": 0.6431,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.6408,
+     "rerank": 4.2e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계",
+     "vector_similarity": 0.637,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "mfa-03-p",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 위험과 대응",
+     "vector_similarity": 0.6629,
+     "rerank": 0.096
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계",
+     "vector_similarity": 0.639,
+     "rerank": 0.000523
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 검토한 대안",
+     "vector_similarity": 0.6302,
+     "rerank": 9e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항",
+     "vector_similarity": 0.6224,
+     "rerank": 0.000394
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.5956,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "mfa-04-p",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항",
+     "vector_similarity": 0.6968,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 영향 범위",
+     "vector_similarity": 0.6314,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.6863,
+     "rerank": 5.3e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 영향 범위",
+     "vector_similarity": 0.6807,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계",
+     "vector_similarity": 0.6764,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "mfa-05-p",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 검토한 대안",
+     "vector_similarity": 0.6461,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항",
+     "vector_similarity": 0.6238,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 재검토 시점",
+     "vector_similarity": 0.6205,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 논의한 내용",
+     "vector_similarity": 0.6315,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록",
+     "vector_similarity": 0.6229,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "mfa-06-p",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 검토한 대안",
+     "vector_similarity": 0.7131,
+     "rerank": 0.045425
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.7156,
+     "rerank": 4.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계",
+     "vector_similarity": 0.6949,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 영향 범위",
+     "vector_similarity": 0.6951,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항",
+     "vector_similarity": 0.7091,
+     "rerank": 4e-05
+    }
+   ]
+  },
+  {
+   "id": "mfa-07-p",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.5966,
+     "rerank": 0.000805
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 재검토 시점",
+     "vector_similarity": 0.5951,
+     "rerank": 0.000401
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항",
+     "vector_similarity": 0.6311,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록",
+     "vector_similarity": 0.5785,
+     "rerank": 0.000342
+    },
+    {
+     "key": "2025 Q4 결제팀 정기결제 배치 시스템 장애 분석 및 개선안",
+     "vector_similarity": 0.6034,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "mfa-08-p",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.708,
+     "rerank": 0.685101
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 위험과 대응",
+     "vector_similarity": 0.653,
+     "rerank": 0.577429
+    },
+    {
+     "key": "2025 Q3 인증팀 세션 타임아웃 단축 정책 개정안",
+     "vector_similarity": 0.6807,
+     "rerank": 0.000257
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.6218,
+     "rerank": 0.000224
+    },
+    {
+     "key": "2025 Q4 결제팀 정기결제 배치 시스템 장애 분석 및 개선안",
+     "vector_similarity": 0.5895,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "mfa-09-p",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계",
+     "vector_similarity": 0.6258,
+     "rerank": 0.001257
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항",
+     "vector_similarity": 0.6479,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 위험과 대응",
+     "vector_similarity": 0.6166,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 검토한 대안",
+     "vector_similarity": 0.6159,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계",
+     "vector_similarity": 0.6004,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "log-01-p",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.7227,
+     "rerank": 0.076764
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.6949,
+     "rerank": 5.5e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.6984,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록",
+     "vector_similarity": 0.6783,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 배경",
+     "vector_similarity": 0.702,
+     "rerank": 0.007989
+    }
+   ]
+  },
+  {
+   "id": "log-02-p",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.6694,
+     "rerank": 0.000163
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 배경",
+     "vector_similarity": 0.6728,
+     "rerank": 0.000121
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 근거",
+     "vector_similarity": 0.7076,
+     "rerank": 6.2e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 검토한 대안",
+     "vector_similarity": 0.6552,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록",
+     "vector_similarity": 0.639,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "log-03-p",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.6641,
+     "rerank": 0.000454
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 재검토 시점",
+     "vector_similarity": 0.7205,
+     "rerank": 4.3e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 배경",
+     "vector_similarity": 0.6428,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 검토한 대안",
+     "vector_similarity": 0.6465,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록",
+     "vector_similarity": 0.6605,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "log-04-p",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 배경",
+     "vector_similarity": 0.6811,
+     "rerank": 4.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 검토한 대안",
+     "vector_similarity": 0.654,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.6538,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 재검토 시점",
+     "vector_similarity": 0.6461,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록",
+     "vector_similarity": 0.6452,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "log-05-p",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 배경",
+     "vector_similarity": 0.7206,
+     "rerank": 0.000834
+    },
+    {
+     "key": "2027 전사 완전 원격근무 영구 도입안",
+     "vector_similarity": 0.6288,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 검토한 대안",
+     "vector_similarity": 0.7304,
+     "rerank": 3.9e-05
+    },
+    {
+     "key": "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정",
+     "vector_similarity": null,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.702,
+     "rerank": 6e-05
+    }
+   ]
+  },
+  {
+   "id": "log-06-p",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 영향 범위",
+     "vector_similarity": 0.723,
+     "rerank": 0.060202
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 재검토 시점",
+     "vector_similarity": 0.6887,
+     "rerank": 0.000449
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 배경",
+     "vector_similarity": 0.6806,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록",
+     "vector_similarity": 0.6895,
+     "rerank": 9e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.7092,
+     "rerank": 0.00026
+    }
+   ]
+  },
+  {
+   "id": "dem-01-p",
+   "hits": [
+    {
+     "key": "2025 Q4 결제팀 정기결제 배치 시스템 장애 분석 및 개선안",
+     "vector_similarity": 0.7396,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.6093,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 영향 범위",
+     "vector_similarity": 0.5864,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 배경",
+     "vector_similarity": 0.5814,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 영향 범위",
+     "vector_similarity": 0.5577,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "dem-02-p",
+   "hits": [
+    {
+     "key": "2025 Q3 인증팀 세션 타임아웃 단축 정책 개정안",
+     "vector_similarity": 0.7637,
+     "rerank": 0.844916
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.6842,
+     "rerank": 0.012909
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계",
+     "vector_similarity": 0.6544,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 영향 범위",
+     "vector_similarity": 0.6705,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2025 Q4 결제팀 정기결제 배치 시스템 장애 분석 및 개선안",
+     "vector_similarity": 0.6373,
+     "rerank": 0.002715
+    }
+   ]
+  },
+  {
+   "id": "acc-01-t",
+   "hits": [
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.6918,
+     "rerank": 0.96781
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.6843,
+     "rerank": 0.012182
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록",
+     "vector_similarity": 0.6411,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 영향 범위",
+     "vector_similarity": 0.6349,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": null,
+     "rerank": 0.000338
+    }
+   ]
+  },
+  {
+   "id": "acc-02-t",
+   "hits": [
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.6982,
+     "rerank": 0.854906
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 논의한 내용",
+     "vector_similarity": 0.6857,
+     "rerank": 8.3e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 근거",
+     "vector_similarity": 0.6704,
+     "rerank": 0.000195
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 영향 범위",
+     "vector_similarity": 0.683,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.6827,
+     "rerank": 0.000319
+    }
+   ]
+  },
+  {
+   "id": "exp-01-t",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.7944,
+     "rerank": 0.458984
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 정책 내용",
+     "vector_similarity": 0.7808,
+     "rerank": 0.000873
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 문의 담당자",
+     "vector_similarity": 0.7841,
+     "rerank": 0.028585
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차",
+     "vector_similarity": 0.7765,
+     "rerank": 0.000834
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2",
+     "vector_similarity": 0.7774,
+     "rerank": 0.00359
+    }
+   ]
+  },
+  {
+   "id": "mfa-04-t",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항",
+     "vector_similarity": 0.6508,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.6505,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 영향 범위",
+     "vector_similarity": 0.6464,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계",
+     "vector_similarity": 0.6421,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 적용 범위",
+     "vector_similarity": 0.624,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "fp-01",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 검토한 대안",
+     "vector_similarity": 0.7736,
+     "rerank": 0.022096
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항",
+     "vector_similarity": 0.7483,
+     "rerank": 4e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계",
+     "vector_similarity": 0.7268,
+     "rerank": 0.000398
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.7259,
+     "rerank": 3.9e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계",
+     "vector_similarity": 0.7209,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "fp-02",
+   "hits": [
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.7274,
+     "rerank": 0.029716
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.7092,
+     "rerank": 0.003622
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록",
+     "vector_similarity": 0.6742,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 근거",
+     "vector_similarity": 0.6606,
+     "rerank": 6.7e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.6699,
+     "rerank": 3.9e-05
+    }
+   ]
+  },
+  {
+   "id": "fp-03",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.7038,
+     "rerank": 0.21491
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 정책 내용",
+     "vector_similarity": 0.6959,
+     "rerank": 0.003281
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2",
+     "vector_similarity": 0.6839,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 적용 범위",
+     "vector_similarity": 0.6742,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차",
+     "vector_similarity": 0.6656,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "fp-04",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.7753,
+     "rerank": 0.997119
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 근거",
+     "vector_similarity": 0.7386,
+     "rerank": 0.067667
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 검토한 대안",
+     "vector_similarity": 0.7187,
+     "rerank": 0.044368
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록",
+     "vector_similarity": 0.7286,
+     "rerank": 0.000393
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 배경",
+     "vector_similarity": 0.7284,
+     "rerank": 0.013051
+    }
+   ]
+  },
+  {
+   "id": "cf-01",
+   "hits": [
+    {
+     "key": "2027 전사 완전 원격근무 영구 도입안",
+     "vector_similarity": 0.705,
+     "rerank": 0.012834
+    },
+    {
+     "key": "전사 재택근무 및 원격근무 정책 가이드라인",
+     "vector_similarity": 0.733,
+     "rerank": 0.00427
+    },
+    {
+     "key": "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정 v2",
+     "vector_similarity": 0.7112,
+     "rerank": 0.000266
+    },
+    {
+     "key": "2026 하반기 전사 근무제도 개정안: 전원 사무실 의무 출근",
+     "vector_similarity": 0.7013,
+     "rerank": 0.002899
+    },
+    {
+     "key": "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정",
+     "vector_similarity": 0.71,
+     "rerank": 0.000163
+    }
+   ]
+  },
+  {
+   "id": "cf-02",
+   "hits": [
+    {
+     "key": "2026 하반기 전사 근무제도 개정안: 전원 사무실 의무 출근",
+     "vector_similarity": 0.7629,
+     "rerank": 0.960558
+    },
+    {
+     "key": "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정 v2",
+     "vector_similarity": 0.7607,
+     "rerank": 0.618242
+    },
+    {
+     "key": "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정",
+     "vector_similarity": 0.7573,
+     "rerank": 0.539853
+    },
+    {
+     "key": "2027 전사 완전 원격근무 영구 도입안",
+     "vector_similarity": 0.7277,
+     "rerank": 0.525012
+    },
+    {
+     "key": "전사 재택근무 및 원격근무 정책 가이드라인",
+     "vector_similarity": 0.7461,
+     "rerank": 0.478158
+    }
+   ]
+  },
+  {
+   "id": "cf-03",
+   "hits": [
+    {
+     "key": "2027 전사 완전 원격근무 영구 도입안",
+     "vector_similarity": 0.8085,
+     "rerank": 0.947742
+    },
+    {
+     "key": "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정",
+     "vector_similarity": 0.7845,
+     "rerank": 0.452374
+    },
+    {
+     "key": "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정 v2",
+     "vector_similarity": 0.7818,
+     "rerank": 0.45951
+    },
+    {
+     "key": "전사 재택근무 및 원격근무 정책 가이드라인",
+     "vector_similarity": 0.7327,
+     "rerank": 0.075564
+    },
+    {
+     "key": "2026 하반기 전사 근무제도 개정안: 전원 사무실 의무 출근",
+     "vector_similarity": 0.7332,
+     "rerank": 0.002344
+    }
+   ]
+  },
+  {
+   "id": "cf-04",
+   "hits": [
+    {
+     "key": "2025 Q3 인증팀 세션 타임아웃 단축 정책 개정안",
+     "vector_similarity": 0.7474,
+     "rerank": 0.935022
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.6689,
+     "rerank": 0.059219
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 영향 범위",
+     "vector_similarity": 0.6345,
+     "rerank": 0.030052
+    },
+    {
+     "key": "2025 Q4 결제팀 정기결제 배치 시스템 장애 분석 및 개선안",
+     "vector_similarity": 0.6218,
+     "rerank": 0.007236
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계",
+     "vector_similarity": 0.6225,
+     "rerank": 0.008264
+    }
+   ]
+  },
+  {
+   "id": "cf-05",
+   "hits": [
+    {
+     "key": "2025 Q3 인증팀 세션 타임아웃 단축 정책 개정안",
+     "vector_similarity": 0.7256,
+     "rerank": 0.060949
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.6586,
+     "rerank": 0.070464
+    },
+    {
+     "key": "2025 Q4 결제팀 정기결제 배치 시스템 장애 분석 및 개선안",
+     "vector_similarity": 0.6701,
+     "rerank": 0.002535
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 영향 범위",
+     "vector_similarity": 0.628,
+     "rerank": 0.000459
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계",
+     "vector_similarity": 0.6067,
+     "rerank": 5.9e-05
+    }
+   ]
+  },
+  {
+   "id": "neg-11",
+   "hits": [
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 논의한 내용",
+     "vector_similarity": 0.5584,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026 하반기 전사 근무제도 개정안: 전원 사무실 의무 출근",
+     "vector_similarity": 0.5815,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정 v2",
+     "vector_similarity": 0.579,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정",
+     "vector_similarity": 0.5743,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "전사 재택근무 및 원격근무 정책 가이드라인",
+     "vector_similarity": 0.5633,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "neg-12",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 시행일과 재검토 시점",
+     "vector_similarity": 0.6119,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 근거",
+     "vector_similarity": null,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026 하반기 전사 근무제도 개정안: 전원 사무실 의무 출근",
+     "vector_similarity": 0.6006,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정 v2",
+     "vector_similarity": 0.5956,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2",
+     "vector_similarity": 0.5951,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "neg-13",
+   "hits": [
+    {
+     "key": "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정 v2",
+     "vector_similarity": 0.5645,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정",
+     "vector_similarity": 0.561,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 근거",
+     "vector_similarity": 0.556,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026 하반기 전사 근무제도 개정안: 전원 사무실 의무 출근",
+     "vector_similarity": 0.5543,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 영향 범위",
+     "vector_similarity": 0.552,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "neg-14",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2",
+     "vector_similarity": 0.5929,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 적용 범위",
+     "vector_similarity": 0.5828,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 시행일과 재검토 시점",
+     "vector_similarity": 0.5767,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 문의 담당자",
+     "vector_similarity": 0.5795,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차",
+     "vector_similarity": 0.5689,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "neg-15",
+   "hits": [
+    {
+     "key": "2026 하반기 전사 근무제도 개정안: 전원 사무실 의무 출근",
+     "vector_similarity": 0.6142,
+     "rerank": 0.001184
+    },
+    {
+     "key": "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정",
+     "vector_similarity": 0.6132,
+     "rerank": 0.000522
+    },
+    {
+     "key": "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정 v2",
+     "vector_similarity": 0.6134,
+     "rerank": 0.000385
+    },
+    {
+     "key": "전사 재택근무 및 원격근무 정책 가이드라인",
+     "vector_similarity": 0.5895,
+     "rerank": 7.7e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 문의 담당자",
+     "vector_similarity": 0.6039,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "neg-16",
+   "hits": [
+    {
+     "key": "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정 v2",
+     "vector_similarity": 0.584,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 근거",
+     "vector_similarity": null,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.5825,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.5807,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정",
+     "vector_similarity": 0.5807,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "neg-17",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 재검토 시점",
+     "vector_similarity": 0.6158,
+     "rerank": 0.000601
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.5964,
+     "rerank": 0.000609
+    },
+    {
+     "key": "2026 하반기 전사 근무제도 개정안: 전원 사무실 의무 출근",
+     "vector_similarity": 0.5948,
+     "rerank": 0.000502
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.6284,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 액션 아이템",
+     "vector_similarity": 0.5895,
+     "rerank": 0.000195
+    }
+   ]
+  },
+  {
+   "id": "neg-18",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.6317,
+     "rerank": 0.001133
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 논의한 내용",
+     "vector_similarity": 0.6388,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 영향 범위",
+     "vector_similarity": 0.6046,
+     "rerank": 0.000397
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.6322,
+     "rerank": 0.000194
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.633,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "neg-19",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 근거",
+     "vector_similarity": 0.6462,
+     "rerank": 0.000292
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 배경",
+     "vector_similarity": 0.6592,
+     "rerank": 0.000234
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계",
+     "vector_similarity": null,
+     "rerank": 0.000246
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.6589,
+     "rerank": 0.000133
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 검토한 대안",
+     "vector_similarity": 0.6538,
+     "rerank": 0.00015
+    }
+   ]
+  },
+  {
+   "id": "neg-20",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 검토한 대안",
+     "vector_similarity": 0.6762,
+     "rerank": 0.000838
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.6864,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항",
+     "vector_similarity": 0.6867,
+     "rerank": 8.4e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계",
+     "vector_similarity": 0.6824,
+     "rerank": 5.2e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계",
+     "vector_similarity": 0.6765,
+     "rerank": 0.000108
+    }
+   ]
+  },
+  {
+   "id": "neg-21",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 문의 담당자",
+     "vector_similarity": 0.6828,
+     "rerank": 0.12303
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록",
+     "vector_similarity": 0.6689,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 영향 범위",
+     "vector_similarity": 0.6661,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 액션 아이템",
+     "vector_similarity": 0.6544,
+     "rerank": 0.001985
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.6576,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "neg-22",
+   "hits": [
+    {
+     "key": "전사 재택근무 및 원격근무 정책 가이드라인",
+     "vector_similarity": 0.5954,
+     "rerank": 0.000886
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 근거",
+     "vector_similarity": 0.6207,
+     "rerank": 0.000548
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 시행일과 재검토 시점",
+     "vector_similarity": 0.6366,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 적용 범위",
+     "vector_similarity": 0.6184,
+     "rerank": 0.000214
+    },
+    {
+     "key": "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정",
+     "vector_similarity": 0.6033,
+     "rerank": 0.000316
+    }
+   ]
+  },
+  {
+   "id": "neg-23",
+   "hits": [
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 영향 범위",
+     "vector_similarity": 0.6509,
+     "rerank": 0.064845
+    },
+    {
+     "key": "2025 Q4 결제팀 정기결제 배치 시스템 장애 분석 및 개선안",
+     "vector_similarity": 0.6648,
+     "rerank": 5.1e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차",
+     "vector_similarity": 0.6148,
+     "rerank": 6.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.5972,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.6001,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "neg-24",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 검토한 대안",
+     "vector_similarity": 0.636,
+     "rerank": 0.180411
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항",
+     "vector_similarity": 0.6189,
+     "rerank": 0.001313
+    },
+    {
+     "key": "2027 전사 완전 원격근무 영구 도입안",
+     "vector_similarity": null,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "전사 재택근무 및 원격근무 정책 가이드라인",
+     "vector_similarity": null,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계",
+     "vector_similarity": 0.5848,
+     "rerank": 0.000114
+    }
+   ]
+  },
+  {
+   "id": "neg-25",
+   "hits": [
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 논의한 내용",
+     "vector_similarity": 0.6113,
+     "rerank": 0.000435
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 근거",
+     "vector_similarity": 0.6127,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2027 전사 완전 원격근무 영구 도입안",
+     "vector_similarity": 0.5828,
+     "rerank": 0.000107
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 액션 아이템",
+     "vector_similarity": null,
+     "rerank": 8.5e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.5944,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "neg-26",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.66,
+     "rerank": 0.000387
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 재검토 시점",
+     "vector_similarity": 0.6876,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록",
+     "vector_similarity": 0.6562,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 검토한 대안",
+     "vector_similarity": 0.6423,
+     "rerank": 5.6e-05
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 배경",
+     "vector_similarity": 0.6521,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "neg-27",
+   "hits": [
+    {
+     "key": "2027 전사 완전 원격근무 영구 도입안",
+     "vector_similarity": 0.6502,
+     "rerank": 0.007838
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계",
+     "vector_similarity": 0.6812,
+     "rerank": 4.3e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 시행일과 재검토 시점",
+     "vector_similarity": 0.6375,
+     "rerank": 0.002681
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.6636,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026 하반기 전사 근무제도 개정안: 전원 사무실 의무 출근",
+     "vector_similarity": 0.642,
+     "rerank": 0.001243
+    }
+   ]
+  },
+  {
+   "id": "neg-28",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 위험과 대응",
+     "vector_similarity": 0.5959,
+     "rerank": 0.003746
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.5907,
+     "rerank": 0.002217
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 정책 내용",
+     "vector_similarity": 0.6084,
+     "rerank": 0.00064
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2",
+     "vector_similarity": 0.6025,
+     "rerank": 0.001484
+    },
+    {
+     "key": "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정 v2",
+     "vector_similarity": 0.6256,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "neg-29",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 시행일과 재검토 시점",
+     "vector_similarity": 0.746,
+     "rerank": 0.004812
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 근거",
+     "vector_similarity": null,
+     "rerank": 0.001942
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 재검토 시점",
+     "vector_similarity": 0.6612,
+     "rerank": 0.001028
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.7224,
+     "rerank": 0.000596
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 정책 내용",
+     "vector_similarity": 0.72,
+     "rerank": 4.6e-05
+    }
+   ]
+  },
+  {
+   "id": "neg-30",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.7237,
+     "rerank": 0.955609
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 위험과 대응",
+     "vector_similarity": 0.68,
+     "rerank": 0.043915
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 영향 범위",
+     "vector_similarity": 0.6682,
+     "rerank": 3.9e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 검토한 대안",
+     "vector_similarity": 0.6776,
+     "rerank": 0.000229
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계",
+     "vector_similarity": 0.6687,
+     "rerank": 0.00041
+    }
+   ]
+  },
+  {
+   "id": "neg-31",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차",
+     "vector_similarity": 0.7064,
+     "rerank": 0.002666
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.7273,
+     "rerank": 4e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 정책 내용",
+     "vector_similarity": 0.7136,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 적용 범위",
+     "vector_similarity": 0.7194,
+     "rerank": 4e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2",
+     "vector_similarity": 0.7083,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "neg-32",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계",
+     "vector_similarity": 0.6863,
+     "rerank": 0.000429
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항",
+     "vector_similarity": 0.6731,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 위험과 대응",
+     "vector_similarity": 0.643,
+     "rerank": 4.4e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 검토한 대안",
+     "vector_similarity": 0.6351,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계",
+     "vector_similarity": 0.6152,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "mul-01",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.7669,
+     "rerank": 0.970917
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.6555,
+     "rerank": 0.434263
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 근거",
+     "vector_similarity": 0.7155,
+     "rerank": 0.037133
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 배경",
+     "vector_similarity": 0.7172,
+     "rerank": 0.084602
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 영향 범위",
+     "vector_similarity": 0.7029,
+     "rerank": 0.05724
+    }
+   ]
+  },
+  {
+   "id": "mul-02",
+   "hits": [
+    {
+     "key": "2025 Q3 인증팀 세션 타임아웃 단축 정책 개정안",
+     "vector_similarity": 0.71,
+     "rerank": 0.295086
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 영향 범위",
+     "vector_similarity": 0.707,
+     "rerank": 0.001374
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.7166,
+     "rerank": 8.3e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계",
+     "vector_similarity": 0.7223,
+     "rerank": 0.005493
+    },
+    {
+     "key": "2025 Q4 결제팀 정기결제 배치 시스템 장애 분석 및 개선안",
+     "vector_similarity": 0.6284,
+     "rerank": 0.016748
+    }
+   ]
+  },
+  {
+   "id": "mul-03",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.7212,
+     "rerank": 0.002731
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 시행일과 재검토 시점",
+     "vector_similarity": 0.6992,
+     "rerank": 0.002676
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.6954,
+     "rerank": 0.002292
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 적용 범위",
+     "vector_similarity": 0.7012,
+     "rerank": 0.001661
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 문의 담당자",
+     "vector_similarity": 0.7221,
+     "rerank": 0.001273
+    }
+   ]
+  },
+  {
+   "id": "mul-04",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 재검토 시점",
+     "vector_similarity": 0.7151,
+     "rerank": 0.0273
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 검토한 대안",
+     "vector_similarity": 0.6715,
+     "rerank": 0.023203
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.7054,
+     "rerank": 0.002672
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.7132,
+     "rerank": 0.000417
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 정책 내용",
+     "vector_similarity": 0.6964,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "mul-05",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.6972,
+     "rerank": 0.94793
+    },
+    {
+     "key": "2025 Q4 결제팀 정기결제 배치 시스템 장애 분석 및 개선안",
+     "vector_similarity": 0.7329,
+     "rerank": 0.289701
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 검토한 대안",
+     "vector_similarity": 0.6599,
+     "rerank": 0.347232
+    },
+    {
+     "key": "2025 Q3 인증팀 세션 타임아웃 단축 정책 개정안",
+     "vector_similarity": 0.7051,
+     "rerank": 0.000815
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계",
+     "vector_similarity": 0.6682,
+     "rerank": 0.007285
+    }
+   ]
+  },
+  {
+   "id": "mul-06",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 영향 범위",
+     "vector_similarity": 0.6943,
+     "rerank": 0.631356
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.703,
+     "rerank": 0.291058
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 근거",
+     "vector_similarity": 0.7108,
+     "rerank": 0.010917
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 영향 범위",
+     "vector_similarity": 0.6738,
+     "rerank": 0.039141
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 배경",
+     "vector_similarity": 0.6792,
+     "rerank": 0.00068
+    }
+   ]
+  },
+  {
+   "id": "mul-07",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 검토한 대안",
+     "vector_similarity": 0.706,
+     "rerank": 0.313369
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 검토한 대안",
+     "vector_similarity": 0.6928,
+     "rerank": 0.280865
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 배경",
+     "vector_similarity": 0.6957,
+     "rerank": 0.023184
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.6978,
+     "rerank": 0.030433
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 영향 범위",
+     "vector_similarity": 0.6483,
+     "rerank": 0.036429
+    }
+   ]
+  },
+  {
+   "id": "mul-08",
+   "hits": [
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.6982,
+     "rerank": 0.618218
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.7055,
+     "rerank": 0.752412
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 배경",
+     "vector_similarity": 0.6576,
+     "rerank": 0.12456
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.6838,
+     "rerank": 0.00066
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 근거",
+     "vector_similarity": 0.6613,
+     "rerank": 0.01841
+    }
+   ]
+  },
+  {
+   "id": "mul-09",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항",
+     "vector_similarity": 0.6673,
+     "rerank": 0.000283
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.6824,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 적용 범위",
+     "vector_similarity": 0.6724,
+     "rerank": 5.3e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 정책 내용",
+     "vector_similarity": 0.6743,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2",
+     "vector_similarity": 0.6696,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "mul-10",
+   "hits": [
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 논의한 내용",
+     "vector_similarity": 0.6899,
+     "rerank": 0.780849
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.6777,
+     "rerank": 0.430454
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차",
+     "vector_similarity": 0.7529,
+     "rerank": 0.027501
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.6968,
+     "rerank": 0.002921
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 위험과 대응",
+     "vector_similarity": 0.6281,
+     "rerank": 0.061133
+    }
+   ]
+  },
+  {
+   "id": "mul-11",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.7256,
+     "rerank": 0.752136
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 근거",
+     "vector_similarity": 0.6884,
+     "rerank": 0.015728
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.6853,
+     "rerank": 0.007847
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 근거",
+     "vector_similarity": 0.696,
+     "rerank": 0.002758
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.6771,
+     "rerank": 4.2e-05
+    }
+   ]
+  },
+  {
+   "id": "mul-12",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 영향 범위",
+     "vector_similarity": 0.6935,
+     "rerank": 0.75286
+    },
+    {
+     "key": "2025 Q4 결제팀 정기결제 배치 시스템 장애 분석 및 개선안",
+     "vector_similarity": 0.7715,
+     "rerank": 0.081906
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.7165,
+     "rerank": 0.002115
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계",
+     "vector_similarity": 0.6812,
+     "rerank": 0.044335
+    },
+    {
+     "key": "2025 Q3 인증팀 세션 타임아웃 단축 정책 개정안",
+     "vector_similarity": 0.6546,
+     "rerank": 0.000531
+    }
+   ]
+  },
+  {
+   "id": "fp-05",
+   "hits": [
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.6948,
+     "rerank": 0.994629
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.6865,
+     "rerank": 0.003881
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 논의한 내용",
+     "vector_similarity": 0.6857,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 영향 범위",
+     "vector_similarity": 0.6905,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록",
+     "vector_similarity": 0.6488,
+     "rerank": 4e-05
+    }
+   ]
+  },
+  {
+   "id": "fp-06",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.7901,
+     "rerank": 0.994645
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차",
+     "vector_similarity": 0.7857,
+     "rerank": 0.284058
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 문의 담당자",
+     "vector_similarity": 0.7746,
+     "rerank": 0.002847
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 정책 내용",
+     "vector_similarity": 0.7592,
+     "rerank": 0.0008
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 적용 범위",
+     "vector_similarity": 0.7494,
+     "rerank": 0.029671
+    }
+   ]
+  },
+  {
+   "id": "fp-07",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항",
+     "vector_similarity": 0.7188,
+     "rerank": 0.001337
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.718,
+     "rerank": 0.00062
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 검토한 대안",
+     "vector_similarity": 0.6893,
+     "rerank": 0.000645
+    },
+    {
+     "key": "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정 v2",
+     "vector_similarity": 0.6374,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정",
+     "vector_similarity": 0.6309,
+     "rerank": 4e-05
+    }
+   ]
+  },
+  {
+   "id": "fp-08",
+   "hits": [
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 사항",
+     "vector_similarity": 0.7572,
+     "rerank": 0.98472
+    },
+    {
+     "key": "보안 로그 보관 기간 결정 기록 > 결정 근거",
+     "vector_similarity": 0.718,
+     "rerank": 0.003321
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.6697,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.6513,
+     "rerank": 6.4e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 논의한 내용",
+     "vector_similarity": 0.6654,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "fp-09",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계",
+     "vector_similarity": 0.6897,
+     "rerank": 0.203773
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.6828,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항",
+     "vector_similarity": 0.6735,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 위험과 대응",
+     "vector_similarity": 0.6572,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계",
+     "vector_similarity": 0.6684,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "fp-10",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차",
+     "vector_similarity": 0.7587,
+     "rerank": 0.98593
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.7346,
+     "rerank": 0.927279
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 적용 범위",
+     "vector_similarity": 0.7081,
+     "rerank": 0.003101
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록",
+     "vector_similarity": 0.6688,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 문의 담당자",
+     "vector_similarity": 0.7257,
+     "rerank": 0.012205
+    }
+   ]
+  },
+  {
+   "id": "fp-11",
+   "hits": [
+    {
+     "key": "2025 Q3 인증팀 세션 타임아웃 단축 정책 개정안",
+     "vector_similarity": 0.75,
+     "rerank": 0.983515
+    },
+    {
+     "key": "2025 Q4 결제팀 정기결제 배치 시스템 장애 분석 및 개선안",
+     "vector_similarity": 0.6767,
+     "rerank": 0.001064
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 영향 범위",
+     "vector_similarity": 0.6479,
+     "rerank": 9.1e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.6526,
+     "rerank": 7.9e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계",
+     "vector_similarity": 0.6419,
+     "rerank": 0.000296
+    }
+   ]
+  },
+  {
+   "id": "fp-12",
+   "hits": [
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.7078,
+     "rerank": 0.269932
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.71,
+     "rerank": 0.106815
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 영향 범위",
+     "vector_similarity": 0.7055,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록",
+     "vector_similarity": 0.6615,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 액션 아이템",
+     "vector_similarity": 0.6639,
+     "rerank": 0.009474
+    }
+   ]
+  },
+  {
+   "id": "fp-13",
+   "hits": [
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정",
+     "vector_similarity": 0.6975,
+     "rerank": 0.114401
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 정책 내용",
+     "vector_similarity": 0.69,
+     "rerank": 0.001944
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2",
+     "vector_similarity": 0.6805,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차",
+     "vector_similarity": 0.6614,
+     "rerank": 0.002253
+    },
+    {
+     "key": "사내 데이터 외부 반출 승인 정책 v1.2 > 적용 범위",
+     "vector_similarity": 0.6674,
+     "rerank": 3.9e-05
+    }
+   ]
+  },
+  {
+   "id": "fp-14",
+   "hits": [
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계",
+     "vector_similarity": 0.6729,
+     "rerank": 0.047976
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항",
+     "vector_similarity": 0.6687,
+     "rerank": 0.005763
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표",
+     "vector_similarity": 0.6535,
+     "rerank": 4.5e-05
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계 > 위험과 대응",
+     "vector_similarity": 0.6508,
+     "rerank": 0.000203
+    },
+    {
+     "key": "인증팀 다단계 인증(MFA) 도입 설계",
+     "vector_similarity": 0.6457,
+     "rerank": 3.8e-05
+    }
+   ]
+  },
+  {
+   "id": "fp-15",
+   "hits": [
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항",
+     "vector_similarity": 0.7123,
+     "rerank": 0.046378
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경",
+     "vector_similarity": 0.6959,
+     "rerank": 0.000129
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록",
+     "vector_similarity": 0.6688,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 영향 범위",
+     "vector_similarity": 0.6397,
+     "rerank": 3.8e-05
+    },
+    {
+     "key": "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 근거",
+     "vector_similarity": 0.6645,
+     "rerank": 3.8e-05
+    }
+   ]
+  }
+ ]
+}

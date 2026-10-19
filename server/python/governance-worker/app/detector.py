@@ -1,4 +1,6 @@
 """정책 및 의사결정 상충 감지기(Conflict Detector)."""
+import hashlib
+
 import structlog
 from typing import Optional
 
@@ -17,13 +19,43 @@ from app.notifications.channels.teams import TeamsNotificationChannel
 from app.notifications.dispatcher import NotificationDispatcher
 from app.notifications.models import ConflictNotificationPayload
 from app.settings import Settings
+from app.severity import SeverityBands
 from app.vector_retriever import VectorSearchClient
 
 log = structlog.get_logger()
 
+# 이 점수 이상만 상충으로 기록한다. 운영에서는 settings.conflict_min_severity 를 넘긴다
 DEFAULT_CONFLICT_THRESHOLD = 0.70
 # 조항 하나를 임베딩할 때 넣는 최대 글자 수
 _EMBED_TEXT_LIMIT = 2000
+
+
+def text_hash(text: str) -> str:
+    """상충 판정에 쓰인 원문을 가리키는 해시. 같은 텍스트를 다시 판정했는지 가리는 데만 쓴다(보안 용도가 아니다)."""
+    return hashlib.md5(text.encode("utf-8")).hexdigest()
+
+
+def pack_windows(chunks: list[str], window_chars: int) -> list[str]:
+    """청크를 순서대로 window_chars 이하 묶음으로 담는다. 한 청크가 창보다 길면 창 크기로 자른다.
+
+    조항 추출은 LLM 한 번에 창 하나를 넘긴다. 청크 단위로 묶어야 절 중간이 잘리지 않고, 청크마다 붙은
+    머리글([문서] 제목 | 절 ...)이 LLM 에게 문맥이 된다.
+    """
+    windows: list[str] = []
+    current = ""
+    for chunk in chunks:
+        text = chunk.strip()
+        if not text:
+            continue
+        pieces = [text[i : i + window_chars] for i in range(0, len(text), window_chars)]
+        for piece in pieces:
+            if current and len(current) + 2 + len(piece) > window_chars:
+                windows.append(current)
+                current = ""
+            current = f"{current}\n\n{piece}" if current else piece
+    if current:
+        windows.append(current)
+    return windows
 
 
 class ConflictDetector:
@@ -34,20 +66,70 @@ class ConflictDetector:
         vector_client: VectorSearchClient,
         generator: AnswerGenerator,
         threshold: float = DEFAULT_CONFLICT_THRESHOLD,
+        severity_bands: SeverityBands | None = None,
         dispatcher: Optional[NotificationDispatcher] = None,
         frontend_base_url: str = "http://localhost:5173",
         sync_service: Optional[GraphSyncService] = None,
         settings: Optional[Settings] = None,
+        window_chars: int = 4000,
+        max_windows: int = 5,
+        max_assertions: int = 10,
     ):
         self._db = db
         self._embedder = embedder
         self._vector_client = vector_client
         self._analyzer = ConflictAnalyzer(generator)
         self._threshold = threshold
+        self._severity_bands = severity_bands or SeverityBands()
         self._dispatcher = dispatcher
         self._frontend_base_url = frontend_base_url
         self._sync_service = sync_service
         self._settings = settings
+        self._window_chars = window_chars
+        self._max_windows = max_windows
+        self._max_assertions = max_assertions
+
+    async def forget_document(self, document_id: int) -> None:
+        """삭제된 문서를 지식 그래프에서 뺀다. GraphRAG 가 이웃 문서에서 건너와 삭제된 문서를 문맥에 싣지 않게 한다.
+
+        상충 행(decision_conflicts)은 기록으로 남긴다 — 조회 API·그래프 API 가 삭제 문서가 걸린 행을 이미 거른다.
+        실패하면 예외를 그대로 올려 스트림이 다시 전달하게 한다(노드 제거는 멱등이다).
+        """
+        if not self._sync_service:
+            return
+        removed = await self._sync_service.remove_document(document_id)
+        log.info("삭제된 문서를 지식 그래프에서 뺐다", document_id=document_id, removed=removed)
+
+    async def _source_windows(self, document_id: int, form_content: str) -> list[str]:
+        """상충 검사의 원문. 검색 색인과 같은 텍스트(indexing.document_chunk)를 쓰고, 색인이 없을 때만 폼 본문을 쓴다."""
+        chunks = await self._db.find_source_chunks(document_id)
+        if not chunks:
+            chunks = [form_content] if form_content and form_content.strip() else []
+        windows = pack_windows(chunks, self._window_chars)
+        if len(windows) > self._max_windows:
+            log.warning(
+                "문서가 길어 앞부분만 상충 검사한다",
+                document_id=document_id,
+                windows=len(windows),
+                checked=self._max_windows,
+                window_chars=self._window_chars,
+            )
+            windows = windows[: self._max_windows]
+        return windows
+
+    async def _extract_assertions(self, windows: list[str]) -> list[tuple[str, str]]:
+        """(조항, 그 조항을 뽑은 창) 목록. 창은 상충 기록에 원문 해시로 남긴다."""
+        assertions: list[tuple[str, str]] = []
+        seen: set[str] = set()
+        for window in windows:
+            for assertion in await self._analyzer.extract_assertions(window, max_chars=self._window_chars):
+                # 청크 겹침(overlap) 때문에 이웃 창에서 같은 조항이 다시 나올 수 있다. 처음 나온 창을 쓴다
+                if assertion not in seen:
+                    seen.add(assertion)
+                    assertions.append((assertion, window))
+            if len(assertions) >= self._max_assertions:
+                break
+        return assertions[: self._max_assertions]
 
     async def detect_and_record(self, document_id: int, organization_id: int) -> list[ConflictDetectionResult]:
         """문서의 핵심 조항을 추출하여 같은 조직의 기존 정책들과 상충 여부를 분석하고 기록한다."""
@@ -62,6 +144,9 @@ class ConflictDetector:
         doc_version = doc.get("current_version")
         org_id = organization_id
 
+        # 그래프 동기화와 조항 추출이 같은 원문(색인 청크 창)을 본다
+        windows = await self._source_windows(document_id, doc_content)
+
         # Neo4j 지식 그래프 동기화 (노드 및 인과 관계 추출)
         if self._sync_service:
             try:
@@ -72,11 +157,13 @@ class ConflictDetector:
                     status=str(doc.get("decision_status", "CURRENT")),
                     authored_at=str(doc.get("authored_at", "")),
                     organization_id=org_id,
+                    sources=windows,
+                    extract_max_chars=self._window_chars,
                 )
             except Exception as e:
                 log.warning("Neo4j 지식 그래프 동기화 실패 (무시 후 상충 검사 계속)", error=str(e))
 
-        assertions = await self._analyzer.extract_assertions(doc_content)
+        assertions = await self._extract_assertions(windows)
         if not assertions:
             log.info("문서에서 추출된 핵심 조항 없음", document_id=document_id)
             CONFLICT_DETECTIONS.labels(outcome="skipped").inc()
@@ -86,12 +173,13 @@ class ConflictDetector:
             "정책 조항 추출 완료, 기존 규정 대비 상충 탐색 시작",
             document_id=document_id,
             assertions_count=len(assertions),
-            assertions=assertions,
+            assertions=[a for a, _ in assertions],
         )
 
         detected_conflicts: list[ConflictDetectionResult] = []
 
-        for assertion in assertions:
+        for assertion, window in assertions:
+            source_text_hash = text_hash(window)
             # 색인된 문서 청크를 찾는 검색이므로 질의 taskType(RETRIEVAL_QUERY)으로 임베딩한다
             query_vector = await self._embedder.embed_query(assertion[:_EMBED_TEXT_LIMIT])
             candidate_hits = await self._vector_client.search_points(
@@ -121,25 +209,36 @@ class ConflictDetector:
 
                 if result and result.severity_score >= self._threshold:
                     detected_conflicts.append(result)
-                    conflict_id = await self._db.record_conflict(
+                    severity_level = self._severity_bands.level_of(result.severity_score)
+                    recorded = await self._db.record_conflict(
                         source_doc_id=result.source_doc_id,
                         target_doc_id=result.target_doc_id,
                         conflict_type=result.conflict_type,
                         severity_score=result.severity_score,
+                        severity_level=severity_level,
                         source_clause=result.source_assertion,
                         target_clause=result.target_assertion,
                         # decision_conflicts 에 권고 조치 전용 컬럼이 없어 reasoning 에 함께 담는다(알림에는 따로 실린다)
                         reasoning=f"{result.reason} (권고: {result.suggested_action})",
                         affected_teams=result.impacted_teams,
                         source_doc_version=doc_version,
+                        target_doc_version=hit.document_version,
+                        source_text_hash=source_text_hash,
+                        target_text_hash=text_hash(hit.content),
                     )
+                    conflict_id = recorded.id
                     CONFLICTS_RECORDED.inc()
                     log.warning(
                         "🚨 정책 상충(Conflict) 감지 및 DB 저장 완료",
                         conflict_id=conflict_id,
+                        created=recorded.created,
+                        status=recorded.status,
+                        notify=recorded.notify,
+                        inherited_from=recorded.inherited_from,
                         source_doc_id=result.source_doc_id,
                         target_doc_id=result.target_doc_id,
                         severity_score=result.severity_score,
+                        severity_level=severity_level,
                         conflict_type=result.conflict_type,
                         reason=result.reason,
                     )
@@ -161,7 +260,8 @@ class ConflictDetector:
                     # get_active_channels()(전역 설정)만으로 게이트를 걸면 전역 채널이 전부
                     # 꺼져 있을 때 팀별 채널(extra_channels)까지 통째로 건너뛰게 된다. dispatch() 내부가 심각도·활성 채널(전역+팀) 여부를 스스로 판단해
                     # 아무 것도 없으면 조용히 no-op 하므로, 여기서는 dispatcher 존재 여부만 본다.
-                    if self._dispatcher:
+                    # 그 문서 쌍·판에서 처음 감지된 상충만 알린다(재검사·재처리·문구만 다른 재감지는 알리지 않는다).
+                    if self._dispatcher and recorded.notify:
                         payload = ConflictNotificationPayload(
                             conflict_id=conflict_id,
                             source_doc_id=result.source_doc_id,
@@ -172,6 +272,7 @@ class ConflictDetector:
                             target_clause=result.target_assertion,
                             conflict_type=result.conflict_type,
                             severity_score=result.severity_score,
+                            severity_level=severity_level,
                             reasoning=result.reason,
                             affected_teams=result.impacted_teams,
                             recommended_action=result.suggested_action,

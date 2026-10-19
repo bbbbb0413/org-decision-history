@@ -1,6 +1,7 @@
 package com.odh.common.internal;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
@@ -11,6 +12,7 @@ import org.springframework.web.client.RestClient;
  * 없고, index-worker 는 애초에 권한 판정·감사 기록을 하지 않는다.
  */
 @Configuration
+@EnableConfigurationProperties(PermissionCacheProperties.class)
 public class InternalClientsConfiguration {
 
     @Bean
@@ -23,7 +25,8 @@ public class InternalClientsConfiguration {
     @Bean
     public PermissionScopeClient permissionScopeClient(RestClient.Builder builder,
                                                        @Value("${auth.service-url}") String authUrl,
-                                                       @Value("${internal.api-key:}") String internalKey) {
-        return new PermissionScopeClient(builder, authUrl, internalKey);
+                                                       @Value("${internal.api-key:}") String internalKey,
+                                                       PermissionCacheProperties cacheProps) {
+        return new PermissionScopeClient(builder, authUrl, internalKey, cacheProps);
     }
 }

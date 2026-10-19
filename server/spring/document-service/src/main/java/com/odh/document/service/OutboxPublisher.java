@@ -26,17 +26,22 @@ import java.util.Map;
 public class OutboxPublisher {
 
     private static final Logger log = LoggerFactory.getLogger(OutboxPublisher.class);
-    private static final String STREAM_KEY = "stream:document-events";
-    private static final int BATCH = 100;
+    /**
+     * 소비자(Python history_shared.events.STREAM_DOCUMENT_EVENTS)와 따로 적혀 있다. 한쪽만 바꾸면 오류 없이 전달이
+     * 끊기므로 양쪽 테스트가 계약 파일(contracts/events/document-events.schema.json 의 x-stream)과 맞춰 본다.
+     */
+    static final String STREAM_KEY = "stream:document-events";
 
     private final JdbcClient jdbc;
     private final StringRedisTemplate redis;
     private final ObjectMapper mapper;
+    private final OutboxProperties props;
 
-    public OutboxPublisher(JdbcClient jdbc, StringRedisTemplate redis, ObjectMapper mapper) {
+    public OutboxPublisher(JdbcClient jdbc, StringRedisTemplate redis, ObjectMapper mapper, OutboxProperties props) {
         this.jdbc = jdbc;
         this.redis = redis;
         this.mapper = mapper;
+        this.props = props;
     }
 
     /** 문서 저장과 같은 트랜잭션에서 호출한다. */
@@ -63,7 +68,7 @@ public class OutboxPublisher {
     }
 
     /** 미발행 이벤트를 Redis Stream 으로 보낸다. 4단계 색인 워커가 이 스트림을 소비한다. */
-    @Scheduled(fixedDelay = 2000)
+    @Scheduled(fixedDelayString = "${document.outbox.poll-interval:2s}")
     @Transactional
     public void publishPending() {
         List<PendingEvent> rows = jdbc.sql("""
@@ -74,7 +79,7 @@ public class OutboxPublisher {
                         LIMIT :batch
                         FOR UPDATE SKIP LOCKED
                         """)
-                .param("batch", BATCH)
+                .param("batch", props.batch())
                 .query((rs, i) -> new PendingEvent(
                         rs.getLong("id"),
                         String.valueOf(rs.getLong("aggregate_id")),

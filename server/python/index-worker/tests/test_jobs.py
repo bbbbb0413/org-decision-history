@@ -17,7 +17,7 @@ def indexer():
 
 @pytest.fixture
 def jobs(pool, indexer):
-    return JobService(pool, indexer, running_timeout=timedelta(minutes=30))
+    return JobService(pool, indexer)
 
 
 async def job_of(pool, job_key: uuid.UUID) -> dict:
@@ -208,18 +208,11 @@ async def test_mixed_results_fail_job_with_counts(pool, jobs, indexer):
 async def test_stale_running_items_are_recovered(pool, jobs):
     job_key = await jobs.accept_bulk([source(1), source(2)], requested_by=None)
     first, second = await jobs.claim_next(), await jobs.claim_next()
-    assert await jobs.recover_stale_running() == 0, "제한 시간 안의 RUNNING 은 처리 중이다"
+    assert await jobs.recover_stale_running() == 0, "생존 신호가 살아 있는 RUNNING 은 처리 중이다"
 
-    await pool.execute(
-        "UPDATE indexing.index_job_item SET last_attempt_at = now() - interval '31 minutes', retry_count = $2 WHERE id = $1",
-        first.item_id,
-        0,
-    )
-    await pool.execute(
-        "UPDATE indexing.index_job_item SET last_attempt_at = now() - interval '31 minutes', retry_count = $2 WHERE id = $1",
-        second.item_id,
-        3,
-    )
+    stale = "UPDATE indexing.index_job_item SET heartbeat_at = now() - interval '61 seconds', retry_count = $2 WHERE id = $1"
+    await pool.execute(stale, first.item_id, 0)
+    await pool.execute(stale, second.item_id, 3)
 
     assert await jobs.recover_stale_running() == 2
 
@@ -230,3 +223,54 @@ async def test_stale_running_items_are_recovered(pool, jobs):
     job = await job_of(pool, job_key)
     assert (job["status"], job["fail_count"], job["pending_count"]) == ("RUNNING", 1, 1)
     assert (await jobs.claim_next()).item_id == first.item_id
+
+
+class BlockingIndexer:
+    """release 가 설정될 때까지 색인을 끝내지 않는다. 오래 걸리는 색인(속도 제한 대기 등)을 흉내 낸다."""
+
+    def __init__(self):
+        self.started = asyncio.Event()
+        self.release = asyncio.Event()
+
+    async def index(self, document_id: int) -> int:
+        self.started.set()
+        await self.release.wait()
+        return 1
+
+
+async def test_long_running_item_is_kept_alive_by_heartbeat(pool):
+    indexer = BlockingIndexer()
+    jobs = JobService(pool, indexer, heartbeat_interval=timedelta(seconds=0.1), stale_after=timedelta(seconds=0.5))
+    job_key = await jobs.accept_bulk([source(1)], requested_by=None)
+
+    processing = asyncio.create_task(jobs.process_next())
+    await indexer.started.wait()
+    for _ in range(3):  # 회수 기준(0.5초)의 세 배 동안 계속 확인한다
+        await asyncio.sleep(0.5)
+        assert await jobs.recover_stale_running() == 0
+    indexer.release.set()
+    assert await processing
+
+    [item] = await items_of(pool, job_key)
+    assert (item["status"], item["retry_count"]) == ("COMPLETED", 0)
+
+
+async def test_cancelled_processing_releases_item_without_counting_a_retry(pool):
+    indexer = BlockingIndexer()
+    jobs = JobService(pool, indexer)
+    job_key = await jobs.accept_bulk([source(1)], requested_by=None)
+
+    processing = asyncio.create_task(jobs.process_next())
+    await indexer.started.wait()
+    processing.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await processing
+
+    [item] = await items_of(pool, job_key)
+    assert (item["status"], item["retry_count"], item["heartbeat_at"]) == ("PENDING", 0, None)
+    assert (await jobs.claim_next()).item_id == item["id"], "다음 워커가 바로 이어받는다"
+
+
+def test_stale_after_must_leave_room_for_missed_heartbeats():
+    with pytest.raises(ValueError):
+        JobService(None, None, heartbeat_interval=timedelta(seconds=10), stale_after=timedelta(seconds=20))

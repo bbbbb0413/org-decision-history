@@ -7,8 +7,7 @@
   "x-stream": "stream:document-events",
   "x-producer": "document-service OutboxPublisher (record → publishPending)",
   "x-consumers": [
-    "index-worker (그룹 index-worker) — DocumentEventConsumer",
-    "governance-worker (그룹 governance-worker-group) — app/consumer.py"
+    "index-worker (그룹 index-worker) — app/consumer.py DocumentEventHandler"
   ],
   "x-delivery": "최소 한 번 전달. 아웃박스 행을 스트림에 넣은 뒤 published_at 을 기록하므로, 그 사이에 실패하면 같은 이벤트가 다시 발행된다. 소비자는 멱등해야 한다.",
   "type": "object",
@@ -25,8 +24,8 @@
       "pattern": "^[0-9]+$"
     },
     "eventType": {
-      "description": "document.outbox_event_type enum 과 같은 값",
-      "enum": ["DOCUMENT_CREATED", "DOCUMENT_UPDATED", "DOCUMENT_DELETED", "PERMISSION_CHANGED"]
+      "description": "document.outbox_event_type enum 의 값 중 발행되는 것. DB enum 에 남은 PERMISSION_CHANGED 는 발행하는 곳이 없어 계약에서 뺐다(조직·팀 변경은 수정 이벤트로 재색인된다)",
+      "enum": ["DOCUMENT_CREATED", "DOCUMENT_UPDATED", "DOCUMENT_DELETED"]
     },
     "payload": {
       "type": "string",

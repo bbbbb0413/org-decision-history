@@ -9,7 +9,7 @@ log = structlog.get_logger()
 
 
 class NotificationDispatcher:
-    def __init__(self, channels: List[NotificationChannel], min_severity: float = 0.70):
+    def __init__(self, channels: List[NotificationChannel], min_severity: float):
         self._channels = list(channels)
         self._min_severity = min_severity
 

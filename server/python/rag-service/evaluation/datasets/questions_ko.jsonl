@@ -1,0 +1,136 @@
+{"id": "acc-01", "group": "acc-01", "split": "dev", "kind": "original", "question": "퇴사자 권한은 며칠 안에 회수해야 해?", "answerable": true, "gold": ["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항"]}
+{"id": "acc-02", "group": "acc-02", "split": "test", "kind": "original", "question": "운영 DB 직접 접근 계정은 얼마나 자주 재승인해?", "answerable": true, "gold": ["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항"]}
+{"id": "acc-03", "group": "acc-03", "split": "dev", "kind": "original", "question": "퇴사자 계정이 며칠씩 살아 있다는 감사 지적이 뭐였어?", "answerable": true, "gold": ["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경"]}
+{"id": "acc-04", "group": "acc-04", "split": "test", "kind": "original", "question": "권한 회수 기한을 왜 1일이 아니라 3영업일로 정했어?", "answerable": true, "gold": ["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 근거"]}
+{"id": "acc-05", "group": "acc-05", "split": "dev", "kind": "original", "question": "운영 DB 접근 계정 4개 회수 담당자는 누구야?", "answerable": true, "gold": ["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 액션 아이템"]}
+{"id": "acc-06", "group": "acc-06", "split": "test", "kind": "original", "question": "운영 DB 직접 접근을 아예 막는 안은 왜 채택하지 않았어?", "answerable": true, "gold": ["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 논의한 내용"]}
+{"id": "acc-07", "group": "acc-07", "split": "dev", "kind": "original", "question": "인사 시스템 연동은 언제 가능해?", "answerable": true, "gold": ["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 논의한 내용", "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 근거"]}
+{"id": "acc-08", "group": "acc-08", "split": "test", "kind": "original", "question": "결제팀은 장애 대응 계정을 어떻게 받아야 해?", "answerable": true, "gold": ["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 영향 범위"]}
+{"id": "exp-01", "group": "exp-01", "split": "dev", "kind": "original", "question": "데이터를 외부로 반출하려면 누구 승인이 필요해?", "answerable": true, "gold": ["사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정"]}
+{"id": "exp-02", "group": "exp-02", "split": "test", "kind": "original", "question": "장애 대응 때 데이터 반출 예외가 있어?", "answerable": true, "gold": ["사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차"]}
+{"id": "exp-03", "group": "exp-03", "split": "dev", "kind": "original", "question": "데이터 반출 정책 시행일이 언제야?", "answerable": true, "gold": ["사내 데이터 외부 반출 승인 정책 v1.2 > 시행일과 재검토 시점", "사내 데이터 외부 반출 승인 정책 v1.2"]}
+{"id": "exp-04", "group": "exp-04", "split": "test", "kind": "original", "question": "고객 개인정보 원본을 반출해도 돼?", "answerable": true, "gold": ["사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정"]}
+{"id": "exp-05", "group": "exp-05", "split": "dev", "kind": "original", "question": "반출 이력은 몇 년 보관해?", "answerable": true, "gold": ["사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정"]}
+{"id": "exp-06", "group": "exp-06", "split": "test", "kind": "original", "question": "개인 클라우드로 데이터를 옮겨도 되나?", "answerable": true, "gold": ["사내 데이터 외부 반출 승인 정책 v1.2 > 정책 내용"]}
+{"id": "exp-07", "group": "exp-07", "split": "dev", "kind": "original", "question": "채용 공고 자료도 반출 승인을 받아야 해?", "answerable": true, "gold": ["사내 데이터 외부 반출 승인 정책 v1.2 > 적용 범위"]}
+{"id": "exp-08", "group": "exp-08", "split": "test", "kind": "original", "question": "규제 기관에 자료를 낼 때 정보보안팀 승인이 필요해?", "answerable": true, "gold": ["사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차"]}
+{"id": "exp-09", "group": "exp-09", "split": "dev", "kind": "original", "question": "데이터 반출 정책 문의는 누구에게 해?", "answerable": true, "gold": ["사내 데이터 외부 반출 승인 정책 v1.2 > 문의 담당자"]}
+{"id": "mfa-01", "group": "mfa-01", "split": "test", "kind": "original", "question": "관리자 MFA는 어떤 인증 수단으로 정했어?", "answerable": true, "gold": ["인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항", "인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계"]}
+{"id": "mfa-02", "group": "mfa-02", "split": "dev", "kind": "original", "question": "SMS 인증을 고르지 않은 이유는?", "answerable": true, "gold": ["인증팀 다단계 인증(MFA) 도입 설계 > 검토한 대안"]}
+{"id": "mfa-03", "group": "mfa-03", "split": "test", "kind": "original", "question": "TOTP 기기를 잃어버리면 어떻게 해?", "answerable": true, "gold": ["인증팀 다단계 인증(MFA) 도입 설계 > 위험과 대응"]}
+{"id": "mfa-04", "group": "mfa-04", "split": "dev", "kind": "original", "question": "MFA 적용 대상 계정은 누구야?", "answerable": true, "gold": ["인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항"]}
+{"id": "mfa-05", "group": "mfa-05", "split": "test", "kind": "original", "question": "WebAuthn 보안키는 언제 다시 검토해?", "answerable": true, "gold": ["인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항", "인증팀 다단계 인증(MFA) 도입 설계 > 검토한 대안"]}
+{"id": "mfa-06", "group": "mfa-06", "split": "dev", "kind": "original", "question": "MFA 도입의 성공 기준은 뭐야?", "answerable": true, "gold": ["인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표"]}
+{"id": "mfa-07", "group": "mfa-07", "split": "test", "kind": "original", "question": "신뢰 기기는 며칠 동안 기억해?", "answerable": true, "gold": ["인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계"]}
+{"id": "mfa-08", "group": "mfa-08", "split": "dev", "kind": "original", "question": "MFA를 도입하면 세션 타임아웃 정책은 없어지나?", "answerable": true, "gold": ["인증팀 다단계 인증(MFA) 도입 설계 > 영향 범위"]}
+{"id": "mfa-09", "group": "mfa-09", "split": "test", "kind": "original", "question": "복구 코드는 몇 개 발급해?", "answerable": true, "gold": ["인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계"]}
+{"id": "log-01", "group": "log-01", "split": "dev", "kind": "original", "question": "보안 로그는 얼마나 보관해?", "answerable": true, "gold": ["보안 로그 보관 기간 결정 기록 > 결정 사항"]}
+{"id": "log-02", "group": "log-02", "split": "test", "kind": "original", "question": "디버그 로그 보관을 짧게 잡은 근거는?", "answerable": true, "gold": ["보안 로그 보관 기간 결정 기록 > 결정 근거"]}
+{"id": "log-03", "group": "log-03", "split": "dev", "kind": "original", "question": "로그 보관 정책은 언제 다시 검토해?", "answerable": true, "gold": ["보안 로그 보관 기간 결정 기록 > 재검토 시점"]}
+{"id": "log-04", "group": "log-04", "split": "test", "kind": "original", "question": "보안 로그를 90일만 보관하다가 생긴 문제는?", "answerable": true, "gold": ["보안 로그 보관 기간 결정 기록 > 배경"]}
+{"id": "log-05", "group": "log-05", "split": "dev", "kind": "original", "question": "전체 로그를 1년 보관하는 안은 왜 버렸어?", "answerable": true, "gold": ["보안 로그 보관 기간 결정 기록 > 검토한 대안"]}
+{"id": "log-06", "group": "log-06", "split": "test", "kind": "original", "question": "로그 보관 정책 변경으로 인증팀이 해야 할 일은?", "answerable": true, "gold": ["보안 로그 보관 기간 결정 기록 > 영향 범위"]}
+{"id": "dem-01", "group": "dem-01", "split": "dev", "kind": "original", "question": "정기결제 배치가 왜 실패했어?", "answerable": true, "gold": ["2025 Q4 결제팀 정기결제 배치 시스템 장애 분석 및 개선안"]}
+{"id": "dem-02", "group": "dem-02", "split": "test", "kind": "original", "question": "인증 게이트웨이 세션 타임아웃은 몇 분으로 바뀌었어?", "answerable": true, "gold": ["2025 Q3 인증팀 세션 타임아웃 단축 정책 개정안"]}
+{"id": "neg-01", "group": "neg-01", "split": "dev", "kind": "unanswerable_far", "question": "사내 식당 점심 메뉴는 뭐야?", "answerable": false, "gold": []}
+{"id": "neg-02", "group": "neg-02", "split": "test", "kind": "unanswerable_far", "question": "회사 주차 등록은 어떻게 해?", "answerable": false, "gold": []}
+{"id": "neg-03", "group": "neg-03", "split": "dev", "kind": "unanswerable_far", "question": "신입 사원 노트북 지급 절차 알려줘", "answerable": false, "gold": []}
+{"id": "neg-04", "group": "neg-04", "split": "test", "kind": "unanswerable_far", "question": "연차 휴가는 1년에 며칠이야?", "answerable": false, "gold": []}
+{"id": "neg-05", "group": "neg-05", "split": "dev", "kind": "unanswerable_near", "question": "VPN 접속 시 허용되는 국가는 어디야?", "answerable": false, "gold": []}
+{"id": "neg-06", "group": "neg-06", "split": "test", "kind": "unanswerable_near", "question": "비밀번호는 몇 자 이상이어야 해?", "answerable": false, "gold": []}
+{"id": "neg-07", "group": "neg-07", "split": "dev", "kind": "unanswerable_near", "question": "방화벽 규칙 변경 승인 절차는?", "answerable": false, "gold": []}
+{"id": "neg-08", "group": "neg-08", "split": "test", "kind": "unanswerable_near", "question": "백업 데이터는 몇 년 보관해?", "answerable": false, "gold": []}
+{"id": "neg-09", "group": "neg-09", "split": "dev", "kind": "unanswerable_near", "question": "개발 서버 접근 권한 신청은 어디서 해?", "answerable": false, "gold": []}
+{"id": "neg-10", "group": "neg-10", "split": "test", "kind": "unanswerable_near", "question": "보안 교육은 1년에 몇 번 들어야 해?", "answerable": false, "gold": []}
+{"id": "acc-01-p", "group": "acc-01", "split": "dev", "kind": "paraphrase", "question": "회사를 그만두거나 부서를 옮긴 사람 계정은 언제까지 막아야 돼?", "answerable": true, "gold": ["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항"]}
+{"id": "acc-02-p", "group": "acc-02", "split": "test", "kind": "paraphrase", "question": "프로덕션 데이터베이스에 바로 붙는 계정은 얼마 만에 다시 허락받아야 해?", "answerable": true, "gold": ["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항"]}
+{"id": "acc-03-p", "group": "acc-03", "split": "dev", "kind": "paraphrase", "question": "내부 점검에서 나간 사람 아이디가 오래 남아 있다고 걸렸던 게 평균 며칠이었지?", "answerable": true, "gold": ["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경"]}
+{"id": "acc-04-p", "group": "acc-04", "split": "test", "kind": "paraphrase", "question": "계정 정리 마감을 하루가 아니라 사흘로 잡은 까닭이 뭐야?", "answerable": true, "gold": ["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 근거"]}
+{"id": "acc-05-p", "group": "acc-05", "split": "dev", "kind": "paraphrase", "question": "프로덕션 DB 계정 네 개 정리는 누가 맡았어?", "answerable": true, "gold": ["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 액션 아이템"]}
+{"id": "acc-06-p", "group": "acc-06", "split": "test", "kind": "paraphrase", "question": "운영 데이터베이스를 읽기 전용 사본만 열어주는 쪽으로 가지 않은 이유는?", "answerable": true, "gold": ["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 논의한 내용"]}
+{"id": "acc-07-p", "group": "acc-07", "split": "dev", "kind": "paraphrase", "question": "HR 시스템이랑 자동으로 엮이는 건 언제쯤 돼?", "answerable": true, "gold": ["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 논의한 내용", "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 근거"]}
+{"id": "acc-08-p", "group": "acc-08", "split": "test", "kind": "paraphrase", "question": "장애 났을 때 쓸 계정은 결제 쪽 사람들이 따로 요청해야 해?", "answerable": true, "gold": ["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 영향 범위"]}
+{"id": "exp-01-p", "group": "exp-01", "split": "dev", "kind": "paraphrase", "question": "회사 자료를 밖으로 내보낼 때 누구 결재를 받아?", "answerable": true, "gold": ["사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정"]}
+{"id": "exp-02-p", "group": "exp-02", "split": "test", "kind": "paraphrase", "question": "서비스가 터진 상황이면 자료를 먼저 빼고 나중에 서류 내도 돼?", "answerable": true, "gold": ["사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차"]}
+{"id": "exp-03-p", "group": "exp-03", "split": "dev", "kind": "paraphrase", "question": "자료를 밖으로 내보내는 규칙은 언제부터 효력이 있어?", "answerable": true, "gold": ["사내 데이터 외부 반출 승인 정책 v1.2 > 시행일과 재검토 시점", "사내 데이터 외부 반출 승인 정책 v1.2"]}
+{"id": "exp-04-p", "group": "exp-04", "split": "test", "kind": "paraphrase", "question": "고객 이름이랑 전화번호가 그대로 들어간 파일을 외부에 줘도 돼?", "answerable": true, "gold": ["사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정"]}
+{"id": "exp-05-p", "group": "exp-05", "split": "dev", "kind": "paraphrase", "question": "자료 내보낸 기록은 언제까지 남겨둬?", "answerable": true, "gold": ["사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정"]}
+{"id": "exp-06-p", "group": "exp-06", "split": "test", "kind": "paraphrase", "question": "내 구글드라이브에 회사 데이터 올려서 넘겨도 돼?", "answerable": true, "gold": ["사내 데이터 외부 반출 승인 정책 v1.2 > 정책 내용"]}
+{"id": "exp-07-p", "group": "exp-07", "split": "dev", "kind": "paraphrase", "question": "이미 홈페이지에 공개된 자료도 내보낼 때 허가가 필요해?", "answerable": true, "gold": ["사내 데이터 외부 반출 승인 정책 v1.2 > 적용 범위"]}
+{"id": "exp-08-p", "group": "exp-08", "split": "test", "kind": "paraphrase", "question": "금융감독원 같은 감독 당국에 낼 자료도 보안팀 결재를 거쳐야 해?", "answerable": true, "gold": ["사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차"]}
+{"id": "exp-09-p", "group": "exp-09", "split": "dev", "kind": "paraphrase", "question": "회사 데이터 밖으로 보내는 거 궁금하면 어디로 물어봐?", "answerable": true, "gold": ["사내 데이터 외부 반출 승인 정책 v1.2 > 문의 담당자"]}
+{"id": "mfa-01-p", "group": "mfa-01", "split": "test", "kind": "paraphrase", "question": "관리자 로그인 2차 인증은 뭘로 하기로 했어?", "answerable": true, "gold": ["인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항", "인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계"]}
+{"id": "mfa-02-p", "group": "mfa-02", "split": "dev", "kind": "paraphrase", "question": "문자 메시지 인증번호 방식은 왜 뺐어?", "answerable": true, "gold": ["인증팀 다단계 인증(MFA) 도입 설계 > 검토한 대안"]}
+{"id": "mfa-03-p", "group": "mfa-03", "split": "test", "kind": "paraphrase", "question": "OTP 앱 깔린 폰을 잃어버리면 어떡해?", "answerable": true, "gold": ["인증팀 다단계 인증(MFA) 도입 설계 > 위험과 대응"]}
+{"id": "mfa-04-p", "group": "mfa-04", "split": "dev", "kind": "paraphrase", "question": "2단계 로그인은 어떤 역할 가진 사람한테 걸려?", "answerable": true, "gold": ["인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항"]}
+{"id": "mfa-05-p", "group": "mfa-05", "split": "test", "kind": "paraphrase", "question": "유비키 같은 하드웨어 키는 언제 다시 들여다봐?", "answerable": true, "gold": ["인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항", "인증팀 다단계 인증(MFA) 도입 설계 > 검토한 대안"]}
+{"id": "mfa-06-p", "group": "mfa-06", "split": "dev", "kind": "paraphrase", "question": "2차 인증 도입이 잘 됐는지 뭘로 판단해?", "answerable": true, "gold": ["인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표"]}
+{"id": "mfa-07-p", "group": "mfa-07", "split": "test", "kind": "paraphrase", "question": "한 번 인증한 PC는 얼마 동안 다시 안 물어봐?", "answerable": true, "gold": ["인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계"]}
+{"id": "mfa-08-p", "group": "mfa-08", "split": "dev", "kind": "paraphrase", "question": "2단계 인증이 생기면 30분 자동 로그아웃은 없어져?", "answerable": true, "gold": ["인증팀 다단계 인증(MFA) 도입 설계 > 영향 범위"]}
+{"id": "mfa-09-p", "group": "mfa-09", "split": "test", "kind": "paraphrase", "question": "백업용 코드는 몇 개 받아?", "answerable": true, "gold": ["인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계"]}
+{"id": "log-01-p", "group": "log-01", "split": "dev", "kind": "paraphrase", "question": "접속 기록이나 권한 바뀐 기록은 언제까지 저장해?", "answerable": true, "gold": ["보안 로그 보관 기간 결정 기록 > 결정 사항"]}
+{"id": "log-02-p", "group": "log-02", "split": "test", "kind": "paraphrase", "question": "디버깅용 기록을 짧게 두는 까닭은?", "answerable": true, "gold": ["보안 로그 보관 기간 결정 기록 > 결정 근거"]}
+{"id": "log-03-p", "group": "log-03", "split": "dev", "kind": "paraphrase", "question": "기록 저장 기한 규칙은 다음에 언제 손봐?", "answerable": true, "gold": ["보안 로그 보관 기간 결정 기록 > 재검토 시점"]}
+{"id": "log-04-p", "group": "log-04", "split": "test", "kind": "paraphrase", "question": "기록을 석 달만 두다가 무슨 일이 있었어?", "answerable": true, "gold": ["보안 로그 보관 기간 결정 기록 > 배경"]}
+{"id": "log-05-p", "group": "log-05", "split": "dev", "kind": "paraphrase", "question": "모든 기록을 1년씩 두자는 안은 왜 안 됐어?", "answerable": true, "gold": ["보안 로그 보관 기간 결정 기록 > 검토한 대안"]}
+{"id": "log-06-p", "group": "log-06", "split": "test", "kind": "paraphrase", "question": "기록 저장 기한이 바뀌면 인증팀은 뭘 해야 해?", "answerable": true, "gold": ["보안 로그 보관 기간 결정 기록 > 영향 범위"]}
+{"id": "dem-01-p", "group": "dem-01", "split": "dev", "kind": "paraphrase", "question": "매달 자동 결제 돌리는 작업이 죽은 이유가 뭐야?", "answerable": true, "gold": ["2025 Q4 결제팀 정기결제 배치 시스템 장애 분석 및 개선안"]}
+{"id": "dem-02-p", "group": "dem-02", "split": "test", "kind": "paraphrase", "question": "인증 서버 세션 유효 시간을 얼마로 줄였어?", "answerable": true, "gold": ["2025 Q3 인증팀 세션 타임아웃 단축 정책 개정안"]}
+{"id": "acc-01-t", "group": "acc-01", "split": "dev", "kind": "typo", "question": "퇴사자 계정 몇일안에 막아야됨?", "answerable": true, "gold": ["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항"]}
+{"id": "acc-02-t", "group": "acc-02", "split": "test", "kind": "typo", "question": "운영디비 직접접근계정 재승인 주기?", "answerable": true, "gold": ["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항"]}
+{"id": "exp-01-t", "group": "exp-01", "split": "dev", "kind": "typo", "question": "데이타 반출 승인권자 누구임", "answerable": true, "gold": ["사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정"]}
+{"id": "mfa-04-t", "group": "mfa-04", "split": "dev", "kind": "typo", "question": "엠에프에이 적용대상 누구야", "answerable": true, "gold": ["인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항"]}
+{"id": "fp-01", "group": "fp-01", "split": "dev", "kind": "false_premise", "question": "MFA는 SMS 인증으로 정했지?", "answerable": true, "gold": ["인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항", "인증팀 다단계 인증(MFA) 도입 설계 > 검토한 대안", "인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계"]}
+{"id": "fp-02", "group": "fp-02", "split": "test", "kind": "false_premise", "question": "퇴사자 권한은 1일 안에 회수하기로 했지?", "answerable": true, "gold": ["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항", "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 근거"]}
+{"id": "fp-03", "group": "fp-03", "split": "dev", "kind": "false_premise", "question": "반출 이력은 1년만 보관하면 되지?", "answerable": true, "gold": ["사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정"]}
+{"id": "fp-04", "group": "fp-04", "split": "test", "kind": "false_premise", "question": "디버그 로그도 1년 보관이지?", "answerable": true, "gold": ["보안 로그 보관 기간 결정 기록 > 결정 사항"]}
+{"id": "cf-01", "group": "cf-01", "split": "dev", "kind": "conflict", "question": "지금 재택근무 할 수 있어?", "answerable": true, "gold": ["2026 하반기 전사 근무제도 개정안: 전원 사무실 의무 출근", "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정", "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정 v2", "2027 전사 완전 원격근무 영구 도입안", "전사 재택근무 및 원격근무 정책 가이드라인"], "gold_groups": [["전사 재택근무 및 원격근무 정책 가이드라인", "2027 전사 완전 원격근무 영구 도입안"], ["2026 하반기 전사 근무제도 개정안: 전원 사무실 의무 출근", "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정", "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정 v2"]]}
+{"id": "cf-02", "group": "cf-02", "split": "test", "kind": "conflict", "question": "사무실 출근이 의무야?", "answerable": true, "gold": ["2026 하반기 전사 근무제도 개정안: 전원 사무실 의무 출근", "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정", "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정 v2", "2027 전사 완전 원격근무 영구 도입안", "전사 재택근무 및 원격근무 정책 가이드라인"], "gold_groups": [["전사 재택근무 및 원격근무 정책 가이드라인", "2027 전사 완전 원격근무 영구 도입안"], ["2026 하반기 전사 근무제도 개정안: 전원 사무실 의무 출근", "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정", "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정 v2"]]}
+{"id": "cf-03", "group": "cf-03", "split": "dev", "kind": "conflict", "question": "2027년에는 원격근무가 어떻게 돼?", "answerable": true, "gold": ["2027 본사 전면 출근 강제화 및 재택근무 처벌 규정", "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정 v2", "2027 전사 완전 원격근무 영구 도입안"], "gold_groups": [["2027 전사 완전 원격근무 영구 도입안"], ["2027 본사 전면 출근 강제화 및 재택근무 처벌 규정", "2027 본사 전면 출근 강제화 및 재택근무 처벌 규정 v2"]]}
+{"id": "cf-04", "group": "cf-04", "split": "test", "kind": "conflict", "question": "세션 타임아웃 30분 정책은 아직 유효해?", "answerable": true, "gold": ["2025 Q3 인증팀 세션 타임아웃 단축 정책 개정안", "인증팀 다단계 인증(MFA) 도입 설계 > 영향 범위"], "gold_groups": [["인증팀 다단계 인증(MFA) 도입 설계 > 영향 범위"], ["2025 Q3 인증팀 세션 타임아웃 단축 정책 개정안"]]}
+{"id": "cf-05", "group": "cf-05", "split": "dev", "kind": "conflict", "question": "세션 타임아웃을 줄이고 나서 어떤 문제가 생겼어?", "answerable": true, "gold": ["2025 Q4 결제팀 정기결제 배치 시스템 장애 분석 및 개선안", "인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표"], "gold_groups": [["2025 Q4 결제팀 정기결제 배치 시스템 장애 분석 및 개선안"], ["인증팀 다단계 인증(MFA) 도입 설계 > 배경과 목표"]]}
+{"id": "neg-11", "group": "neg-11", "split": "dev", "kind": "unanswerable_far", "question": "구내 헬스장은 몇 시까지 열어?", "answerable": false, "gold": []}
+{"id": "neg-12", "group": "neg-12", "split": "test", "kind": "unanswerable_far", "question": "명절 선물은 언제 나와?", "answerable": false, "gold": []}
+{"id": "neg-13", "group": "neg-13", "split": "dev", "kind": "unanswerable_far", "question": "법인카드 한도는 얼마야?", "answerable": false, "gold": []}
+{"id": "neg-14", "group": "neg-14", "split": "test", "kind": "unanswerable_far", "question": "사내 동호회 지원금은 얼마야?", "answerable": false, "gold": []}
+{"id": "neg-15", "group": "neg-15", "split": "dev", "kind": "unanswerable_far", "question": "재직증명서는 어디서 떼?", "answerable": false, "gold": []}
+{"id": "neg-16", "group": "neg-16", "split": "test", "kind": "unanswerable_far", "question": "퇴직금 정산은 언제 돼?", "answerable": false, "gold": []}
+{"id": "neg-17", "group": "neg-17", "split": "dev", "kind": "unanswerable_near", "question": "개인정보 처리방침은 언제 개정됐어?", "answerable": false, "gold": []}
+{"id": "neg-18", "group": "neg-18", "split": "test", "kind": "unanswerable_near", "question": "운영 DB 백업 주기는 어떻게 돼?", "answerable": false, "gold": []}
+{"id": "neg-19", "group": "neg-19", "split": "dev", "kind": "unanswerable_near", "question": "로그 수집 서버 사양은 뭐야?", "answerable": false, "gold": []}
+{"id": "neg-20", "group": "neg-20", "split": "test", "kind": "unanswerable_near", "question": "MFA 도입 예산은 얼마야?", "answerable": false, "gold": []}
+{"id": "neg-21", "group": "neg-21", "split": "dev", "kind": "unanswerable_near", "question": "정보보안팀 팀장은 누구야?", "answerable": false, "gold": []}
+{"id": "neg-22", "group": "neg-22", "split": "test", "kind": "unanswerable_near", "question": "외부 인력 계약 기간은 보통 얼마야?", "answerable": false, "gold": []}
+{"id": "neg-23", "group": "neg-23", "split": "dev", "kind": "unanswerable_near", "question": "결제팀 장애 대응 계정 신청서 양식은 어디 있어?", "answerable": false, "gold": []}
+{"id": "neg-24", "group": "neg-24", "split": "test", "kind": "unanswerable_near", "question": "WebAuthn 보안키는 어느 회사 제품을 써?", "answerable": false, "gold": []}
+{"id": "neg-25", "group": "neg-25", "split": "dev", "kind": "unanswerable_near", "question": "인사 시스템은 무슨 솔루션이야?", "answerable": false, "gold": []}
+{"id": "neg-26", "group": "neg-26", "split": "test", "kind": "unanswerable_near", "question": "보안 감사는 1년에 몇 번 해?", "answerable": false, "gold": []}
+{"id": "neg-27", "group": "neg-27", "split": "dev", "kind": "unanswerable_near", "question": "SSO 도입 계획 있어?", "answerable": false, "gold": []}
+{"id": "neg-28", "group": "neg-28", "split": "test", "kind": "unanswerable_near", "question": "업무폰을 잃어버리면 회사가 보상해 줘?", "answerable": false, "gold": []}
+{"id": "neg-29", "group": "neg-29", "split": "dev", "kind": "unanswerable_unknown", "question": "2027년 4월 데이터 반출 정책 재검토 결과는 어떻게 됐어?", "answerable": false, "gold": []}
+{"id": "neg-30", "group": "neg-30", "split": "test", "kind": "unanswerable_unknown", "question": "MFA 도입 후 로그인 실패율은 실제로 얼마였어?", "answerable": false, "gold": []}
+{"id": "neg-31", "group": "neg-31", "split": "dev", "kind": "unanswerable_unknown", "question": "데이터 무단 반출로 징계받은 사례 있어?", "answerable": false, "gold": []}
+{"id": "neg-32", "group": "neg-32", "split": "test", "kind": "unanswerable_unknown", "question": "TOTP 앱은 어떤 걸 쓰라고 했어?", "answerable": false, "gold": []}
+{"id": "mul-01", "group": "mul-01", "split": "dev", "kind": "multi", "question": "보안 로그 중 인증·권한 변경 로그 보관 기간과 데이터 반출 이력 보관 기간을 각각 알려줘", "answerable": true, "gold": ["보안 로그 보관 기간 결정 기록 > 결정 사항", "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정"], "gold_groups": [["보안 로그 보관 기간 결정 기록 > 결정 사항"], ["사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정"]]}
+{"id": "mul-02", "group": "mul-02", "split": "dev", "kind": "multi", "question": "MFA 1단계 인증 수단이랑 인증 게이트웨이 세션 토큰 유효 기간은 각각 어떻게 정했어?", "answerable": true, "gold": ["인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항", "인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계", "2025 Q3 인증팀 세션 타임아웃 단축 정책 개정안"], "gold_groups": [["인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항", "인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계"], ["2025 Q3 인증팀 세션 타임아웃 단축 정책 개정안"]]}
+{"id": "mul-03", "group": "mul-03", "split": "dev", "kind": "multi", "question": "퇴사자 권한 회수 기한과 데이터 반출 승인권자를 함께 알려줘", "answerable": true, "gold": ["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항", "사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정"], "gold_groups": [["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항"], ["사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정"]]}
+{"id": "mul-04", "group": "mul-04", "split": "dev", "kind": "multi", "question": "데이터 반출 정책과 보안 로그 보관 정책은 각각 언제 다시 검토해?", "answerable": true, "gold": ["사내 데이터 외부 반출 승인 정책 v1.2 > 시행일과 재검토 시점", "보안 로그 보관 기간 결정 기록 > 재검토 시점"], "gold_groups": [["사내 데이터 외부 반출 승인 정책 v1.2 > 시행일과 재검토 시점"], ["보안 로그 보관 기간 결정 기록 > 재검토 시점"]]}
+{"id": "mul-05", "group": "mul-05", "split": "dev", "kind": "multi", "question": "세션 단축이 결제팀 정기결제 배치에 준 영향과, 그 뒤 인증팀이 계정 탈취를 막으려고 고른 인증 수단은?", "answerable": true, "gold": ["2025 Q4 결제팀 정기결제 배치 시스템 장애 분석 및 개선안", "인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항", "인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계"], "gold_groups": [["2025 Q4 결제팀 정기결제 배치 시스템 장애 분석 및 개선안"], ["인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항", "인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계"]]}
+{"id": "mul-06", "group": "mul-06", "split": "dev", "kind": "multi", "question": "접근 권한 검토 결정과 보안 로그 보관 결정이 인증팀·결제팀에 각각 요구하는 일은 뭐야?", "answerable": true, "gold": ["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 영향 범위", "보안 로그 보관 기간 결정 기록 > 영향 범위"], "gold_groups": [["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 영향 범위"], ["보안 로그 보관 기간 결정 기록 > 영향 범위"]]}
+{"id": "mul-07", "group": "mul-07", "split": "dev", "kind": "multi", "question": "MFA에서 SMS 인증을 고르지 않은 이유와 보안 로그를 전부 1년 보관하지 않은 이유는?", "answerable": true, "gold": ["인증팀 다단계 인증(MFA) 도입 설계 > 검토한 대안", "보안 로그 보관 기간 결정 기록 > 검토한 대안"], "gold_groups": [["인증팀 다단계 인증(MFA) 도입 설계 > 검토한 대안"], ["보안 로그 보관 기간 결정 기록 > 검토한 대안"]]}
+{"id": "mul-08", "group": "mul-08", "split": "test", "kind": "multi", "question": "운영 DB 직접 접근 계정 재승인 주기와 데이터 접근 로그 보관 기간은?", "answerable": true, "gold": ["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항", "보안 로그 보관 기간 결정 기록 > 결정 사항"], "gold_groups": [["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항"], ["보안 로그 보관 기간 결정 기록 > 결정 사항"]]}
+{"id": "mul-09", "group": "mul-09", "split": "test", "kind": "multi", "question": "MFA 적용 대상 역할과 데이터 반출 규정의 적용 대상은 각각 누구야?", "answerable": true, "gold": ["인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항", "사내 데이터 외부 반출 승인 정책 v1.2 > 적용 범위"], "gold_groups": [["인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항"], ["사내 데이터 외부 반출 승인 정책 v1.2 > 적용 범위"]]}
+{"id": "mul-10", "group": "mul-10", "split": "test", "kind": "multi", "question": "장애 대응 때 데이터 반출 예외 절차랑 운영 DB 직접 접근을 아예 닫지 않은 이유를 같이 알려줘", "answerable": true, "gold": ["사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차", "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 논의한 내용"], "gold_groups": [["사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차"], ["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 논의한 내용"]]}
+{"id": "mul-11", "group": "mul-11", "split": "test", "kind": "multi", "question": "권한 회수 기한을 3영업일로 잡은 이유와 디버그 로그를 30일만 두는 이유는?", "answerable": true, "gold": ["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 근거", "보안 로그 보관 기간 결정 기록 > 결정 근거"], "gold_groups": [["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 근거"], ["보안 로그 보관 기간 결정 기록 > 결정 근거"]]}
+{"id": "mul-12", "group": "mul-12", "split": "test", "kind": "multi", "question": "결제팀 정기결제 배치 장애 원인과, MFA 설계가 세션 타임아웃 정책을 대체하는지 여부는?", "answerable": true, "gold": ["2025 Q4 결제팀 정기결제 배치 시스템 장애 분석 및 개선안", "인증팀 다단계 인증(MFA) 도입 설계 > 영향 범위"], "gold_groups": [["2025 Q4 결제팀 정기결제 배치 시스템 장애 분석 및 개선안"], ["인증팀 다단계 인증(MFA) 도입 설계 > 영향 범위"]]}
+{"id": "fp-05", "group": "fp-05", "split": "dev", "kind": "false_premise", "question": "운영 DB 직접 접근 계정은 1년에 한 번 재승인하지?", "answerable": true, "gold": ["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항"]}
+{"id": "fp-06", "group": "fp-06", "split": "dev", "kind": "false_premise", "question": "데이터 반출은 정보보안팀 한 명만 승인하면 되지?", "answerable": true, "gold": ["사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정"]}
+{"id": "fp-07", "group": "fp-07", "split": "dev", "kind": "false_premise", "question": "MFA는 모든 직원 계정에 적용하는 거지?", "answerable": true, "gold": ["인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항"]}
+{"id": "fp-08", "group": "fp-08", "split": "dev", "kind": "false_premise", "question": "데이터 접근 로그는 30일만 보관하지?", "answerable": true, "gold": ["보안 로그 보관 기간 결정 기록 > 결정 사항"]}
+{"id": "fp-09", "group": "fp-09", "split": "test", "kind": "false_premise", "question": "MFA 신뢰 기기 기억은 90일이지?", "answerable": true, "gold": ["인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계"]}
+{"id": "fp-10", "group": "fp-10", "split": "test", "kind": "false_premise", "question": "규제 기관에 내는 자료 반출도 정보보안팀 승인을 받아야 하지?", "answerable": true, "gold": ["사내 데이터 외부 반출 승인 정책 v1.2 > 예외와 승인 절차"]}
+{"id": "fp-11", "group": "fp-11", "split": "dev", "kind": "false_premise", "question": "세션 토큰 유효 기간은 24시간으로 정했지?", "answerable": true, "gold": ["2025 Q3 인증팀 세션 타임아웃 단축 정책 개정안"]}
+{"id": "fp-12", "group": "fp-12", "split": "dev", "kind": "false_premise", "question": "운영 DB 직접 접근 계정 14개는 이번 주 안에 전부 회수하지?", "answerable": true, "gold": ["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항", "2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 배경"]}
+{"id": "fp-13", "group": "fp-13", "split": "dev", "kind": "false_premise", "question": "반출 이력은 24시간만 보관하면 되지?", "answerable": true, "gold": ["사내 데이터 외부 반출 승인 정책 v1.2 > 확정된 규정"]}
+{"id": "fp-14", "group": "fp-14", "split": "dev", "kind": "false_premise", "question": "MFA 복구 코드는 30일마다 새로 발급하지?", "answerable": true, "gold": ["인증팀 다단계 인증(MFA) 도입 설계 > 결정 사항", "인증팀 다단계 인증(MFA) 도입 설계 > 제안하는 설계"]}
+{"id": "fp-15", "group": "fp-15", "split": "dev", "kind": "false_premise", "question": "퇴사자 권한 회수 기한은 분기마다 한 번이지?", "answerable": true, "gold": ["2026-03 정보보안팀 접근 권한 정기 검토 회의록 > 결정 사항"]}

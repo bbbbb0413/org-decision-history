@@ -11,7 +11,6 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +26,6 @@ import java.util.Map;
 public class OpsHealthService {
 
     private static final Logger log = LoggerFactory.getLogger(OpsHealthService.class);
-    private static final Duration TIMEOUT = Duration.ofSeconds(2);
 
     private final JdbcClient jdbc;
     private final StringRedisTemplate redis;
@@ -47,8 +45,8 @@ public class OpsHealthService {
         this.services = services;
 
         var factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout((int) TIMEOUT.toMillis());
-        factory.setReadTimeout((int) TIMEOUT.toMillis());
+        factory.setConnectTimeout((int) services.healthTimeout().toMillis());
+        factory.setReadTimeout((int) services.healthTimeout().toMillis());
         this.http = RestClient.builder().requestFactory(factory).build();
     }
 

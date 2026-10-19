@@ -140,11 +140,15 @@ paths:
         schema:
           type: integer
           format: int64
-      - in: query
+      - description: 평가값 필터(대소문자 무시). 허용값이 아니면 필터 없이 전체
+        in: query
         name: rating
         required: false
         schema:
           type: string
+          enum:
+          - HELPFUL
+          - NOT_HELPFUL
       - in: query
         name: page
         required: false

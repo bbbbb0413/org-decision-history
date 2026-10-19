@@ -1,4 +1,4 @@
-"""StateGraph 연결. 보안 가드레일 -> 권한 스코프 -> 질의 재작성 -> 질의 지능화(HyDE/분해) -> 검색 -> 생성 -> 자가 비판(Critique)."""
+"""StateGraph 연결. 보안 가드레일 -> 권한 스코프 -> 질의 계획(재작성·갈래·하위 질의, HyDE) -> 검색 -> 생성 -> 자가 비판(Critique)."""
 from langgraph.graph import END, StateGraph
 
 from app.graph.nodes import GraphNodes
@@ -14,22 +14,21 @@ def build_graph(nodes: GraphNodes):
 
     # 2. 질의 전처리 및 지능화
     graph.add_node("fetch_scope", nodes.fetch_scope)
-    graph.add_node("rewrite_question", nodes.rewrite_question)
-    graph.add_node("expand_queries", nodes.expand_queries)
+    graph.add_node("plan_query", nodes.plan_query)
 
     # 3. 검색 및 근거 검증
     graph.add_node("retrieve", nodes.retrieve)
     graph.add_node("rerank", nodes.rerank)
+    graph.add_node("judge_evidence", nodes.judge_evidence)
     graph.add_node("no_evidence_no_hits", nodes.no_evidence_no_hits)
     graph.add_node("resolve_sources", nodes.resolve_sources)
     graph.add_node("no_evidence_no_sources", nodes.no_evidence_no_sources)
     graph.add_node("check_cache", nodes.check_cache)
     graph.add_node("emit_cached", nodes.emit_cached)
 
-    # 4. 답변 생성 및 자가 비판 (Self-Critique & Refinement Loop)
+    # 4. 답변 생성 및 자가 비판 (신뢰도가 낮으면 상태만 낮춘다)
     graph.add_node("generate", nodes.generate)
     graph.add_node("critique", nodes.critique)
-    graph.add_node("refine_query", nodes.refine_query)
 
     # 5. 저장 및 완료
     graph.add_node("persist_answer", nodes.persist_answer)
@@ -45,16 +44,16 @@ def build_graph(nodes: GraphNodes):
     )
     graph.add_edge("security_blocked", END)
 
-    # 권한 스코프 -> 질의 재작성 -> 질의 지능화(HyDE/분해) -> 검색 -> 재순위화
-    graph.add_edge("fetch_scope", "rewrite_question")
-    graph.add_edge("rewrite_question", "expand_queries")
-    graph.add_edge("expand_queries", "retrieve")
+    # 권한 스코프 -> 질의 계획 -> 검색 -> 재순위화
+    graph.add_edge("fetch_scope", "plan_query")
+    graph.add_edge("plan_query", "retrieve")
     graph.add_edge("retrieve", "rerank")
 
-    # 재순위화 후 근거 판정
+    # 재순위화 후 근거 판정(1차 거름 → 리랭커 확신 → 경량 LLM 판정)
+    graph.add_edge("rerank", "judge_evidence")
     graph.add_conditional_edges(
-        "rerank",
-        nodes.route_after_rerank,
+        "judge_evidence",
+        nodes.route_after_judge,
         {"resolve_sources": "resolve_sources", "no_evidence_no_hits": "no_evidence_no_hits"},
     )
     graph.add_edge("no_evidence_no_hits", END)
@@ -73,17 +72,9 @@ def build_graph(nodes: GraphNodes):
     )
     graph.add_edge("emit_cached", END)
 
-    # 생성 -> 자가 비판 (Critique)
+    # 생성 -> 자가 비판 -> 저장. 답변이 이미 스트리밍됐으므로 재검색 루프는 두지 않는다
     graph.add_edge("generate", "critique")
-
-    # 자가 비판 결과에 따른 조건부 분기 (재검색 vs 저장)
-    graph.add_conditional_edges(
-        "critique",
-        nodes.route_after_critique,
-        {"refine_query": "refine_query", "persist_answer": "persist_answer"},
-    )
-    # 재검색 루프: refine_query -> retrieve
-    graph.add_edge("refine_query", "retrieve")
+    graph.add_edge("critique", "persist_answer")
 
     # 저장 -> 요약 갱신 및 완료
     graph.add_edge("persist_answer", "refresh_summary_and_finish")

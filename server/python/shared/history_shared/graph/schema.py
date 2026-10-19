@@ -16,6 +16,9 @@ REL_TYPES = frozenset({
     "CONFLICTS_WITH",
 })
 
+# 문서 본문에서 LLM 이 뽑아 만드는 관계. 다시 동기화할 때 이것만 지우고 새로 만든다(sync.py)
+EXTRACTED_REL_TYPES = REL_TYPES - {"CONFLICTS_WITH"}
+
 # MERGE (n:{label} {{key_field: $key_value}}) 의 key_field. 지금은 항상 "id" 또는
 # "name"만 쓰지만(sync.py), 여기도 같은 이유로 허용 목록을 둔다
 KEY_FIELDS = frozenset({"id", "name"})

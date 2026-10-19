@@ -84,7 +84,7 @@ class SlackNotificationChannel:
                                 "emoji": True,
                             },
                             "url": payload.conflict_url,
-                            "style": "danger" if payload.severity_score >= 0.85 else "primary",
+                            "style": "danger" if payload.is_critical else "primary",
                         }
                     ],
                 },

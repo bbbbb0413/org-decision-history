@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.HexFormat;
@@ -24,16 +23,14 @@ import java.util.Objects;
 @Service
 public class TimelineService {
 
-    /** 상충 분석 캐시 유효 시간. 문서가 자주 바뀌지 않아 하루면 충분하다. */
-    private static final Duration CONFLICT_TTL = Duration.ofHours(24);
-    private static final int MAX_EVENTS = 30;
-
     private final JdbcClient jdbc;
     private final ConflictDetector detector;
+    private final TimelineProperties props;
 
-    public TimelineService(JdbcClient jdbc, ConflictDetector detector) {
+    public TimelineService(JdbcClient jdbc, ConflictDetector detector, TimelineProperties props) {
         this.jdbc = jdbc;
         this.detector = detector;
+        this.props = props;
     }
 
     // @Transactional을 붙이지 않는다 — conflictsOf가 캐시 미스일 때 ConflictDetector.detect가
@@ -68,7 +65,7 @@ public class TimelineService {
                 """);
         Map<String, Object> params = new HashMap<>();
         params.put("pattern", "%" + topic.strip() + "%");
-        params.put("limit", MAX_EVENTS);
+        params.put("limit", props.maxEvents());
 
         if (!scope.systemAdmin()) {
             where.append(" AND (d.organization_id IN (:orgIds) OR d.team_id IN (:teamIds) OR d.id IN (:docIds))");
@@ -171,7 +168,7 @@ public class TimelineService {
     }
 
     private void writeCache(String normalized, String scopeHash, List<TimelineDtos.Conflict> conflicts) {
-        Instant expiresAt = Instant.now().plus(CONFLICT_TTL);
+        Instant expiresAt = Instant.now().plus(props.conflictTtl());
         if (conflicts.isEmpty()) {
             jdbc.sql("""
                             INSERT INTO chat.timeline_conflict

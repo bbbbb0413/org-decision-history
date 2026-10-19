@@ -225,12 +225,36 @@ def existing_titles(token: str) -> set[str]:
         page += 1
 
 
-def wait_for_indexing(token: str, timeout_s: int = 180) -> bool:
-    """전역 색인 큐가 빌 때까지 기다린다. 개별 문서 상태를 주는 API 는 없다."""
+def wait_for_import(token: str, job_key: str, timeout_s: int = 60) -> dict | None:
+    """가져오기 작업이 끝날 때까지 기다린다. 202 를 받은 직후에는 항목이 아직 없다(비동기 처리)."""
     deadline = time.time() + timeout_s
     while time.time() < deadline:
-        status, body = call("GET", "/api/admin/ops/index-status", token)
-        if status == 200 and body.get("pendingCount") == 0 and body.get("runningCount") == 0:
+        status, detail = call("GET", f"/api/document-imports/{job_key}", token)
+        if status == 200 and detail.get("status") in ("COMPLETED", "FAILED"):
+            return detail
+        time.sleep(1)
+    return None
+
+
+def wait_for_indexing(token: str, document_ids: set[int], timeout_s: int = 180) -> bool:
+    """문서마다 색인 항목이 끝날(COMPLETED) 때까지 기다린다.
+
+    전역 색인 큐가 비었는지만 보면 안 된다 — 가져오기 직후에는 아웃박스 이벤트가 아직 색인기에 닿지 않아
+    큐가 "비어" 있고, 그때 질문하면 검색할 청크가 없어 근거 없음으로 끝난다.
+    """
+    deadline = time.time() + timeout_s
+    while time.time() < deadline:
+        done: set[int] = set()
+        status, page = call("GET", "/api/index-jobs?size=100", token)
+        for job in (page or {}).get("content", []) if status == 200 else []:
+            item_status, items = call("GET", f"/api/index-jobs/{job['jobKey']}/items", token)
+            for item in items if item_status == 200 else []:
+                if item.get("status") == "FAILED" and item.get("documentId") in document_ids:
+                    print(f"  색인 실패: 문서 {item['documentId']} — {item.get('failureReason')}", file=sys.stderr)
+                    return False
+                if item.get("status") == "COMPLETED":
+                    done.add(item.get("documentId"))
+        if document_ids <= done:
             return True
         time.sleep(3)
     return False
@@ -245,6 +269,7 @@ def seed(dry_run: bool) -> int:
 
     tokens: dict[str, str] = {}
     created = 0
+    document_ids: set[int] = set()
     for entry in MANIFEST:
         path = DOCUMENTS / entry["file"]
         if not path.exists():
@@ -280,18 +305,21 @@ def seed(dry_run: bool) -> int:
         if status != 202:
             sys.exit(f"가져오기 실패: {path.name} → {status} {body}")
 
-        detail_status, detail = call("GET", f"/api/document-imports/{body['jobKey']}", token)
-        items = (detail or {}).get("items", []) if detail_status == 200 else []
+        detail = wait_for_import(token, body["jobKey"])
+        if detail is None:
+            sys.exit(f"가져오기가 시간 안에 끝나지 않았다: {path.name}")
+        items = detail.get("items", [])
         failed = [i for i in items if i.get("status") != "SUCCESS"]
-        if failed:
-            sys.exit(f"가져오기가 항목 단위로 실패했다: {path.name} → {failed}")
-        print(f"  등록: {expected} (문서 {items[0].get('documentId') if items else '?'})")
+        if failed or not items:
+            sys.exit(f"가져오기가 항목 단위로 실패했다: {path.name} → {failed or detail}")
+        document_ids.add(items[0]["documentId"])
+        print(f"  등록: {expected} (문서 {items[0]['documentId']})")
         created += 1
 
     if created and not dry_run:
         print("색인을 기다린다...")
-        if wait_for_indexing(admin):
-            print("색인 큐가 비었다.")
+        if wait_for_indexing(admin, document_ids):
+            print(f"색인이 끝났다({len(document_ids)}건).")
         else:
             print("색인이 시간 안에 끝나지 않았다. 운영 현황에서 확인해라.", file=sys.stderr)
     return created

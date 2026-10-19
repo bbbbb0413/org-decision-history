@@ -1,6 +1,8 @@
 package com.odh.auth.metrics;
 
 import com.odh.auth.domain.SystemRole;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import com.odh.auth.policy.PolicyService;
 import com.odh.auth.repository.UserRoleRepository;
 import com.odh.common.ErrorCode;
@@ -51,6 +53,8 @@ public class ProductMetricsController {
     @GetMapping("/feedback")
     public PageResponse<MetricsDtos.FeedbackItem> feedback(
             @RequestHeader(InternalAuth.USER_ID_HEADER) Long actorId,
+            @Parameter(description = "평가값 필터(대소문자 무시). 허용값이 아니면 필터 없이 전체",
+                    schema = @Schema(implementation = FeedbackRating.class))
             @RequestParam(required = false) String rating,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {

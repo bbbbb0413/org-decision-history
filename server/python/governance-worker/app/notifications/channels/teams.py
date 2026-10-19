@@ -24,7 +24,7 @@ class TeamsNotificationChannel:
         return {
             "@type": "MessageCard",
             "@context": "http://schema.org/extensions",
-            "themeColor": "D9383A" if payload.severity_score >= 0.85 else "FF9900",
+            "themeColor": "D9383A" if payload.is_critical else "FF9900",
             "summary": f"⚠️ [정책 상충] {payload.source_doc_title}",
             "sections": [
                 {

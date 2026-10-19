@@ -42,6 +42,17 @@ internal:
 auth:
   service-url: ${AUTH_SERVICE_URL:http://localhost:8081}
 
+# 아웃박스 발행 튜닝값(OutboxProperties). 주기는 @Scheduled 가 같은 키를 직접 읽는다
+document:
+  outbox:
+    batch: 100
+    poll-interval: 2s
+
+# 권한 범위 캐시(common PermissionCacheProperties). 권한 변경은 최대 ttl 뒤에 반영된다
+permission-cache:
+  ttl: 10s
+  max-entries: 10000
+
 storage:
   # 서비스가 파일을 넣고 뺄 때 쓰는 내부 주소
   endpoint: ${STORAGE_ENDPOINT:http://localhost:9000}

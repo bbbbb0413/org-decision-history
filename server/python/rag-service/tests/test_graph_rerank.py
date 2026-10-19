@@ -1,6 +1,7 @@
 import pytest
 from unittest.mock import MagicMock
 
+from app.generation.prompt import PromptBudget
 from app.graph.build import build_graph
 from app.graph.nodes import GraphNodes
 from app.search.models import SearchHit
@@ -42,7 +43,6 @@ async def test_graph_compilation_with_reranker():
         generator=mock_generator,
         reranker=reranker,
         candidate_count=20,
-        reranker_top_k=5,
         reranker_min_score=0.0,
     )
 
@@ -68,14 +68,12 @@ async def test_nodes_rerank_integration():
     mock_memory = MagicMock()
     mock_generator = MagicMock()
 
-    class CustomRanker:
-        def rerank(self, req):
-            # 역순으로 정렬
-            return [{"id": p["id"], "score": float(10 - p["id"]), "text": p["text"]} for p in req.passages]
+    class CustomClient:
+        async def scores(self, query, texts):
+            # 앞 후보일수록 높은 점수(첫 후보 10점, 둘째 9점, ...)
+            return [float(10 - i) for i in range(len(texts))]
 
-    reranker = CrossEncoderReranker(enabled=False)
-    reranker._ranker = CustomRanker()
-    reranker.enabled = True
+    reranker = CrossEncoderReranker(CustomClient())
 
     nodes = GraphNodes(
         db=mock_db,
@@ -87,8 +85,8 @@ async def test_nodes_rerank_integration():
         generator=mock_generator,
         reranker=reranker,
         candidate_count=20,
-        reranker_top_k=2,
         reranker_min_score=0.0,
+        prompt_budget=PromptBudget(evidence_count=2),
     )
 
     state = {
@@ -103,7 +101,7 @@ async def test_nodes_rerank_integration():
     result = await nodes.rerank(state)
     hits = result["hits"]
     assert len(hits) == 2
-    # CustomRanker: id 0 gets score 10, id 1 gets score 9
+    # CustomClient: 첫 후보 10점, 둘째 9점
     assert hits[0].document_id == 1
     assert hits[1].document_id == 2
     assert hits[0].rerank_score == 10.0

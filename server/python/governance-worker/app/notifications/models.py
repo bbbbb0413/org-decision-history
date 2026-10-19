@@ -2,6 +2,8 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import List
 
+from app.severity import display_label
+
 
 @dataclass(frozen=True)
 class ConflictNotificationPayload:
@@ -14,6 +16,7 @@ class ConflictNotificationPayload:
     target_clause: str
     conflict_type: str
     severity_score: float
+    severity_level: str  # 기록할 때 정한 등급(app/severity.py). 여기서 다시 계산하지 않는다
     reasoning: str
     affected_teams: List[str]
     recommended_action: str
@@ -34,8 +37,8 @@ class ConflictNotificationPayload:
 
     @property
     def severity_label(self) -> str:
-        if self.severity_score >= 0.85:
-            return f"🔴 High ({self.severity_score:.2f})"
-        elif self.severity_score >= 0.70:
-            return f"🟡 Medium ({self.severity_score:.2f})"
-        return f"🟢 Low ({self.severity_score:.2f})"
+        return display_label(self.severity_level, self.severity_score)
+
+    @property
+    def is_critical(self) -> bool:
+        return self.severity_level == "CRITICAL"

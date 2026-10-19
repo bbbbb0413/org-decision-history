@@ -5,6 +5,7 @@ import json
 
 import pytest
 from fakes import FakeEvents, FakeFiles
+from history_shared.events import DocumentUnindexedEvent
 from golden import CASES, EXPECTED, GOLDEN, input_bytes, load
 from history_shared.config import QdrantSettings
 from history_shared.embeddings import Embedder, EmbeddingError, LocalHashingEmbedder
@@ -288,6 +289,26 @@ async def test_event_publish_failure_is_retryable_but_keeps_both_indexes(pool, a
     # 재시도로 색인을 다시 돌려도 되게, 이미 만든 청크·벡터는 그대로 남아 있어야 한다
     assert len(await chunk_rows(pool, document_id)) == 1
     assert len(await points_of(qdrant, document_id)) == 1
+
+
+async def test_deleted_document_publishes_document_unindexed_event(pool, add_document, vectors):
+    document_id = await add_document(organization_id=3, team_id=9, version=2)
+    await pool.execute("UPDATE document.document SET deleted_at = now() WHERE id = $1", document_id)
+    events = FakeEvents()
+
+    assert await pipeline_of(pool, vectors, events=events).index(document_id) == 0
+
+    [event] = events.published
+    assert isinstance(event, DocumentUnindexedEvent)
+    assert (event.document_id, event.version, event.organization_id, event.team_id) == (document_id, 2, 3, 9)
+
+
+async def test_unindexed_publish_failure_is_retryable(pool, add_document, vectors):
+    document_id = await add_document(deleted=True)
+
+    error = await expect_failure(pipeline_of(pool, vectors, events=FakeEvents(fail=True)), document_id)
+
+    assert (error.stage, error.retryable) == (IndexStage.EVENT_PUBLISH, True)
 
 
 async def test_no_publisher_configured_skips_event_silently(pool, add_document, vectors):

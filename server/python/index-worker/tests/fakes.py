@@ -1,5 +1,5 @@
 """테스트 대역."""
-from history_shared.events import DocumentIndexedEvent
+from history_shared.events import IndexEvent
 
 from app.documents import DocumentSource
 
@@ -24,9 +24,9 @@ class FakeEvents:
 
     def __init__(self, *, fail: bool = False):
         self.fail = fail
-        self.published: list[DocumentIndexedEvent] = []
+        self.published: list[IndexEvent] = []
 
-    async def publish(self, event: DocumentIndexedEvent) -> None:
+    async def publish(self, event: IndexEvent) -> None:
         if self.fail:
             raise ConnectionError("redis down")
         self.published.append(event)

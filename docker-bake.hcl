@@ -18,7 +18,7 @@ variable "VITE_GATEWAY_URL" {
 group "default" {
   targets = [
     "gateway", "auth-service", "document-service", "chat-service",
-    "rag-service", "index-worker", "governance-worker", "front",
+    "rag-service", "reranker-service", "index-worker", "governance-worker", "front",
   ]
 }
 
@@ -54,6 +54,14 @@ target "rag-service" {
   inherits   = ["_common"]
   dockerfile = "server/python/rag-service/Dockerfile"
   tags       = ["history/rag-service:${IMAGE_TAG}"]
+}
+
+# 재순위화 추론 서버(TEI 기반). 모델은 리비전을 고정해 빌드 때 Hugging Face 에서 받아 넣는다.
+# 베이스는 빌드 플랫폼(amd64·arm64)에 맞춰 Dockerfile 이 고른다
+target "reranker-service" {
+  inherits   = ["_common"]
+  dockerfile = "server/inference/reranker/Dockerfile"
+  tags       = ["history/reranker-service:${IMAGE_TAG}"]
 }
 
 # 색인 워커(Python)

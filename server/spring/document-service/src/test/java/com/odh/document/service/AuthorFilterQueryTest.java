@@ -1,6 +1,7 @@
 package com.odh.document.service;
 
 import com.odh.common.PermissionScope;
+import com.odh.document.domain.ConflictSeverityLevel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -153,6 +154,18 @@ class AuthorFilterQueryTest {
         assertThat(conflicts.listConflicts(null, ME, 0, 20, ALL).content()).isEmpty();
     }
 
+    @Test
+    @DisplayName("상충 목록 — 등급은 저장된 값을 그대로 내준다(점수로 다시 계산하지 않는다)")
+    void conflictsReturnStoredSeverityLevel() {
+        // 점수 0.90 이지만 기록 당시 구간으로 HIGH 로 저장된 상충. 지금 구간(0.85)으로 다시 계산하면 CRITICAL 이다
+        insertConflict(myDoc, theirDoc, "기록 당시 HIGH", "HIGH");
+
+        var item = conflicts.listConflicts(null, null, 0, 20, ALL).content().getFirst();
+
+        assertThat(item.severityScore()).isEqualTo(0.90);
+        assertThat(item.severityLevel()).isEqualTo(ConflictSeverityLevel.HIGH);
+    }
+
     private long insertDocument(String title, Long authorId, String authorName) {
         return jdbc.sql("""
                         INSERT INTO document.document
@@ -167,15 +180,20 @@ class AuthorFilterQueryTest {
     }
 
     private long insertConflict(long sourceId, long targetId, String clause) {
+        return insertConflict(sourceId, targetId, clause, "CRITICAL");
+    }
+
+    private long insertConflict(long sourceId, long targetId, String clause, String severityLevel) {
         return jdbc.sql("""
                         INSERT INTO document.decision_conflicts
                             (source_doc_id, target_doc_id, source_clause, target_clause,
-                             conflict_type, severity_score, reasoning, affected_teams, status)
+                             conflict_type, severity_score, severity_level, reasoning, affected_teams, status)
                         VALUES (:source, :target, :clause, '상대 조항',
-                                'DIRECT_CONTRADICTION', 0.90, '사유', '{}', 'OPEN')
+                                'DIRECT_CONTRADICTION', 0.90, :level, '사유', '{}', 'OPEN')
                         RETURNING id
                         """)
                 .param("source", sourceId).param("target", targetId).param("clause", clause)
+                .param("level", severityLevel)
                 .query(Long.class).single();
     }
 }

@@ -14,10 +14,6 @@ from app.settings import Settings
 
 log = structlog.get_logger()
 
-_SCOPE_TTL_SECONDS = 10.0
-# 이 이상 서로 다른 사용자가 동시에 뜨겁게 조회될 일은 없다 — 넘치면 오래된 것부터 밀려난다
-_SCOPE_CACHE_MAX_ENTRIES = 10_000
-
 
 @dataclass(frozen=True)
 class PermissionScope:
@@ -64,7 +60,7 @@ class AuthClient:
         # 수동 TTL 검사로는 오래된 항목이 지워지지 않고 계속 쌓인다.
         # TTLCache 가 만료·최대 크기 둘 다 알아서 쫓아낸다
         self._cache: TTLCache[int, PermissionScope] = TTLCache(
-            maxsize=_SCOPE_CACHE_MAX_ENTRIES, ttl=_SCOPE_TTL_SECONDS
+            maxsize=settings.permission_cache_max_entries, ttl=settings.permission_cache_ttl_seconds
         )
 
     async def close(self) -> None:

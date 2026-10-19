@@ -50,6 +50,16 @@ ops:
   document-url: ${DOCUMENT_SERVICE_URL:http://localhost:8082}
   index-url:    ${INDEX_SERVICE_URL:http://localhost:8083}
   chat-url:     ${CHAT_SERVICE_URL:http://localhost:8084}
+  # 운영 화면 튜닝값(OpsProperties). 기본값은 코드와 같다
+  health-timeout: 2s     # 다른 서비스 상태 확인 연결·읽기 타임아웃
+  dlq-max-entries: 100   # DLQ 목록 한 번에 읽는 최대 항목
+
+# 제품 지표 정책값(MetricsProperties)
+metrics:
+  product:
+    latency-target: 5s   # 일반 질문 응답 목표(기능명세서 핵심 지표 4)
+    max-days: 365
+    default-days: 30
 
 # OpenAPI 스펙 생성. `/v3/api-docs(.yaml)` 는 내부 키 필터 뒤에 있어
 # 게이트웨이를 통해서는 닿지 않는다. 스펙 원본은 contracts/openapi 에 떠서 커밋한다.

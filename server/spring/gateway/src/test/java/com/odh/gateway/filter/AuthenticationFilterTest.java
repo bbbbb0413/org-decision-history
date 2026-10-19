@@ -158,6 +158,49 @@ class AuthenticationFilterTest {
         verify(chain, never()).filter(any());
     }
 
+    /**
+     * 키 조회·Redis 같은 검증 기반이 실패하면 503 이다. 401 로 답하면 프론트가 재발급을 시도하고,
+     * 재발급도 같은 이유로 실패해 사용자를 로그아웃시킨다.
+     */
+    @Test
+    void keySourceFailure_respondsWith503NotTokenInvalid() {
+        assertServiceUnavailable(new com.nimbusds.jose.jwk.source.JWKSetUnavailableException("jwks down", null));
+    }
+
+    @Test
+    void redisFailure_respondsWith503NotTokenInvalid() {
+        assertServiceUnavailable(new org.springframework.data.redis.RedisConnectionFailureException("redis down"));
+    }
+
+    @Test
+    void forgedOrMalformedToken_isStill401TokenInvalid() {
+        for (Throwable e : List.<Throwable>of(
+                new com.nimbusds.jose.proc.BadJWSException("Signed JWT rejected: Invalid signature"),
+                new java.text.ParseException("Invalid serialized JWT", 0))) {
+            MockServerWebExchange exchange = MockServerWebExchange.from(
+                    MockServerHttpRequest.get("/api/documents/1").header("Authorization", "Bearer bad").build());
+            when(verifier.verify("bad")).thenReturn(Mono.error(e));
+
+            filter.filter(exchange, chain).block();
+
+            assertThat(exchange.getResponse().getStatusCode()).as(e.toString()).isEqualTo(HttpStatus.UNAUTHORIZED);
+            assertThat(responseBody(exchange)).contains("TOKEN_INVALID");
+        }
+        verify(chain, never()).filter(any());
+    }
+
+    private void assertServiceUnavailable(Throwable failure) {
+        MockServerWebExchange exchange = MockServerWebExchange.from(
+                MockServerHttpRequest.get("/api/documents/1").header("Authorization", "Bearer good").build());
+        when(verifier.verify("good")).thenReturn(Mono.error(failure));
+
+        filter.filter(exchange, chain).block();
+
+        assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+        assertThat(responseBody(exchange)).contains("AUTH_UNAVAILABLE").doesNotContain("TOKEN_INVALID");
+        verify(chain, never()).filter(any());
+    }
+
     private ServerHttpRequest forwardedRequest() {
         ArgumentCaptor<ServerWebExchange> captor = ArgumentCaptor.forClass(ServerWebExchange.class);
         verify(chain).filter(captor.capture());

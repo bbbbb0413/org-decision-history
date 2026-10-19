@@ -16,6 +16,8 @@ WORKDIR /app
 COPY --from=deps /deps /usr/local/lib/python3.12/site-packages
 COPY server/python/rag-service/app ./app
 COPY server/python/rag-service/tests ./tests
+# 오프라인 평가(평가셋·스크립트). 운영과 같은 이미지·설정으로 돌린다: python -m evaluation.retrieval_eval
+COPY server/python/rag-service/evaluation ./evaluation
 USER app
 # HTTP 포트를 열지 않는다 — Kafka consumer로만 동작한다.
 ENTRYPOINT ["python", "-m", "app.main"]

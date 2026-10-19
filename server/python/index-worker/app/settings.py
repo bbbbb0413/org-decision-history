@@ -29,9 +29,12 @@ class Settings(ServiceSettings):
     runner_enabled: bool = True
     runner_interval_seconds: float = 1.0
     runner_max_per_tick: int = 20
-    # RUNNING 으로 이 시간 넘게 남은 항목은 워커가 처리 도중 중단된 것으로 보고 되돌린다.
-    # 속도 제한 대기를 포함한 가장 긴 색인 시간보다 넉넉해야 한다
-    running_timeout_minutes: int = 30
+    # 처리 중 항목의 생존 신호. 이 간격으로 heartbeat_at 을 쓰고, 신호가 stale 초 넘게 끊긴 RUNNING 은
+    # 워커가 죽은 것으로 보고 되돌린다. 처리 시간이 아니라 신호 간격 기준이라 긴 색인과 무관하게 짧게 둔다
+    running_heartbeat_seconds: float = 10.0
+    running_stale_seconds: float = 60.0
+    # 멈춘 항목을 찾는 주기. 최악의 회수 지연은 stale + 이 값이다
+    running_recover_interval_seconds: float = 30.0
 
 
 settings = Settings()

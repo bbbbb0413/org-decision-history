@@ -1,10 +1,10 @@
-"""색인 완료 이벤트(stream:index-events, DOCUMENT_INDEXED)를 받아 상충 검사를 건다."""
+"""색인 결과 이벤트(stream:index-events)를 받아 상충 검사를 걸거나 삭제 문서를 그래프에서 뺀다."""
 import json
 import uuid
 
 from history_shared.streams import PermanentMessageError, StreamMessage
 
-from app.consumer import DocumentIndexedHandler, build_consumer
+from app.consumer import IndexEventHandler, build_consumer
 from app.settings import Settings
 
 
@@ -16,25 +16,39 @@ def fields(**payload) -> dict[str, str]:
 class RecordingDetector:
     def __init__(self):
         self.calls: list[tuple[int, int]] = []
+        self.forgotten: list[int] = []
 
     async def detect_and_record(self, document_id: int, organization_id: int):
         self.calls.append((document_id, organization_id))
         return []
 
+    async def forget_document(self, document_id: int):
+        self.forgotten.append(document_id)
+
 
 async def test_handler_dispatches_document_id_and_organization_id():
     detector = RecordingDetector()
 
-    await DocumentIndexedHandler(detector)(StreamMessage("1-0", fields(organizationId=7)))
+    await IndexEventHandler(detector)(StreamMessage("1-0", fields(organizationId=7)))
 
     assert detector.calls == [(12, 7)]
+
+
+async def test_unindexed_event_removes_document_from_graph():
+    detector = RecordingDetector()
+    body = {"documentId": 12, "version": 3, "organizationId": 1, "teamId": None}
+    unindexed = {"aggregateId": "12", "eventType": "DOCUMENT_UNINDEXED", "payload": json.dumps(body)}
+
+    await IndexEventHandler(detector)(StreamMessage("1-0", unindexed))
+
+    assert (detector.forgotten, detector.calls) == ([12], [])
 
 
 async def test_wrong_event_type_is_a_permanent_error():
     detector = RecordingDetector()
 
     try:
-        await DocumentIndexedHandler(detector)(StreamMessage("1-0", {"eventType": "DOCUMENT_CREATED", "payload": "{}"}))
+        await IndexEventHandler(detector)(StreamMessage("1-0", {"eventType": "DOCUMENT_CREATED", "payload": "{}"}))
         assert False, "예외가 나야 한다"
     except PermanentMessageError:
         pass

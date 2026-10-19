@@ -73,6 +73,10 @@ jobs:
               - *all
               - *python
               - server/python/rag-service/**
+            # TEI 기반이라 Python 공통 패키지와 무관하다
+            reranker-service:
+              - *all
+              - server/inference/reranker/**
             index-worker:
               - *all
               - *python

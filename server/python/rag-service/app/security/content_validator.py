@@ -2,15 +2,9 @@ from dataclasses import dataclass
 import re
 import unicodedata
 
-_ZERO_WIDTH_PATTERN = re.compile(r"[\u200b-\u200d\ufeff]")
+from app.security.rule_loader import Rule, load_rules
 
-INJECTION_PATTERNS = [
-    re.compile(r"ignore\s+(previous|all)\s+instructions?", re.IGNORECASE),
-    re.compile(r"system\s*:\s*", re.IGNORECASE),
-    re.compile(r"당신의\s*이전\s*지시(사항)?을?\s*무시(해|하세요|하십시오)?", re.IGNORECASE),
-    re.compile(r"시스템\s*프롬프트를?\s*(출력|알려줘|보여줘)", re.IGNORECASE),
-    re.compile(r"<\s*script[^>]*>", re.IGNORECASE),
-]
+_ZERO_WIDTH_PATTERN = re.compile(r"[​-‍﻿]")
 
 
 @dataclass(frozen=True)
@@ -18,25 +12,30 @@ class GuardrailVerdict:
     is_allowed: bool
     reason: str | None = None
     pattern: str | None = None
+    # 걸린 규칙(rules/injection.yaml 의 id). 차단 로그와 규칙 파일을 대조할 때 쓴다
+    rule_id: str | None = None
 
     @classmethod
     def allow(cls) -> "GuardrailVerdict":
         return cls(is_allowed=True)
 
     @classmethod
-    def block(cls, reason: str, pattern: str) -> "GuardrailVerdict":
-        return cls(is_allowed=False, reason=reason, pattern=pattern)
+    def block(cls, reason: str, pattern: str, rule_id: str | None = None) -> "GuardrailVerdict":
+        return cls(is_allowed=False, reason=reason, pattern=pattern, rule_id=rule_id)
 
 
 class ContentValidator:
-    """프롬프트 인젝션, 제로너비 공백 우회 및 악의적 패턴을 사전 차단한다."""
+    """프롬프트 인젝션, 제로너비 공백 우회 및 악의적 패턴을 사전 차단한다. 규칙은 rules/injection.yaml 이다."""
+
+    def __init__(self, rules: list[Rule] | None = None):
+        self._rules = rules if rules is not None else load_rules("injection")
 
     def inspect(self, text: str) -> GuardrailVerdict:
         cleaned = self._clean_text(text)
-        matched = next((p for p in INJECTION_PATTERNS if p.search(cleaned)), None)
+        matched = next((r for r in self._rules if r.pattern.search(cleaned)), None)
         if matched is None:
             return GuardrailVerdict.allow()
-        return GuardrailVerdict.block("의심스러운 지시문 패턴 감지", matched.pattern)
+        return GuardrailVerdict.block("의심스러운 지시문 패턴 감지", matched.pattern.pattern, matched.id)
 
     @staticmethod
     def _clean_text(text: str) -> str:
@@ -44,4 +43,4 @@ class ContentValidator:
         return _ZERO_WIDTH_PATTERN.sub("", normalized)
 
 
-__all__ = ["INJECTION_PATTERNS", "GuardrailVerdict", "ContentValidator"]
+__all__ = ["GuardrailVerdict", "ContentValidator"]

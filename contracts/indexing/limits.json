@@ -1,0 +1,5 @@
+{
+  "description": "가져오기(document-service DocumentMetadataExtractor)와 색인(index-worker app/parse.py)이 함께 지키는 원본 읽기 상한. 두 단계가 같은 범위를 봐야 하므로 한쪽만 바꾸면 그쪽 테스트가 실패한다(contracts/indexing/README.md §3.2).",
+  "xlsxMaxRows": 2000,
+  "xlsxMaxCellChars": 500
+}

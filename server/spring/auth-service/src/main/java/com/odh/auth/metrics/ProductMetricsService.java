@@ -15,7 +15,6 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * 제품 지표 집계.
@@ -59,28 +58,23 @@ public class ProductMetricsService {
 
     private static final Logger log = LoggerFactory.getLogger(ProductMetricsService.class);
 
-    /** 핵심 지표 4의 일반 질문 목표(5초). 타임라인 질문 목표(10초)는 여기서 측정하지 않는다. */
-    private static final long LATENCY_TARGET_MS = 5_000;
-
-    /** 조회 기간 상한. 1년을 넘는 집계는 대시보드 용도를 벗어나고 스캔 비용만 커진다. */
-    private static final int MAX_DAYS = 365;
-    private static final int DEFAULT_DAYS = 30;
-
-    /** 목록에서 걸 수 있는 평가값. 임의 문자열이 SQL 비교로 흘러가지 않게 허용 목록으로 막는다. */
-    private static final Set<String> ALLOWED_RATINGS = Set.of("HELPFUL", "NOT_HELPFUL");
-
     private final JdbcClient jdbc;
+    /** 지연 목표(일반 질문, 기능명세서 핵심 지표 4)·조회 기간. 타임라인 질문 목표(10초)는 여기서 측정하지 않는다 */
+    private final MetricsProperties props;
+    private final long latencyTargetMs;
 
-    public ProductMetricsService(JdbcClient jdbc) {
+    public ProductMetricsService(JdbcClient jdbc, MetricsProperties props) {
         this.jdbc = jdbc;
+        this.props = props;
+        this.latencyTargetMs = props.latencyTarget().toMillis();
     }
 
     /** 음수·0·과대 입력을 기본값과 상한으로 맞춘다. {@code PageRequest} 와 같은 보정 방침이다. */
-    public static int clampDays(int days) {
+    public int clampDays(int days) {
         if (days <= 0) {
-            return DEFAULT_DAYS;
+            return props.defaultDays();
         }
-        return Math.min(days, MAX_DAYS);
+        return Math.min(days, props.maxDays());
     }
 
     /**
@@ -108,7 +102,7 @@ public class ProductMetricsService {
         var feedback = section(degraded, "feedback",
                 () -> feedback(from), MetricsDtos.Feedback.empty());
         var latency = section(degraded, "latency",
-                () -> latency(from), MetricsDtos.Latency.empty(LATENCY_TARGET_MS));
+                () -> latency(from), MetricsDtos.Latency.empty(latencyTargetMs));
         var denials = section(degraded, "denials",
                 () -> denials(from), MetricsDtos.AccessDenials.empty());
         var adoption = section(degraded, "adoption",
@@ -233,7 +227,7 @@ public class ProductMetricsService {
                         WHERE m.role = 'ASSISTANT' AND m.created_at >= :from
                         """)
                 .param("from", boundary(from))
-                .param("targetMs", LATENCY_TARGET_MS)
+                .param("targetMs", latencyTargetMs)
                 .query((rs, i) -> {
                     long measured = rs.getLong("measured");
                     var avg = rs.getBigDecimal("avg_ms");
@@ -244,7 +238,7 @@ public class ProductMetricsService {
                             avg == null ? null : avg.longValue(),
                             p95Null ? null : p95,
                             rs.getLong("over_target"),
-                            LATENCY_TARGET_MS);
+                            latencyTargetMs);
                 })
                 .single();
     }
@@ -302,9 +296,8 @@ public class ProductMetricsService {
     @Transactional(readOnly = true)
     public PageResponse<MetricsDtos.FeedbackItem> feedbackItems(String rating, int page, int size) {
         PageRequest paging = PageRequest.of(page, size);
-        String safeRating = (rating != null && ALLOWED_RATINGS.contains(rating.trim().toUpperCase()))
-                ? rating.trim().toUpperCase()
-                : null;
+        // 허용값은 FeedbackRating 한 곳에 있다. 아니면 필터 없이 전체
+        String safeRating = FeedbackRating.parse(rating).map(Enum::name).orElse(null);
 
         long total = jdbc.sql("""
                         SELECT count(*) FROM chat.answer_feedback f

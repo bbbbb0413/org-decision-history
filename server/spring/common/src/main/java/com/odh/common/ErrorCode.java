@@ -7,6 +7,8 @@ public final class ErrorCode {
     public static final String INVALID_CREDENTIALS = "INVALID_CREDENTIALS";
     public static final String TOKEN_INVALID       = "TOKEN_INVALID";
     public static final String TOKEN_EXPIRED       = "TOKEN_EXPIRED";
+    /** 토큰을 검증할 기반(키 조회·Redis)이 실패했다. 토큰이 틀렸다는 뜻이 아니다 — 503 */
+    public static final String AUTH_UNAVAILABLE    = "AUTH_UNAVAILABLE";
     public static final String INTERNAL_AUTH_FAILED= "INTERNAL_AUTH_FAILED";
     public static final String SCOPE_VIOLATION     = "SCOPE_VIOLATION";
     public static final String NOT_FOUND           = "NOT_FOUND";

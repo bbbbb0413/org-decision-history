@@ -164,7 +164,7 @@ class ConflictDetectorTest {
     }
 
     private ConflictDetector detector(LlmProperties props, AnswerGenerator generator) {
-        return new ConflictDetector(generator, props);
+        return new ConflictDetector(generator, props, TimelineProperties.defaults());
     }
 
     private TimelineSource source(long documentId, String status, String decisionExcerpt) {

@@ -43,13 +43,13 @@ flowchart TB
     end
 
     subgraph Edge["Edge Tier"]
-        GW["Spring Cloud Gateway<br/>• IP Rate Limiting (Redis)<br/>• Reactive JWT Verifier<br/>• Correlation ID Injection"]
+        GW["Spring Cloud Gateway<br/>• IP Rate Limiting (Redis)<br/>• Reactive JWT Verifier (JWKS Outage Tolerance)<br/>• Correlation ID Injection"]
     end
 
     subgraph CoreServices["Core Domain Services (Spring MVC / PostgreSQL)"]
         AUTH["auth-service<br/>• RBAC / PermissionScope<br/>• Refresh Token Rotation<br/>• Product & Ops Metrics"]
         DOC["document-service<br/>• Document CRUD & Files<br/>• Transactional Outbox"]
-        CHAT["chat-service<br/>• Conversations & Timeline<br/>• SSE Stream Relay"]
+        CHAT["chat-service<br/>• Conversations & Timeline<br/>• SSE Relay (Pub/Sub Wake-up + XRANGE)"]
     end
 
     subgraph EventBrokers["Event & Message Broker Tier"]
@@ -60,7 +60,11 @@ flowchart TB
     subgraph Workers["Autonomous Workers (Python 3.12 / AsyncIO)"]
         IDX["index-worker<br/>• PDF/DOCX/PPTX/XLSX Parser<br/>• Font-size Heading Inference<br/>• Bounding Box Extraction"]
         GOV["governance-worker<br/>• Real-time Conflict Detector<br/>• Neo4j Graph Sync<br/>• Slack/Teams/Email Alerts"]
-        RAG["rag-service (LangGraph)<br/>• Hybrid Search (FTS + Vector)<br/>• Cross-Encoder Reranker<br/>• Neo4j GraphRAG Multi-hop"]
+        RAG["rag-service (LangGraph)<br/>• LLM Query Planner<br/>• Hybrid Search (FTS + Vector)<br/>• LLM Evidence Judge<br/>• Neo4j GraphRAG Multi-hop"]
+    end
+
+    subgraph Models["Model Serving"]
+        RR["reranker-service<br/>• Hugging Face TEI (CPU, ONNX)<br/>• bge-reranker-base int8"]
     end
 
     subgraph Storage["Storage & Intelligence Tier"]
@@ -82,7 +86,7 @@ flowchart TB
 
     %% Events to Workers
     RS -->|"group: index-worker"| IDX
-    IDX -->|"DOCUMENT_INDEXED"| RS
+    IDX -->|"DOCUMENT_INDEXED / UNINDEXED"| RS
     RS -->|"group: governance-worker"| GOV
     KAFKA -->|"Consume Job"| RAG
 
@@ -90,10 +94,11 @@ flowchart TB
     IDX --> QD & PG & MIO
     GOV --> QD & N4J
     RAG --> QD & N4J & PG
+    RAG -->|"POST /rerank"| RR
 
     %% Worker to SSE Stream
-    RAG -->|"XADD chat:answer:stream"| RS
-    RS -->|"XREAD Tail → SSE Relay"| CHAT
+    RAG -->|"XADD chat:answer:stream + PUBLISH"| RS
+    RS -->|"Wake-up → XRANGE → SSE Relay"| CHAT
 ```
 
 서비스별 역할, 요청 흐름(인증 · 문서 등록 → 색인 → 상충 감지 · 질문 → 답변 스트리밍 · 토큰 회전), 답변 파이프라인과 신뢰성 장치는 [**아키텍처 및 요청 흐름**](docs/아키텍처_및_요청흐름.md) 문서에 시퀀스 다이어그램과 함께 정리했습니다.
@@ -114,8 +119,10 @@ flowchart TB
 ### ② 환각(Hallucination) 억제: 2차 재순위화 + PDF 시각적 바운딩 박스
 - **문제**: 범용 벡터 검색의 상위 청크가 실제 질문과 미묘하게 어긋나 환각을 유발하고, 텍스트만 나열된 출처는 사용자가 신뢰하기 어려움.
 - **해결책**:
-  - **하이브리드 검색 & Reranking**: PostgreSQL 전문검색(`ts_rank`)과 Qdrant(코사인 벡터) 결과를 RRF로 병합해 상위 20개 후보를 만든 뒤, `ms-marco-MultiBERT-L-12` Cross-Encoder 모델을 통해 의미적 유사도를 2차 정밀 재평가(Top-5 선정).
-  - **근거가 없으면 답하지 않음**: 재순위화 후 근거가 없거나 요청자가 볼 수 있는 출처가 없으면 생성 단계로 가지 않고 `NO_EVIDENCE`로 종료.
+  - **하이브리드 검색 & Reranking**: PostgreSQL 전문검색(`ts_rank`)과 Qdrant(코사인 벡터) 결과를 RRF로 병합해 상위 20개 후보를 만든 뒤, 별도 서빙하는 `reranker-service`(Hugging Face TEI + `bge-reranker-base` int8, 한국어 평가셋 MRR 0.92)가 2차 정밀 재평가(Top-5 선정). 리랭커가 실패하거나 8초 안에 답하지 않으면 1차 순위로 답한다.
+  - **질의 계획**: 경량 LLM 한 번으로 대화 맥락 재작성·갈래(단순/복합/추상)·하위 질의를 정한다. 복합 질문은 하위 질의마다 따로 재순위화해 한 대상이 근거를 독차지하지 않게 한다.
+  - **근거가 없으면 답하지 않음**: 벡터 유사도로 값싸게 거른 뒤 경량 LLM이 "근거에 답이 있는가"를 판정한다. 근거가 없거나 요청자가 볼 수 있는 출처가 없으면 생성 단계로 가지 않고 `NO_EVIDENCE`로 종료.
+  - **오프라인 평가**: 원 질문·바꿔 말한 질문·답 없는 질문을 섞은 한국어 평가셋(dev/test 분리)으로 검색 순위·근거 판정·질의 계획을 재고, 리랭커 이미지가 바뀌면 CI가 MRR 0.70 미만에서 실패시킨다.
   - **PDF 시각적 검증 (Visual Grounding)**:
     - `pdfplumber` 기반 파서가 문서를 색인할 때 텍스트뿐만 아니라 줄 단위 좌표(페이지·x·y·w·h, 0~1 정규화)를 추출하여 PostgreSQL 청크 테이블에 보존. 글자 크기로 헤딩을 추정해 PDF도 절 단위로 인용.
     - 프론트엔드 출처 패널에서 클릭 시 원본 PDF를 모달로 띄우고, 답변의 근거가 된 청크가 차지한 줄들을 하이라이트.
@@ -126,7 +133,8 @@ flowchart TB
   - **조항 단위 후보 게이팅**:
     1. **핵심 조항 추출**: 색인 완료 이벤트 수신 시, LLM이 새 문서에서 규정·결정에 해당하는 핵심 조항을 뽑는다.
     2. **벡터 최근접 후보**: 조항마다 같은 조직 안에서 Qdrant 최근접 청크 5개만 비교 후보로 삼는다. LLM 호출이 문서 수의 제곱이 아니라 `조항 수 × 5` 이하로 묶인다.
-    3. **LLM 모순 판정**: 후보 쌍에 대해서만 Groq(GPT-OSS 120B, 한도 초과 시 20B)를 호출해 모순 여부, 심각도(0.0~1.0), 상충 조항을 추출하고 심각도 0.70 이상만 기록.
+    3. **LLM 모순 판정**: 후보 쌍에 대해서만 Groq(GPT-OSS 120B, 한도 초과 시 20B)를 호출해 모순 여부, 심각도(0.0~1.0), 상충 조항을 추출하고 심각도 0.70 이상만 기록. 등급(치명적·높음·보통)은 기록할 때 한 곳에서 정해 저장하므로 알림과 화면이 어긋나지 않는다.
+  - **사람의 판정 보존**: 판정에 쓰인 원문 텍스트의 해시를 함께 기록해, 문서의 다른 곳만 고쳐 판이 올라가도 사람이 기각한 상충을 다시 알리지 않는다.
   - **자동 버전 수명주기 관리**: 문서를 개정(Revision)하여 새 판본이 등록되면, 과거 판본을 기준으로 열려 있던 기존 상충 건을 감지하여 자동으로 `SUPERSEDED` 상태로 전환 및 종료.
   - **다채널 알림 라우팅**: 상충 감지 시 Slack Block Kit, Teams Card, 그리고 해당 문서의 **실제 작성자(Author) 개인 이메일**로 상충 보고서 자동 발송.
 
@@ -142,6 +150,20 @@ flowchart TB
   - `contracts/` 디렉터리에 JSON Schema(이벤트 포맷) 및 OpenAPI 스펙을 중앙 집중화.
   - **Golden Snapshot Tests**: 파싱·청킹·임베딩 결과의 기대값을 스냅샷으로 고정하여, 워커 리팩토링이나 라이브러리 업데이트로 검색 결과가 조용히 바뀌면 CI 단계에서 실패.
   - **OpenAPI 스냅샷**: 각 Spring 서비스의 실제 API 스펙을 코드에서 뽑아 커밋하고, 어긋나면 CI가 실패해 계약 변경이 리뷰를 건너뛰지 못하게 함.
+
+### ⑥ SSE 답변 릴레이: 블로킹 XREAD → Pub/Sub 알림 + XRANGE
+- **문제**: chat-service가 스트림마다 블로킹 `XREAD`를 반복했는데, 블로킹 명령은 전용 연결이 필요해 읽기마다 Redis TCP 연결을 새로 열었다. 닫힌 소켓이 TIME_WAIT로 60초 남아 임시 포트(약 28,000개)가 고갈되고, 동시 200 스트림 지속 부하에서 약 30초 만에 열려 있던 모든 스트림이 끊겼다.
+- **해결책**:
+  - 생산자(rag-service)는 `XADD` 뒤 job별 채널에 `PUBLISH`로 "새 레코드 있음"만 알린다. chat-service는 인스턴스당 구독 연결 하나로 알림을 받고, 데이터는 공유 커넥션의 `XRANGE`로 `lastId` 다음부터 읽는다. 알림이 유실·역전돼도 빠지는 이벤트가 없고 하트비트마다 한 번 더 읽어 메운다.
+  - 패턴 구독은 인스턴스 수만큼 알림이 복제되므로 job별 채널을 참조 카운트로 구독·해제한다. Spring Data Redis 리스너 컨테이너가 구독 준비 중에 추가된 채널을 빠뜨리는 경쟁은 영구 앵커 채널로 막고, 실제 Redis 통합 테스트로 재현·검증했다.
+  - **결과**: 같은 부하 도구(`deploy/loadtest/relay/`)로 동시 2,000 스트림 거절 0, 60초 지속 동시 1,000 완주, 유실·중복 0. 다음 병목은 chat-service CPU다.
+
+### ⑦ 게이트웨이 인증의 장애 분리: 401과 503을 가른다
+- **문제**: JWKS 조회 실패나 Redis 장애도 `401`로 답하면, 프론트는 재발급을 시도하고 그것도 실패해 정상 사용자를 로그아웃시킨다. 또 블로킹 JWKS 조회가 Netty 이벤트 루프에서 돌면 그 루프의 모든 연결이 함께 멈춘다.
+- **해결책**:
+  - 서명·형식·만료·모르는 키·로그아웃은 `401 TOKEN_INVALID`, 키 조회·Redis 장애는 `503 AUTH_UNAVAILABLE`. 프론트는 503이면 토큰을 그대로 둔다.
+  - 검증은 `boundedElastic`에서 돌리고, JWKS 체인을 직접 조립해 만료 전 백그라운드 갱신·장애 시 마지막 키로 1시간 검증·조회 실패 후 2초 백오프·모르는 kid 재조회 30초 1회 제한을 둔다.
+  - **결과**: auth-service를 6.5분 멈춰도(캐시 수명 5분 초과) 기존 토큰 요청 13/13 성공, auth-service가 내려간 채 기동하면 401이 아닌 503을 반환(첫 조회 실패 뒤에는 2~6ms).
 
 ---
 
@@ -169,8 +191,9 @@ flowchart TB
 | **Databases** | PostgreSQL 16, Neo4j 5.26, Qdrant 1.12 | RDB(도메인 데이터) + Graph DB(의사결정망) + Vector DB(임베딩) |
 | **Message Broker** | Apache Kafka 3.8, Redis 7.4 (Streams) | 실시간 잡 큐(LLM 분산) 및 이벤트 스트리밍(XAUTOCLAIM/DLQ) |
 | **Object Storage** | MinIO S3 | PDF, DOCX, PPTX, XLSX, MD, TXT 원본 파일 저장 (서명 URL 다운로드) |
+| **Model Serving** | Hugging Face Text Embeddings Inference | 재순위화 모델(리비전 고정)을 이미지에 넣어 서빙, 모든 환경에서 같은 모델 |
 | **Frontend** | React 18, Vite, TypeScript | 지식 그래프 시각화(xyflow), PDF 좌표 하이라이트 모달 |
-| **DevOps / CI** | Docker Compose, GitHub Actions | 15개 서비스 리소스 리밋 격리, Bake 기반 다중 이미지 캐시 빌드 |
+| **DevOps / CI** | Docker Compose, GitHub Actions | 16개 서비스 리소스 리밋 격리, Bake 기반 다중 이미지 캐시 빌드 |
 
 ---
 
@@ -189,7 +212,7 @@ cd org-decision-history
 cp .env.example .env
 # 필요 시 .env 파일에 GEMINI_API_KEY 및 GROQ_API_KEY 입력 (미입력 시 로컬 해시 임베딩/근거 발췌 모드로 자동 폴백)
 
-# 3. 전체 서비스 및 저장소 원클릭 기동 (15개 컨테이너)
+# 3. 전체 서비스 및 저장소 원클릭 기동 (16개 컨테이너)
 docker compose --profile app up -d --wait
 
 # 4. 접속

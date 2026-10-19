@@ -53,6 +53,13 @@ CREATE TABLE document.decision_conflicts (
     status          VARCHAR(30) NOT NULL DEFAULT 'OPEN',
     -- V5__conflict_source_version.sql: 판정에 쓰인 source 문서의 판(NULL = 컬럼 생기기 전 기록)
     source_doc_version INT,
+    -- V7__conflict_target_version.sql: 판정에 쓰인 target 문서의 판
+    target_doc_version INT,
+    -- V8__conflict_text_hash.sql: 판정에 쓰인 원문 창·target 청크의 md5
+    source_text_hash VARCHAR(32),
+    target_text_hash VARCHAR(32),
+    -- V6__conflict_severity_level.sql: 기록 시점 등급
+    severity_level  VARCHAR(10) NOT NULL CHECK (severity_level IN ('CRITICAL', 'HIGH', 'MEDIUM')),
     resolved_by     VARCHAR(100),
     resolution_note TEXT,
     resolved_at     TIMESTAMPTZ,

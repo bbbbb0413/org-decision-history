@@ -21,10 +21,6 @@ from app.search.vector_retriever import VectorRetriever, VectorSearchClient
 
 log = structlog.get_logger()
 
-# 각 검색에서 가져올 후보 수. 병합 후 상위 limit개만 쓰지만 후보는 넉넉히 본다.
-CANDIDATES = 20
-# 벡터 검색에서만 걸리고(키워드 일치가 전혀 없고) 코사인 유사도가 이 미만이면 버린다.
-MIN_VECTOR_SIMILARITY = 0.5
 
 
 class HybridSearchService:
@@ -33,10 +29,17 @@ class HybridSearchService:
         embedder: Embedder,
         vector_client: VectorSearchClient,
         keyword_client: KeywordSearchClient,
+        candidates: int = 20,
+        min_vector_similarity: float = 0.5,
     ):
         self._embedder = embedder
         self._vector_client = vector_client
         self._keyword_client = keyword_client
+        # 각 검색에서 가져올 후보 수. 병합 후 상위 limit개만 쓰지만 후보는 넉넉히 본다.
+        # limit 이 이보다 크면 limit 만큼 가져온다 — 호출부가 요청한 수가 조용히 잘리지 않게
+        self._candidates = candidates
+        # 벡터 검색에서만 걸리고(키워드 일치가 전혀 없고) 코사인 유사도가 이 미만이면 버린다.
+        self._min_vector_similarity = min_vector_similarity
 
     async def search(self, query: str, scope: PermissionScope, limit: int) -> list[SearchHit]:
         return await self.search_multi([query], scope, limit)
@@ -46,10 +49,11 @@ class HybridSearchService:
         if scope.is_empty() or not valid_queries:
             return []
 
+        candidates = max(self._candidates, limit)
         vector_retriever = VectorRetriever(
-            client=self._vector_client, embedder=self._embedder, scope=scope, limit=CANDIDATES
+            client=self._vector_client, embedder=self._embedder, scope=scope, limit=candidates
         )
-        keyword_retriever = KeywordRetriever(client=self._keyword_client, scope=scope, limit=CANDIDATES)
+        keyword_retriever = KeywordRetriever(client=self._keyword_client, scope=scope, limit=candidates)
 
         tasks = []
         for q in valid_queries:
@@ -70,7 +74,7 @@ class HybridSearchService:
             id_key="chunk_key",
             c=60,
         )
-        fused_docs = ensemble.weighted_reciprocal_rank(all_doc_lists)[:CANDIDATES]
+        fused_docs = ensemble.weighted_reciprocal_rank(all_doc_lists)[:candidates]
         fused_hits = [self._to_hit(d) for d in fused_docs]
         filled = await self._keyword_client.fill_content(fused_hits)
 
@@ -94,4 +98,4 @@ class HybridSearchService:
         if hit.key in keyword_matched:
             return True
         sim = hit.vector_similarity
-        return sim is not None and sim >= MIN_VECTOR_SIMILARITY
+        return sim is not None and sim >= self._min_vector_similarity

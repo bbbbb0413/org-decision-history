@@ -34,6 +34,10 @@ test = [
 [tool.setuptools.packages.find]
 include = ["history_shared*"]
 
+# 프롬프트 파일(history_shared.prompts 가 읽는다). 빠지면 설치본에서 import 할 때 FileNotFoundError 로 기동이 실패한다
+[tool.setuptools.package-data]
+"history_shared.graph" = ["prompts/*.md"]
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"

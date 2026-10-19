@@ -9,8 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.client.RestClient;
 
-import java.time.Duration;
-
 /**
  * 사용자의 읽기 범위를 auth-service 에 물어본다.
  *
@@ -24,24 +22,24 @@ import java.time.Duration;
 public class PermissionScopeClient {
 
     private static final Logger log = LoggerFactory.getLogger(PermissionScopeClient.class);
-    private static final Duration TTL = Duration.ofSeconds(10);
-    /** 이 이상 서로 다른 사용자가 동시에 뜨겁게 조회될 일은 없다 — 넘치면 오래된 것부터 밀려난다 */
-    private static final long MAX_ENTRIES = 10_000;
 
     private final RestClient client;
     private final String internalKey;
     // 수동 TTL 검사로는 오래된 항목이 지워지지 않고 계속 쌓인다.
     // Caffeine 이 TTL 만료·최대 크기 둘 다 알아서 쫓아낸다
-    private final Cache<Long, PermissionScope> cache = Caffeine.newBuilder()
-            .maximumSize(MAX_ENTRIES)
-            .expireAfterWrite(TTL)
-            .build();
+    // 크기·유효 시간은 PermissionCacheProperties(permission-cache.*)에서 온다
+    private final Cache<Long, PermissionScope> cache;
 
     public PermissionScopeClient(RestClient.Builder builder,
                                  @Value("${auth.service-url}") String authUrl,
-                                 @Value("${internal.api-key:}") String internalKey) {
+                                 @Value("${internal.api-key:}") String internalKey,
+                                 PermissionCacheProperties cacheProps) {
         this.client = builder.baseUrl(authUrl).build();
         this.internalKey = internalKey;
+        this.cache = Caffeine.newBuilder()
+                .maximumSize(cacheProps.maxEntries())
+                .expireAfterWrite(cacheProps.ttl())
+                .build();
     }
 
     public PermissionScope scopeOf(Long userId) {

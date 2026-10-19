@@ -19,9 +19,10 @@ pydantic-settings==2.7.1
 prometheus-client==0.21.1
 pytest==8.3.4
 pytest-asyncio==0.24.0
-numpy>=1.26.0
-flashrank==0.2.10
+# 재순위화 추론은 reranker-service(TEI 이미지)가 한다 — 모델 런타임 의존성이 여기에는 없다
 neo4j>=5.26.0
 # AuthClient의 권한 범위 캐시가 TTL만 있고 최대 크기가 없어 장기 실행 시
 # 서서히 메모리가 늘었다. TTLCache로 상한을 둔다
 cachetools==5.5.0
+# 보안 규칙 파일(app/security/rules/*.yaml). langchain-core 가 이미 끌어오지만 직접 쓰므로 고정한다
+PyYAML==6.0.3

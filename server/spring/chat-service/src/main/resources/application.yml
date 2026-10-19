@@ -31,17 +31,36 @@ spring:
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
   mvc:
     async:
-      # SSE 연결 상한. 게이트웨이 응답 타임아웃 300초와 맞춘다.
-      request-timeout: 300000
+      # SSE 연결 상한. chat.sse.timeout 과 같은 값을 쓴다(게이트웨이 응답 타임아웃 300초와 맞춘다)
+      request-timeout: ${chat.sse.timeout:5m}
 
 server:
   port: ${SERVER_PORT:8084}
+
+# 운영 튜닝값(SseProperties·TimelineProperties). 기본값은 코드와 같고, 환경변수로 덮어쓴다(예: CHAT_SSE_TIMEOUT=10m)
+chat:
+  sse:
+    timeout: 5m          # 앞단 프록시·게이트웨이 응답 타임아웃과 맞춘다
+    heartbeat: 15s       # 프록시 idle 타임아웃보다 짧게
+    stream-block: 5s     # POLL 전용
+    # PUBSUB: 알림 구독 + XRANGE / POLL: job 마다 블로킹 XREAD 루프 — 롤백용 (CHAT_SSE_RELAY_MODE 로 바꾼다)
+    relay-mode: PUBSUB
+    drain-batch-size: 100
+  timeline:
+    conflict-ttl: 24h    # 상충 분석 캐시
+    max-events: 30       # 타임라인 문서 수 — 상충 비교 LLM 호출 수를 정한다
+    max-difference-length: 500
 
 internal:
   api-key: ${INTERNAL_API_KEY:}
 
 auth:
   service-url: ${AUTH_SERVICE_URL:http://localhost:8081}
+
+# 권한 범위 캐시(common PermissionCacheProperties). 권한 변경은 최대 ttl 뒤에 반영된다
+permission-cache:
+  ttl: 10s
+  max-entries: 10000
 
 llm:
   # 상충 판정에만 쓴다. 비어 있으면 상태 비교만으로 판정한다.

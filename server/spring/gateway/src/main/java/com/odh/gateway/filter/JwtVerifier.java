@@ -1,43 +1,114 @@
 package com.odh.gateway.filter;
 
 import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.jwk.source.JWKSource;
-import com.nimbusds.jose.jwk.source.JWKSourceBuilder;
+import com.nimbusds.jose.jwk.source.CachingJWKSetSource;
+import com.nimbusds.jose.jwk.source.OutageTolerantJWKSetSource;
+import com.nimbusds.jose.jwk.source.RefreshAheadCachingJWKSetSource;
+import com.nimbusds.jose.jwk.source.RetryingJWKSetSource;
 import com.nimbusds.jose.proc.JWSVerificationKeySelector;
 import com.nimbusds.jose.proc.SecurityContext;
+import com.nimbusds.jose.util.events.Event;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 import com.nimbusds.jwt.proc.ExpiredJWTException;
 import com.odh.common.TokenRevocation;
 import com.odh.gateway.config.GatewayProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.net.URI;
 import java.net.URL;
+import java.time.Duration;
 import java.util.Date;
 import java.util.List;
 
 /**
  * auth-service 의 JWKS 로 토큰 서명과 만료를 검증한다.
  *
- * JWKSourceBuilder 가 공개키를 캐시하고, 모르는 kid 를 만나면 다시 받아온다.
+ * {@link GatewayKeySource} 가 공개키를 캐시하고, 모르는 kid 를 만나면 다시 받아온다.
  * auth-service 가 재시작해 키가 바뀌어도 게이트웨이를 함께 내리지 않아도 된다.
+ *
+ * 키 조회가 검증을 멈추지 않게 네 가지를 둔다:
+ * - 검증을 Netty 이벤트 루프 밖(boundedElastic)에서 돈다. 키 조회는 블로킹 HTTP 이고, 갱신 중인 다른
+ *   요청은 갱신 락을 최대 15초 기다린다 — 이벤트 루프에서 돌면 그 루프의 모든 연결이 함께 멈춘다.
+ * - 만료 전에 백그라운드에서 갱신한다(스케줄). 요청 경로에서 조회하는 일은 기동 직후와 모르는 kid 뿐이다.
+ * - auth-service 가 응답하지 않으면 마지막으로 받은 키를 계속 쓴다(장애 허용 1시간). 없으면 캐시가
+ *   만료되는 순간 조회가 한 번 실패할 때 재조회 제한 동안 모든 토큰이 거절된다.
+ * - "모르는 키"(401)와 "키를 확인하지 못함"(503)을 가른다({@link GatewayKeySource}, {@link AuthenticationFilter}).
  */
 @Component
-public class JwtVerifier {
+public class JwtVerifier implements DisposableBean {
+
+    private static final Logger log = LoggerFactory.getLogger(JwtVerifier.class);
 
     private final DefaultJWTProcessor<SecurityContext> processor;
+    private final GatewayKeySource keySource;
     private final ReactiveStringRedisTemplate redis;
 
+    @Autowired   // 테스트용 생성자가 하나 더 있어 Spring 이 고를 생성자를 밝힌다
     public JwtVerifier(GatewayProperties properties, ReactiveStringRedisTemplate redis) throws Exception {
-        URL jwksUrl = URI.create(properties.jwksUri()).toURL();
-        JWKSource<SecurityContext> keySource = JWKSourceBuilder.create(jwksUrl).build();
+        this(URI.create(properties.jwksUri()).toURL(), KeySourceTiming.DEFAULT, redis);
+    }
 
+    /** 테스트가 캐시·장애 허용 시간을 줄여 쓰려고 연다. */
+    JwtVerifier(URL jwksUrl, KeySourceTiming timing, ReactiveStringRedisTemplate redis) {
+        this.keySource = new GatewayKeySource(jwksUrl, timing, JwtVerifier::logKeySourceEvent);
         this.processor = new DefaultJWTProcessor<>();
         this.processor.setJWSKeySelector(new JWSVerificationKeySelector<>(JWSAlgorithm.RS256, keySource));
         this.redis = redis;
+    }
+
+    /**
+     * @param cacheTtl                  키 캐시 수명
+     * @param refreshAhead              만료 이만큼 전에 백그라운드에서 갱신한다
+     * @param refreshWait               다른 요청이 갱신 중일 때 기다리는 최대 시간
+     * @param unknownKidRefreshInterval 모르는 kid 로 다시 받아오는 최소 간격({@link GatewayKeySource})
+     * @param outageTtl                 auth-service 가 응답하지 않을 때 마지막 키를 계속 쓰는 시간
+     * @param httpTimeout               JWKS 조회 연결·읽기 타임아웃
+     * @param failureBackoff            조회가 실패하면 이 시간 동안 다시 묻지 않는다({@link GatewayKeySource})
+     */
+    record KeySourceTiming(Duration cacheTtl, Duration refreshAhead, Duration refreshWait,
+                           Duration unknownKidRefreshInterval, Duration outageTtl, Duration httpTimeout,
+                           Duration failureBackoff) {
+        static final KeySourceTiming DEFAULT = new KeySourceTiming(
+                Duration.ofMinutes(5), Duration.ofSeconds(30), Duration.ofSeconds(15),
+                Duration.ofSeconds(30), Duration.ofHours(1), Duration.ofSeconds(2), Duration.ofSeconds(2));
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        keySource.close();
+    }
+
+    /**
+     * 키 조회가 실패했거나(재시도·장애 허용·갱신 실패) 갱신 대기가 시간 초과된 이벤트는 사유와 함께 WARN 으로,
+     * 갱신을 기다리는 요청마다 나는 대기 이벤트는 DEBUG 로, 나머지(정상 갱신, 5분에 몇 번)는 INFO 로 남긴다.
+     */
+    private static void logKeySourceEvent(Event<?, SecurityContext> event) {
+        String name = event.getClass().getSimpleName();
+        Exception cause = switch (event) {
+            case RetryingJWKSetSource.RetrialEvent<?> e -> e.getException();
+            case OutageTolerantJWKSetSource.OutageEvent<?> e -> e.getException();
+            case RefreshAheadCachingJWKSetSource.ScheduledRefreshFailed<?> e -> e.getException();
+            default -> null;
+        };
+        if (cause != null) {
+            log.warn("JWKS 키 소스 이벤트: {} — {}", name, cause.toString());
+        } else if (event instanceof CachingJWKSetSource.RefreshTimedOutEvent<?>
+                || event instanceof CachingJWKSetSource.UnableToRefreshEvent<?>
+                || event instanceof RefreshAheadCachingJWKSetSource.UnableToRefreshAheadOfExpirationEvent<?>) {
+            log.warn("JWKS 키 소스 이벤트: {}", name);
+        } else if (event instanceof CachingJWKSetSource.WaitingForRefreshEvent<?>) {
+            log.debug("JWKS 키 소스 이벤트: {}", name);
+        } else {
+            log.info("JWKS 키 소스 이벤트: {}", name);
+        }
     }
 
     /**
@@ -52,9 +123,12 @@ public class JwtVerifier {
      *
      * 서명·만료 검사를 통과해도 로그아웃 워터마크({@link TokenRevocation})보다
      * 먼저 발급된 토큰이면 거부한다 — Redis 조회가 필요해 이 메서드 전체가 리액티브다.
+     *
+     * 서명 검증은 이벤트 루프 밖에서 돈다(클래스 주석). 서명 검증 자체는 짧지만, 키 조회가 끼면 블로킹이다.
      */
     public Mono<Claims> verify(String token) {
         return Mono.fromCallable(() -> verifySignatureAndExpiry(token))
+                .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(this::rejectIfRevoked);
     }
 
